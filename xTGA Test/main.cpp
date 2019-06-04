@@ -3,17 +3,16 @@
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
 //==============================================================================
-/// file 	: types.h
-/// purpose : defines various types the library uses.
+/// file 	: main.cpp
+/// purpose : This project exists solely to showcase the proper way to link the
+///			  library. You can go ahead and use the file to test the library as you please :)
 //==============================================================================
 
-#ifndef XTGA_TYPES_H__
-#define XTGA_TYPES_H__
+#include "xTGA/xTGA.h"
+#include <iostream>
 
-#include <stdint.h>
+int main()
+{
 
-typedef unsigned char UChar;
-typedef uint16_t UInt16;
-typedef uint32_t UInt32;
-
-#endif // !XTGA_TYPES_H__
+	return 0;
+}

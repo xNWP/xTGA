@@ -13,6 +13,8 @@
 #include "xTGA/flags.h"
 #include "xTGA/types.h"
 
+#pragma pack(push, 1)
+
 namespace xtga
 {
 	namespace structs
@@ -24,9 +26,9 @@ namespace xtga
 				UChar RawBits;
 				struct
 				{
-					UChar						ALPHA_CHANNEL	: 4;
-					xtga::flags::IMAGEORIGIN	IMAGE_ORIGIN	: 2;
-					UChar						UNUSED			: 2;
+					UChar						ALPHA_CHANNEL_BITCOUNT : 4;
+					xtga::flags::IMAGEORIGIN	IMAGE_ORIGIN : 2;
+					UChar						UNUSED : 2;
 				};
 			};
 		};
@@ -83,10 +85,17 @@ namespace xtga
 			UInt16						SOFTWARE_VERSION;				/* The version of the software used to create the image. The version is multiplied by 100. i.e. for version 2.50, store 250. */
 			UChar						SOFTWARE_LETTER;				/* The letter that is added to the end of the software version, i.e. 'b' for beta. */
 			UInt32						KEY_COLOR;						/* The chroma key color for the image in format ARGB. */
+			UInt16						PIXEL_RATIO_X;					/* The numerator of the pixel aspect ratio. */
+			UInt16						PIXEL_RATIO_Y;					/* The denominator of the pixel aspect ratio. Can be 0 to denote no pixel aspect ratio info. */
+			UInt16						GAMMA_NUMERATOR;				/* The numerator of the gamma correction. */
+			UInt16						GAMMA_DENOMINATOR;				/* The denominator of the gamma correction. Can be 0 to denote no gamma correction info. */
+			UInt32						COLOR_CORRECTION_TABLE;			/* The offset from the beginning of the file for the color correction table. */
+			UInt32						THUMBNAIL_OFFSET;				/* The offset from the beginning of the file for the thumbnail image. */
 			UInt32						SCAN_LINE_OFFSET;				/* The offset from the beginning of the file for the scan line table. */
 			xtga::flags::ALPHATYPE		ALPHATYPE;						/* Details the type of alpha the image contains. */
 		};
 	}
 }
 
+#pragma pack(pop)
 #endif // !XTGA_STRUCTURES_H__

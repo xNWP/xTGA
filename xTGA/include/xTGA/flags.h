@@ -37,11 +37,11 @@ namespace xtga
 
 		enum class ALPHATYPE : UChar
 		{
-			NOALPHA						= 0x00,			/* There is no alpha in the image. */
-			UNDEFINED_ALPHA_IGNORE		= 0x01,			/* The data in the alpha channel is undefined and can be ignored. */
-			UNDEFINED_ALPHA_KEEP		= 0x02,			/* The data in the alpha channel is undefined but should be kept. */
-			STRAIGHT					= 0x03,			/* The data in the alpha channel is a valid straight alpha. */
-			PREMULTIPLIED				= 0x04			/* The data in the alpha channel is a valid premultiplied alpha. */
+			NOALPHA					= 0x00,			/* There is no alpha in the image. */
+			UNDEFINED_ALPHA_IGNORE	= 0x01,			/* The data in the alpha channel is undefined and can be ignored. */
+			UNDEFINED_ALPHA_KEEP	= 0x02,			/* The data in the alpha channel is undefined but should be kept. */
+			STRAIGHT				= 0x03,			/* The data in the alpha channel is a valid straight alpha. */
+			PREMULTIPLIED			= 0x04			/* The data in the alpha channel is a valid premultiplied alpha. */
 		};
 	}
 }
