@@ -13,6 +13,7 @@
 #include "xTGA/api.h"
 #include "xTGA/error.h"
 #include "xTGA/flags.h"
+#include "xTGA/pixelformats.h"
 #include "xTGA/structures.h"
 #include "xTGA/tga_file.h"
 #include "xTGA/types.h"

@@ -15,5 +15,6 @@
 typedef unsigned char UChar;
 typedef uint16_t UInt16;
 typedef uint32_t UInt32;
+typedef uint64_t UInt64;
 
 #endif // !XTGA_TYPES_H__

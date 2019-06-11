@@ -277,8 +277,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\xTGA\api.h" />
-    <ClInclude Include="include\xTGA\codecs.h" />
+    <ClInclude Include="include\xTGA\internal\codecs.h" />
     <ClInclude Include="include\xTGA\error.h" />
+    <ClInclude Include="include\xTGA\pixelformats.h" />
     <ClInclude Include="include\xTGA\structures.h" />
     <ClInclude Include="include\xTGA\flags.h" />
     <ClInclude Include="include\xTGA\tga_file.h" />

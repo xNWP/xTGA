@@ -94,6 +94,19 @@ namespace xtga
 			UInt32						SCAN_LINE_OFFSET;				/* The offset from the beginning of the file for the scan line table. */
 			xtga::flags::ALPHATYPE		ALPHATYPE;						/* Details the type of alpha the image contains. */
 		};
+
+		struct RLEPacket
+		{
+			union
+			{
+				UChar RawBits;
+				struct
+				{
+					UChar PIXEL_COUNT_MINUS_ONE : 7;
+					UChar RUN_LENGTH : 1;
+				};
+			};
+		};
 	}
 }
 

@@ -11,11 +11,42 @@
 #define XTGA_TGA_FILE_H__
 
 #include "xTGA/api.h"
+#include "xTGA/error.h"
+#include "xTGA/pixelformats.h"
 #include "xTGA/structures.h"
 #include "xTGA/types.h"
 
 namespace xtga
 {
+	struct Parameters
+	{
+		static Parameters RGB24();						/* RGB with 8-bits per primary. */
+		static Parameters RGB24_RLE();					/* RGB with 8-bits per primary and Run-length encoding. */
+		static Parameters RGB24_COLORMAPPED();			/* RGB with 8-bits per primary and indexed color. */
+		static Parameters RGB24_RLE_COLORMAPPED();		/* RGB with 8-bits per primary, Run-length encoding, and indexed color. */
+		static Parameters RGB16();						/* RGB with 5-bits per primary (1-bit set to ignore). */
+		static Parameters RGB16_RLE();					/* RGB with 5-bits per primary (1-bit set to ignore) and Run-length encoding. */
+		static Parameters RGB16_COLORMAPPED();			/* RGB with 5-bits per primary (1-bit set to ignore) and indexed color. */
+		static Parameters RGB16_RLE_COLORMAPPED();		/* RGB with 5-bits per primary (1-bit set to ignore), Run-length encoding, and indexed color. */
+		static Parameters RGBA32();						/* RGBA with 8-bits per primary, and 8-bit alpha. */
+		static Parameters RGBA32_RLE();					/* RGBA with 8-bits per primary, 8-bit alpha, and Run-length encoding. */
+		static Parameters RGBA32_COLORMAPPED();			/* RGBA with 8-bits per primary, 8-bit alpha, and indexed color. */
+		static Parameters RGBA32_RLE_COLORMAPPED();		/* RGBA with 8-bits per primary, 8-bit alpha, Run-length encoding, and indexed color. */
+		static Parameters I8();							/* Grayscale with 8-bit primary. */
+		static Parameters I8_RLE();						/* Grayscale with 8-bit primary and Run-length encoding. */
+		static Parameters IA16();						/* Grayscale with 8-bit primary, 8-bit alpha. */
+		static Parameters IA16_RLE();					/* Grayscale with 8-bit primary, 8-bit alpha, and Run-length encoding. */
+		static Parameters IA16_COLORMAPPED();			/* Grayscale with 8-bit primary, 8-bit alpha, and indexed color. */
+		static Parameters IA16_RLE_COLORMAPPED();		/* Grayscale with 8-bit primary, 8-bit alpha, Run-length encoding, and indexed color. */
+
+		bool TGA2File					= true;										/* The file should be TGA 2.0 */
+		flags::IMAGETYPE ImageFormat	= flags::IMAGETYPE::TRUE_COLOR;				/* The image type to use. */
+		UChar depth						= 32;										/* The bits per pixel of the image (must be 8/16/24/32). */
+		flags::ALPHATYPE AlphaType		= flags::ALPHATYPE::UNDEFINED_ALPHA_KEEP;	/* The type of alpha the image contains. */
+		bool UseColorMap				= false;									/* Whether or not to use a color map. */
+		bool UseScanLineTable			= false;									/* Whether or not to use a scan line table. */
+	};
+
 	class TGAFile
 	{
 	public:
@@ -25,7 +56,21 @@ namespace xtga
 		/// @param[out] error				Contains the error/status code (can be nullptr).
 		/// @return TGAFile*				The constructed TGAFile object (or nullptr if an error occured).
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI static TGAFile* Alloc(char const * const & filename, UInt32* error = nullptr);
+		XTGAAPI static TGAFile* Alloc(char const* filename, ERRORCODE* error = nullptr);
+
+		//----------------------------------------------------------------------------------------------------
+		/// Allocates a new TGAFile from an existing image buffer. You can edit further details that the config
+		/// doesn't supply from the generated file if needed. Keep in mind you can create illegal combos doing
+		/// this, so be sure to follow the TGA specifications.
+		/// @param[in] buffer				The image buffer to use. Must be RGB/RGBA/I/IA order with the first
+		///									pixel being at the top left of the image.
+		/// @param[in] width				The width of the image (in pixels).
+		/// @param[in] height				The height of the image (in pixels).
+		/// @param[in] config				The configuration to use while building the file.
+		/// @param[out] error				Holds the error/status code (can be nullptr).
+		/// @return TGAFile*				The created TGAFile (or nullptr if an error occured).
+		//----------------------------------------------------------------------------------------------------
+		XTGAAPI static TGAFile* Alloc(void* buffer, UInt32 width, UInt32 height, const Parameters& config, ERRORCODE* error = nullptr);
 		
 		//----------------------------------------------------------------------------------------------------
 		/// Frees the supplied TGAFile object and sets its pointer to nullptr.
@@ -35,9 +80,9 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the Image ID (or nullptr if it does not exist).
-		/// @return UChar const * const &	The Image ID or nullptr.
+		/// @return UChar const *			The Image ID or nullptr.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI UChar const * const & GetImageID() const;
+		XTGAAPI UChar const *  GetImageID() const;
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the Color Map Data (or nullptr if it does not exist).
@@ -54,9 +99,9 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the header of the image.
-		/// @return Header const *		The image header.
+		/// @return Header*				The image header [editable].
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI structs::Header const * GetHeader() const;
+		XTGAAPI structs::Header* GetHeader();
 
 		//----------------------------------------------------------------------------------------------------
 		/// Convenience function to check if the image has an alpha channel.
@@ -118,10 +163,18 @@ namespace xtga
 		XTGAAPI void* GetThumbnailData();
 
 		//----------------------------------------------------------------------------------------------------
-		/// Returns the color correction table (format is ARGB, 256 * 4 * sizeof(UInt16) = 2048 Bytes).
+		/// Returns the color correction table (format is BGRA, 256 * 4 * sizeof(UInt16) = 2048 Bytes).
 		/// @return UInt16*					The fetched color correction table (or nullptr).
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI	UInt16* GetColorCorrectionTable();
+
+		//----------------------------------------------------------------------------------------------------
+		/// Returns the image in RGBA8888 format.
+		/// @param[out] AlphaType			The type of alpha in the image (can be nullptr).
+		/// @param[out] error				Contains the error/status code (can be nullptr).
+		/// @return RGBA8888*				The RGBA buffer (or nullptr if an error occured).
+		//----------------------------------------------------------------------------------------------------
+		XTGAAPI pixelformats::RGBA8888* GetImage(flags::ALPHATYPE* AlphaType = nullptr, ERRORCODE* error = nullptr);
 
 
 		//==================================================================================================

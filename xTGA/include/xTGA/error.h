@@ -13,7 +13,7 @@
 #include "xTGA/types.h"
 
 #define XTGA_SETERROR( CONTAINER, CODE) \
-if (CONTAINER != nullptr) *CONTAINER = (UInt32)CODE
+if (CONTAINER != nullptr) *CONTAINER = CODE
 
 namespace xtga
 {
@@ -23,9 +23,12 @@ namespace xtga
 	enum class ERRORCODE : UInt32
 	{
 		// General Errors
-		UNKNOWN = 0xFFFFFFFF,	/* An unknown error occured. */
-		NONE = 0x00000000,	/* Operation completed without error. */
-		FILE_ERROR = 0x00000001	/* An error occured while opening/saving a file descriptor. */
+		UNKNOWN			= 0xFFFFFFFF,	/* An unknown error occured. */
+		NONE			= 0x00000000,	/* Operation completed without error. */
+		FILE_ERROR		= 0x00000001,	/* An error occured while opening/saving a file descriptor. */
+
+		// Image Errors
+		INVALID_DEPTH	= 0x00000010	/* The supplied image bit depth was invalid. */
 	};
 }
 

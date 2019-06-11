@@ -8,7 +8,10 @@
 //==============================================================================
 
 #include "xTGA/tga_file.h"
+
+#include "xTGA/internal/codecs.h"
 #include "xTGA/error.h"
+#include "xTGA/flags.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -17,8 +20,8 @@ class xtga::TGAFile::__TGAFileImpl
 {
 public:
 	__TGAFileImpl();
-	__TGAFileImpl(char const * const & filename, UInt32* error);
-	virtual ~__TGAFileImpl() = default;
+	__TGAFileImpl(char const * filename, ERRORCODE* error);
+	~__TGAFileImpl();
 	
 	void* _RawData;
 	structs::Header* _Header;
@@ -50,7 +53,7 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl()
 	_ThumbnailData = nullptr;
 }
 
-xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * const & filename, UInt32* error)
+xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* error)
 {
 	// First call default constructor
 	__TGAFileImpl();
@@ -85,11 +88,11 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * const & filename, UInt3
 	if (_Header->COLOR_MAP_TYPE)
 	{
 		_ColorMapData = (void*)(_ImageId + _Header->ID_LENGTH);
-		_ImageData = (void*)( (UChar*)_ColorMapData + (_Header->COLOR_MAP_BITS_PER_ENTRY / 8 * _Header->COLOR_MAP_LENGTH) );
+		_ImageData = (void*)( (UChar*)_ColorMapData + ((UInt64)_Header->COLOR_MAP_BITS_PER_ENTRY / 8 * _Header->COLOR_MAP_LENGTH) );
 	}
 	else
 	{
-		_ImageData = (void*)(_ImageId + _Header->ID_LENGTH);
+		_ImageData = (void*)((UChar*)_RawData + sizeof(structs::Header) + _Header->ID_LENGTH);
 	}
 
 
@@ -136,12 +139,17 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * const & filename, UInt3
 	XTGA_SETERROR(error, ERRORCODE::NONE);
 }
 
-xtga::TGAFile* xtga::TGAFile::Alloc(char const * const & filename, UInt32* error)
+xtga::TGAFile::__TGAFileImpl::~__TGAFileImpl()
 {
-	UInt32 err;
+	delete[] this->_RawData;
+}
+
+xtga::TGAFile* xtga::TGAFile::Alloc(char const* filename, ERRORCODE* error)
+{
+	ERRORCODE err;
 	auto impl = new __TGAFileImpl(filename, &err);
 
-	if (err != (UInt32)ERRORCODE::NONE)
+	if (err != ERRORCODE::NONE)
 	{
 		delete impl;
 		XTGA_SETERROR(error, err);
@@ -168,7 +176,7 @@ void xtga::TGAFile::Free(xtga::TGAFile*& obj)
 	}
 }
 
-UChar const * const & xtga::TGAFile::GetImageID() const
+UChar const * xtga::TGAFile::GetImageID() const
 {
 	return this->_impl->_ImageId;
 }
@@ -183,7 +191,7 @@ void* xtga::TGAFile::GetImageData()
 	return this->_impl->_ImageData;
 }
 
-xtga::structs::Header const * xtga::TGAFile::GetHeader() const
+xtga::structs::Header* xtga::TGAFile::GetHeader()
 {
 	return this->_impl->_Header;
 }
@@ -243,4 +251,122 @@ void* xtga::TGAFile::GetThumbnailData()
 UInt16* xtga::TGAFile::GetColorCorrectionTable()
 {
 	return this->_impl->_ColorCorrectionTable;
+}
+
+xtga::pixelformats::RGBA8888* xtga::TGAFile::GetImage(xtga::flags::ALPHATYPE* AlphaType, ERRORCODE* error)
+{
+	using namespace xtga::flags;
+	using namespace xtga::codecs;
+	using namespace xtga::pixelformats;
+
+	auto Header = this->_impl->_Header;
+	auto ImgFrmt = Header->IMAGE_TYPE;
+	UInt32 pCount = Header->IMAGE_WIDTH * Header->IMAGE_HEIGHT;
+	auto tErr = ERRORCODE::NONE;
+
+	UChar depth;
+	if (ImgFrmt == IMAGETYPE::COLOR_MAPPED_RLE || ImgFrmt == IMAGETYPE::COLOR_MAPPED)
+		depth = IndexDepth(Header->COLOR_MAP_LENGTH, &tErr);
+	else
+		depth = Header->IMAGE_DEPTH;
+
+	if (tErr != ERRORCODE::NONE)
+	{
+		XTGA_SETERROR(error, tErr);
+		return nullptr;
+	}
+
+	void* iBuff = this->_impl->_ImageData;
+	void* rval = nullptr;
+
+	// First decode RLE
+	if (ImgFrmt == IMAGETYPE::COLOR_MAPPED_RLE || ImgFrmt == IMAGETYPE::GRAYSCALE_RLE || ImgFrmt == IMAGETYPE::TRUE_COLOR_RLE)
+	{
+		rval = DecodeRLE(iBuff, depth, pCount, &tErr);
+
+		if (tErr != ERRORCODE::NONE)
+		{
+			XTGA_SETERROR(error, tErr);
+			return nullptr;
+		}
+	}
+
+	// Decode color map
+	if (ImgFrmt == IMAGETYPE::COLOR_MAPPED || ImgFrmt == IMAGETYPE::COLOR_MAPPED_RLE)
+	{
+		auto cmap = this->_impl->_ColorMapData;
+		
+		if (rval)
+		{
+			auto tmp = rval;
+			rval = DecodeColorMap(rval, pCount, cmap, Header->IMAGE_DEPTH, depth, &tErr);
+			delete[] tmp;
+		}
+		else
+		{
+			rval = DecodeColorMap(iBuff, pCount, cmap, Header->IMAGE_DEPTH, depth, &tErr);
+		}
+
+		if (tErr != ERRORCODE::NONE)
+		{
+			XTGA_SETERROR(error, tErr);
+
+			if (rval) delete[] rval;
+			return nullptr;
+		}
+	}
+
+	// Order Pixels
+	auto OrderType = Header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN;
+	if (OrderType == IMAGEORIGIN::BOTTOM_LEFT)
+	{
+		if (rval)
+		{
+			auto tmp = rval;
+			rval = Convert_BottomLeft_To_TopLeft(tmp, Header->IMAGE_WIDTH, Header->IMAGE_HEIGHT, Header->IMAGE_DEPTH, &tErr);
+			delete[] tmp;
+		}
+		else
+		{
+			rval = Convert_BottomLeft_To_TopLeft(iBuff, Header->IMAGE_WIDTH, Header->IMAGE_HEIGHT, Header->IMAGE_DEPTH, &tErr);
+		}
+	}
+	else if (OrderType == IMAGEORIGIN::BOTTOM_RIGHT)
+	{
+		if (rval)
+		{
+			auto tmp = rval;
+			rval = Convert_BottomRight_To_TopLeft(tmp, Header->IMAGE_WIDTH, Header->IMAGE_HEIGHT, Header->IMAGE_DEPTH, &tErr);
+			delete[] tmp;
+		}
+		else
+		{
+			rval = Convert_BottomRight_To_TopLeft(iBuff, Header->IMAGE_WIDTH, Header->IMAGE_HEIGHT, Header->IMAGE_DEPTH, &tErr);
+		}
+	}
+	else if (OrderType == IMAGEORIGIN::TOP_RIGHT)
+	{
+		if (rval)
+		{
+			auto tmp = rval;
+			rval = Convert_TopRight_To_TopLeft(tmp, Header->IMAGE_WIDTH, Header->IMAGE_HEIGHT, Header->IMAGE_DEPTH, &tErr);
+			delete[] tmp;
+		}
+		else
+		{
+			rval = Convert_TopRight_To_TopLeft(iBuff, Header->IMAGE_WIDTH, Header->IMAGE_HEIGHT, Header->IMAGE_DEPTH, &tErr);
+		}
+	}
+
+	if (tErr != ERRORCODE::NONE)
+	{
+		XTGA_SETERROR(error, tErr);
+
+		if (rval) delete[] rval;
+		return nullptr;
+	}
+
+	// TODO: 8/16/24 bits + pixel order + alphaType + ORDER IT
+
+	return (RGBA8888*)rval;
 }
