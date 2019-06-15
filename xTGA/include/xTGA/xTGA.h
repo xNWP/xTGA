@@ -22,5 +22,4 @@
 #	pragma message("Using xTGA in DLL mode. If you are trying to use xTGA as a Static Library, define 'XTGA_STATIC' before including xTGA.h")
 #endif // !XTGA_STATIC
 
-
 #endif

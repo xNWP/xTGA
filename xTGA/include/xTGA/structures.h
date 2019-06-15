@@ -37,7 +37,7 @@ namespace xtga
 		{
 			UChar						ID_LENGTH;						/* Length of the Image ID Field (in bytes). */
 			UChar						COLOR_MAP_TYPE;					/* 0 if there is no color map, 1 otherwise. */
-			xtga::flags::IMAGETYPE		IMAGE_TYPE;						/* Image type. */
+			flags::IMAGETYPE			IMAGE_TYPE;						/* Image type. */
 			UInt16						COLOR_MAP_FIRST_ENTRY_INDEX;	/* Index of the first color map entry. */
 			UInt16						COLOR_MAP_LENGTH;				/* Total number of color map entries. */
 			UChar						COLOR_MAP_BITS_PER_ENTRY;		/* Number of bits per color map entry. */
@@ -53,7 +53,7 @@ namespace xtga
 		{
 			UInt32						EXTENSION_AREA_OFFSET;			/* Offset for the extension area. */
 			UInt32						DEVELOPER_DIRECTORY_OFFSET;		/* Offset for the developer directory. */
-			UChar						SIGNATURE[18];					/* Should always be "TRUEVISION-XFILE.\0" -- note that some implementations omit the final null-terminator. */
+			UChar						SIGNATURE[18];					/* Should always be "TRUEVISION-XFILE.\0" */
 		};
 
 		struct DeveloperDirectoryEntry
@@ -76,7 +76,7 @@ namespace xtga
 			UInt16						SAVE_DATE_YEAR;					/* The year the file was last saved/modified. */
 			UInt16						SAVE_DATE_HOUR;					/* The hour the file was last saved/modified. */
 			UInt16						SAVE_DATE_MINUTE;				/* The minute the file was last saved/modified. */
-			UInt16						SAVE_DATA_SECOND;				/* The second the file was last saved/modified. */
+			UInt16						SAVE_DATE_SECOND;				/* The second the file was last saved/modified. */
 			UChar						JOB_NAME[41];					/* Name/ID tag for the image. Null-terminated. */
 			UInt16						JOB_HOURS;						/* The amount of billed hours for the image. */
 			UInt16						JOB_MINUTES;					/* The amount of billed minutes for the image. */
@@ -84,7 +84,7 @@ namespace xtga
 			UChar						SOFTWARE_ID[41];				/* The software that was used to create the image. Null-terminated. */
 			UInt16						SOFTWARE_VERSION;				/* The version of the software used to create the image. The version is multiplied by 100. i.e. for version 2.50, store 250. */
 			UChar						SOFTWARE_LETTER;				/* The letter that is added to the end of the software version, i.e. 'b' for beta. */
-			UInt32						KEY_COLOR;						/* The chroma key color for the image in format ARGB. */
+			pixelformats::BGRA8888		KEY_COLOR;						/* The chroma key color for the image in format BGRA. */
 			UInt16						PIXEL_RATIO_X;					/* The numerator of the pixel aspect ratio. */
 			UInt16						PIXEL_RATIO_Y;					/* The denominator of the pixel aspect ratio. Can be 0 to denote no pixel aspect ratio info. */
 			UInt16						GAMMA_NUMERATOR;				/* The numerator of the gamma correction. */
@@ -106,6 +106,15 @@ namespace xtga
 					UChar RUN_LENGTH : 1;
 				};
 			};
+		};
+
+		struct ColorCorrectionEntry
+		{
+			// TODO: Verify that this is the correct format
+			UInt16 B;
+			UInt16 G;
+			UInt16 R;
+			UInt16 A;
 		};
 	}
 }

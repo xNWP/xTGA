@@ -9,29 +9,30 @@
 //==============================================================================
 
 #include "xTGA/xTGA.h"
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <chrono>
+
+// TODO: COLOR MAP DOES NOT WORK (maybe needs to be fixed size 2^8 / 2^16 etc.?
 
 int main()
 {
 	auto start = std::chrono::high_resolution_clock::now();
 
-	unsigned int count = 1000000;
-	std::cout << "Starting " << count << " sets.\n";
+	auto a = xtga::TGAFile::Alloc("C:\\Users\\Aorus\\Desktop\\xTGA Data\\24_NoAlpha.tga");
+	xtga::ERRORCODE terr;
 
-	for (unsigned int i = 0; i < count; ++i)
-	{
-		auto a = xtga::TGAFile::Alloc("C:\\Users\\Aorus\\Desktop\\xTGA Data\\32_Alpha_RLE_T2.tga");
-		auto p = (xtga::pixelformats::BGRA8888*)a->GetImage();
-		delete[] p;
-		xtga::TGAFile::Free(a);
-	}
+	auto res1 = a->GenerateColorMap(&terr);
+
+	auto res = a->SaveFile("testout.tga", &terr);
 
 	auto end = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double> time = end - start;
 
-	std::cout << "Done in " << time.count() << "s.\n";
+	std::chrono::duration<double, std::milli> dur = end - start;
+
+	std::cout << "Time Taken: " << dur.count() / 1000 << "s\n";
+
 	std::cin.get();
+
 	return 0;
 }

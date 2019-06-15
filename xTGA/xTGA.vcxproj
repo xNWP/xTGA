@@ -279,6 +279,7 @@
     <ClInclude Include="include\xTGA\api.h" />
     <ClInclude Include="include\xTGA\internal\codecs.h" />
     <ClInclude Include="include\xTGA\error.h" />
+    <ClInclude Include="include\xTGA\marray.h" />
     <ClInclude Include="include\xTGA\pixelformats.h" />
     <ClInclude Include="include\xTGA\structures.h" />
     <ClInclude Include="include\xTGA\flags.h" />
@@ -288,6 +289,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\codecs.cpp" />
+    <ClCompile Include="src\marray.cpp" />
+    <ClCompile Include="src\pixelformats.cpp" />
     <ClCompile Include="src\tga_file.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

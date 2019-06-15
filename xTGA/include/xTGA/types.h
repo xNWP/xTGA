@@ -10,11 +10,18 @@
 #ifndef XTGA_TYPES_H__
 #define XTGA_TYPES_H__
 
-#include <stdint.h>
-
-typedef unsigned char UChar;
-typedef uint16_t UInt16;
-typedef uint32_t UInt32;
-typedef uint64_t UInt64;
+#ifdef __cplusplus
+#	include <cstdint>
+	typedef std::uint8_t UChar;
+	typedef std::uint16_t UInt16;
+	typedef std::uint32_t UInt32;
+	typedef std::uint64_t UInt64;
+#else
+#	include <stdint.h>
+	typedef uint8_t UChar;
+	typedef uint16_t UInt16;
+	typedef uint32_t UInt32;
+	typedef uint64_t UInt64;
+#endif
 
 #endif // !XTGA_TYPES_H__
