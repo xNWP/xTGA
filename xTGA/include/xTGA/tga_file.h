@@ -120,10 +120,12 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		/// Generates a color map for the image (if the required space for a color map exceeds the space that
 		/// not including it uses, or if the image already contains a color map, the color map will not be generated).
+		/// @param[in] force			If true a color map will be generated even if it won't perfectly represent
+		///								the input data, this is done using the "median cut" algorithm (weighted).
 		/// @param[out] error			Holds the error/status code (can be nullptr).
 		/// @return bool				True if the color map was generated.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI bool GenerateColorMap(ERRORCODE* error = nullptr);
+		XTGAAPI bool GenerateColorMap(bool force = false, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the raw image data. Only edit this if you know exactly what you're doing!!!

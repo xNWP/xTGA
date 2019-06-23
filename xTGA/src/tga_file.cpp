@@ -427,7 +427,7 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 
 	if (_Header->COLOR_MAP_TYPE)
 	{
-		_ColorMapData = (void*)(_ImageId + _Header->ID_LENGTH);
+		_ColorMapData = (void*)((UChar*)_RawData + sizeof(structs::Header) + _Header->ID_LENGTH);
 		_ImageData = (void*)( (UChar*)_ColorMapData + ((UInt64)_Header->COLOR_MAP_BITS_PER_ENTRY / 8 * _Header->COLOR_MAP_LENGTH) );
 	}
 	else
@@ -664,7 +664,7 @@ void* xtga::TGAFile::GetColorMap()
 	return this->_impl->_ColorMapData;
 }
 
-bool xtga::TGAFile::GenerateColorMap(xtga::ERRORCODE* error)
+bool xtga::TGAFile::GenerateColorMap(bool force, xtga::ERRORCODE* error)
 {
 	if (this->_impl->_ColorMapData)
 	{
@@ -706,7 +706,7 @@ bool xtga::TGAFile::GenerateColorMap(xtga::ERRORCODE* error)
 		return false;
 	}
 
-	if (!codecs::GenerateColorMap(iBuff, EncBuff, this->_impl->_ColorMapData, pCount, depth, CSize, &terr))
+	if (!codecs::GenerateColorMap(iBuff, EncBuff, this->_impl->_ColorMapData, pCount, depth, CSize, force, &terr))
 	{
 		XTGA_SETERROR(error, terr);
 		if (RLE) delete[] iBuff;
@@ -718,7 +718,6 @@ bool xtga::TGAFile::GenerateColorMap(xtga::ERRORCODE* error)
 	if (RLE)
 	{
 		void* tbuff = nullptr;
-		auto IndexSize = IndexDepth(CSize, &terr);
 		if (terr != ERRORCODE::NONE)
 		{
 			delete[] EncBuff;
@@ -726,7 +725,7 @@ bool xtga::TGAFile::GenerateColorMap(xtga::ERRORCODE* error)
 			return false;
 		}
 
-		if (!EncodeRLE(EncBuff, tbuff, Header->IMAGE_WIDTH, Header->IMAGE_HEIGHT, IndexSize, &terr))
+		if (!EncodeRLE(EncBuff, tbuff, Header->IMAGE_WIDTH, Header->IMAGE_HEIGHT, 8, &terr))
 		{
 			delete[] EncBuff;
 			XTGA_SETERROR(error, terr);
@@ -742,6 +741,7 @@ bool xtga::TGAFile::GenerateColorMap(xtga::ERRORCODE* error)
 	Header->COLOR_MAP_FIRST_ENTRY_INDEX = 0;
 	Header->COLOR_MAP_LENGTH = CSize;
 	Header->COLOR_MAP_TYPE = 1;
+	Header->IMAGE_DEPTH = 8;
 	if (RLE) Header->IMAGE_TYPE = IMAGETYPE::COLOR_MAPPED_RLE;
 	else Header->IMAGE_TYPE = IMAGETYPE::COLOR_MAPPED;
 
@@ -771,14 +771,8 @@ UInt64 xtga::TGAFile::GetImageDataSize(ERRORCODE* error)
 
 	// Consider RLE
 	if (Frmt == IMAGETYPE::COLOR_MAPPED_RLE || Frmt == IMAGETYPE::GRAYSCALE_RLE || Frmt == IMAGETYPE::TRUE_COLOR_RLE)
-	{
-		bool bCMP = Frmt == IMAGETYPE::COLOR_MAPPED_RLE;
-		
-		UChar depth = 0;
-		if (bCMP)
-			depth = IndexDepth(pCount, &terr);
-		else
-			depth = Header->IMAGE_DEPTH;
+	{		
+		UChar depth = Header->IMAGE_DEPTH;
 
 		if (terr != ERRORCODE::NONE)
 		{
@@ -811,19 +805,6 @@ UInt64 xtga::TGAFile::GetImageDataSize(ERRORCODE* error)
 		XTGA_SETERROR(error, ERRORCODE::NONE);
 		return it;
 	}
-	else if (Frmt == IMAGETYPE::COLOR_MAPPED)
-	{
-		UChar depth = IndexDepth(pCount, &terr);
-
-		if (terr != ERRORCODE::NONE)
-		{
-			XTGA_SETERROR(error, terr);
-			return 0;
-		}
-
-		XTGA_SETERROR(error, ERRORCODE::NONE);
-		return depth * pCount;
-	}
 	else
 	{
 		XTGA_SETERROR(error, ERRORCODE::NONE);
@@ -845,22 +826,8 @@ bool xtga::TGAFile::CompressWithRLE(xtga::ERRORCODE* error)
 		return false;
 	}
 
-	UChar depth = 0;
+	UChar depth = Header->IMAGE_DEPTH;;
 	ERRORCODE terr;
-
-	if (Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED)
-	{
-		depth = IndexDepth(Header->COLOR_MAP_LENGTH, &terr);
-		if (terr != ERRORCODE::NONE)
-		{
-			XTGA_SETERROR(error, terr);
-			return false;
-		}
-	}
-	else
-	{
-		depth = Header->IMAGE_DEPTH;
-	}
 
 	void* out = nullptr;
 

@@ -49,19 +49,10 @@ namespace xtga
 		/// @param[in] length				The number of pixels the ImageBuffer contains.
 		/// @param[in] ColorMap				The color map to use.
 		/// @param[in] depth				The number of bits each pixel occupies (must be 16/24/32).
-		/// @param[in] IndexDepth			The number of bits each index is (must be 8/16). Use IndexDepth().
 		/// @param[out] error				Holds the error/status code should an error occur (can be nullptr).
 		/// @return void*					The decoded image buffer or nullptr if an error occured.
 		//----------------------------------------------------------------------------------------------------
-		void* DecodeColorMap(void const* ImageBuffer, UInt32 length, void const* ColorMap, UChar depth, UChar IndexDepth, ERRORCODE* error = nullptr);
-	
-		//----------------------------------------------------------------------------------------------------
-		/// Calculates the index bit depth given color map length.
-		/// @param[in] length				The length of the color map.
-		/// @param[out] error				Holds the error/status code should an error occur (can be nullptr).
-		/// @return UChar					The calculated index bit depth (or 0 if an error occured).
-		//----------------------------------------------------------------------------------------------------
-		UChar IndexDepth(UInt32 length, ERRORCODE* error = nullptr);
+		void* DecodeColorMap(void const* ImageBuffer, UInt32 length, void const* ColorMap, UChar depth, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Takes an array of pixels with the first entry being the bottom left pixel and converts it to
@@ -137,15 +128,18 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		/// Generates a Color Map from an input buffer.
 		/// @param[in] inBuff				The input image buffer of type BGRA5551.
-		/// @param[out] outBuff				The encoded image buffer.
+		/// @param[out] outBuff				The encoded image buffer (Guaranteed 8-bits per pixel).
+		/// @param[out] colorBuff			The generated color map.
 		/// @param[in] length				The number of pixels the input buffer contains.
 		/// @param[in] depth				The bits per pixel of the input image (must be 16/24/32).
-		/// @param[out] ColorMap			The generated color map.
 		/// @param[out] Size				The length of the exported color map.
+		/// @param[in] force				If true a color map will be generated even if it won't perfectly represent
+		///									the input data, this is done by taking the 256 most common values and
+		///									then forcing each pixel to go to the closest common value (weighted).
 		/// @param[out] error				The error/status code (can be nullptr).
 		/// @return bool					True if the color map could be generated.
 		//----------------------------------------------------------------------------------------------------
-		bool GenerateColorMap(const void* inBuff, void*& outBuff, void*& colorBuff, UInt64 length, UChar depth, UInt16& Size, ERRORCODE* error = nullptr);
+		bool GenerateColorMap(const void* inBuff, void*& outBuff, void*& colorBuff, UInt64 length, UChar depth, UInt16& Size, bool force = false, ERRORCODE* error = nullptr);
 	
 		//----------------------------------------------------------------------------------------------------
 		/// Decodes an input image into its original format with the top left pixel being first.

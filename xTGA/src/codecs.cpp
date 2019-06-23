@@ -12,7 +12,11 @@
 #include "xTGA/error.h"
 #include "xTGA/structures.h"
 
+#include <algorithm>
 #include <cmath>
+#include <mutex>
+#include <set>
+#include <thread>
 #include <vector>
 
 constexpr UChar LUT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132,
@@ -446,15 +450,9 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 	return true;
 }
 
-void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, UInt32 length, void const* ColorMap, UChar depth, UChar IndexDepth, ERRORCODE* error)
+void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, UInt32 length, void const* ColorMap, UChar depth, ERRORCODE* error)
 {
 	if (!(depth == 16 || depth == 24 || depth == 32))
-	{
-		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
-		return nullptr;
-	}
-
-	if (!(IndexDepth == 8 || IndexDepth == 16))
 	{
 		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
 		return nullptr;
@@ -465,36 +463,15 @@ void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, UInt32 length, void 
 
 	for (UInt64 i = 0, it = 0; i < length * (UInt64)BPP; ++it, i += BPP)
 	{
-		auto index = (UChar*)ImageBuffer + it;
-
+		auto index = *((UChar*)ImageBuffer + it);
 		for (UChar j = 0; j < BPP; ++j)
 		{
-			rval[i + j] = *( (UChar*)ColorMap + (*index * (UInt64)BPP) + j );
+			rval[i + j] = *( (UChar*)ColorMap + (index * (UInt64)BPP) + j );
 		}
 	}
 
 	XTGA_SETERROR(error, ERRORCODE::NONE);
 	return rval;
-}
-
-UChar xtga::codecs::IndexDepth(UInt32 length, ERRORCODE* error)
-{
-	// assume no error
-	XTGA_SETERROR(error, ERRORCODE::NONE);
-
-	UInt32 rDepth = (UInt32)log2(length);
-
-	if (rDepth <= 8)
-		return 8;
-	if (rDepth <= 16)
-		return 16;
-	if (rDepth <= 24)
-		return 24;
-	if (rDepth <= 32)
-		return 32;
-
-	XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
-	return 0;
 }
 
 void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, UInt32 width, UInt32 height, UChar depth, ERRORCODE* error)
@@ -645,7 +622,7 @@ xtga::pixelformats::RGBA8888 xtga::codecs::IA_To_RGBA(xtga::pixelformats::IA88 p
 	return rval;
 }
 
-bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& ColorMap, UInt64 length, UChar depth, UInt16& Size, ERRORCODE* error)
+bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& ColorMap, UInt64 length, UChar depth, UInt16& Size, bool force, ERRORCODE* error)
 {
 	if (!(depth == 16 || depth == 24 || depth == 32))
 	{
@@ -676,7 +653,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			}
 
 			CMap.push_back(val);
-			IMap.push_back((UChar)((UInt16)CMap.size() - 1));
+			IMap.push_back((UChar)(CMap.size() - 1));
 
 		indexed:;
 
@@ -694,7 +671,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			cPtr[i] = CMap[i];
 
 		outBuff = new UChar[IMap.size()];
-		for (UInt16 i = 0; i < IMap.size(); ++i)
+		for (UInt64 i = 0; i < IMap.size(); ++i)
 			((UChar*)outBuff)[i] = IMap[i];
 
 		Size = (UInt16)CMap.size();
@@ -707,28 +684,29 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 	auto Generate24bitColorMap = [&]() -> bool
 	{
 		std::vector<BGR888> CMap; CMap.reserve(256);
-		std::vector<UInt16> IMap; IMap.reserve(length);
+		std::vector<UChar> IMap; IMap.reserve(length);
 
 		BGR888* iPtr = (BGR888*)inBuff;
 
 		for (UInt64 i = 0; i < length; ++i)
 		{
 			auto val = iPtr[i];
+			auto test = iPtr + i;
 
-			for (UInt32 j = 0; j < CMap.size(); ++j)
+			for (UInt16 j = 0; j < CMap.size(); ++j)
 			{
 				if (CMap[j] == val)
 				{
-					IMap.push_back(j);
+					IMap.push_back((UChar)j);
 					goto indexed;
 				}
 			}
 
 			CMap.push_back(val);
-			IMap.push_back((UInt16)CMap.size() - 1);
+			IMap.push_back((UChar)(CMap.size() - 1));
 
 		indexed:;
-			if (CMap.size() >= 65536)
+			if (CMap.size() >= 256)
 			{
 				XTGA_SETERROR(error, ERRORCODE::COLORMAP_TOO_LARGE);
 				return false;
@@ -738,23 +716,14 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		ColorMap = new BGR888[CMap.size()];
 		BGR888* cPtr = (BGR888*)ColorMap;
 
-		for (UInt32 i = 0; i < CMap.size(); ++i)
+		for (UInt16 i = 0; i < CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
-		if (depth == 8)
-		{
-			outBuff = new UChar[IMap.size()];
-			for (UInt32 i = 0; i < IMap.size(); ++i)
-				((UChar*)outBuff)[i] = (UChar)IMap[i];
-		}
-		else
-		{
-			outBuff = new UInt16[IMap.size()];
-			for (UInt32 i = 0; i < IMap.size(); ++i)
-				((UInt16*)outBuff)[i] = IMap[i];
-		}
+		outBuff = new UChar[IMap.size()];
+		for (UInt64 i = 0; i < IMap.size(); ++i)
+			((UChar*)outBuff)[i] = IMap[i];
 
-		Size = (UInt16)CMap.size();
+		Size = (UChar)CMap.size();
 
 		XTGA_SETERROR(error, ERRORCODE::NONE);
 
@@ -764,7 +733,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 	auto Generate32BitColorMap = [&]() -> bool
 	{
 		std::vector<BGRA8888> CMap; CMap.reserve(256);
-		std::vector<UInt16> IMap; IMap.reserve(length);
+		std::vector<UChar> IMap; IMap.reserve(length);
 
 		BGRA8888* iPtr = (BGRA8888*)inBuff;
 
@@ -772,44 +741,341 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		{
 			auto val = iPtr[i];
 
-			for (UInt32 j = 0; j < CMap.size(); ++j)
+			for (UInt16 j = 0; j < CMap.size(); ++j)
 			{
 				if (CMap[j] == val)
 				{
-					IMap.push_back(j);
+					IMap.push_back((UChar)j);
 					goto indexed;
 				}
 			}
 
 			CMap.push_back(val);
-			IMap.push_back((UInt16)CMap.size() - 1);
+			IMap.push_back((UChar)(CMap.size() - 1));
 
 		indexed:;
-			if (CMap.size() >= 65536)
+			if (CMap.size() >= 256)
 			{
+				if (force)
+				{
+					CMap.clear();
+					IMap.clear();
+					break;
+				}
+
 				XTGA_SETERROR(error, ERRORCODE::COLORMAP_TOO_LARGE);
 				return false;
 			}
 		}
 
+		if (!force)
+			goto notForced;
+
+		// Force ColorMap
+		// Using the 'median cut' algorithm here
+		{
+			struct comp
+			{
+				bool operator()(const BGRA8888& i, const BGRA8888& j) const
+				{
+					return *(UInt32*)&i < *(UInt32*)&j;
+				}
+			};
+
+			auto compa = [](const BGRA8888& i, const BGRA8888& j) -> bool
+			{
+				return i.A < j.A;
+			};
+
+			auto compr = [](const BGRA8888& i, const BGRA8888& j) -> bool
+			{
+				return i.R < j.R;
+			};
+
+			auto compg = [](const BGRA8888& i, const BGRA8888& j) -> bool
+			{
+				return i.G < j.G;
+			};
+
+			auto compb = [](const BGRA8888& i, const BGRA8888& j) -> bool
+			{
+				return i.B < j.B;
+			};
+
+			UInt32 CoreCount = std::thread::hardware_concurrency();
+
+			CoreCount = (UInt32)(CoreCount * 0.75);
+
+			if (CoreCount == 0)
+			{
+				// assume 2
+				CoreCount = 2;
+			}
+
+			if (CoreCount % 2 != 0)
+				--CoreCount;
+
+
+			std::vector<std::set<BGRA8888, comp>> sets;
+			std::vector<std::thread*> threads;
+			std::mutex Lock;
+
+			auto InitSet = [&](const UInt64& start, const UInt64& count)
+			{
+				std::set<BGRA8888, comp> s;
+				for (UInt64 i = start; i < start + count; ++i)
+					s.insert(iPtr[i]);
+
+				Lock.lock();
+				sets.push_back(s);
+				Lock.unlock();
+			};
+
+			UInt64 slice = length / CoreCount;
+
+			// Init Threads for starting sets
+			for (UChar i = 0; i < CoreCount; ++i)
+			{
+				std::thread* t = nullptr;
+				if (i == CoreCount - 1)
+				{
+					UInt64 count = length - (i * slice);
+					t = new std::thread(InitSet, i * slice, count);
+				}
+				else
+				{
+					t = new std::thread(InitSet, i * slice, slice);
+				}
+				threads.push_back(t);
+			}
+
+			// Join threads
+			for (auto& i : threads)
+			{
+				i->join();
+				delete i;
+			}
+
+			threads.clear();
+
+			auto CombineSets = [](std::set<BGRA8888, comp>& s1, const std::set<BGRA8888, comp>& s2)
+			{
+				s1.insert(s2.begin(), s2.end());
+			};
+
+			// Combine sets
+			while (sets.size() > 1)
+			{
+				// spawn threads
+				for (UChar c = 0; c < sets.size() / 2; ++c)
+				{
+					std::thread* t = new std::thread(CombineSets, std::ref(sets[(UInt64)c * 2]), std::ref(sets[(UInt64)c * 2 + 1]));
+					threads.push_back(t);
+				}
+
+				// join threads
+				for (auto& i : threads)
+				{
+					i->join();
+					delete i;
+				}
+
+				threads.clear();
+
+				// Remove unused sets
+				for (UChar c = 0; c < sets.size(); ++c)
+				{
+					if (c % 2 == 1)
+						sets.erase(sets.begin() + c);
+				}
+			}
+
+			auto CheckRange = [](const std::vector<BGRA8888>& set, UInt32 mask) -> UChar
+			{
+				UChar lo = 0xFF;
+				UChar hi = 0x00;
+
+				UChar shift = 0;
+				UInt32 tmask = mask;
+				while (tmask != 0xFF)
+				{
+					tmask >>= 1;
+					shift++;
+				}
+
+				for (const BGRA8888& i : set)
+				{
+					auto pix = ((*(UInt32*)&i) & mask) >> shift;
+					if (pix > hi) hi = pix;
+					else if (pix < lo) lo = pix;
+				}
+				return hi - lo;
+			};
+
+			std::vector<BGRA8888> VUniqueValues(sets[0].begin(), sets[0].end());
+			
+			std::vector<std::vector<BGRA8888>> buckets;
+			buckets.push_back(VUniqueValues);
+
+			while (buckets.size() < 256)
+			{
+				std::vector<std::vector<BGRA8888>> tempBuckets;
+				for (UInt16 i = 0; i < buckets.size(); ++i)
+				{
+					auto AR		= CheckRange(buckets[i], 0xFF000000);
+					auto RR	= CheckRange(buckets[i], 0x00FF0000);
+					auto GR		= CheckRange(buckets[i], 0x0000FF00);
+					auto BR	= CheckRange(buckets[i], 0x000000FF);
+
+					if (AR >= RR && AR >= GR && AR >= BR)
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compa);
+					}
+					else if (RR >= GR && RR >= BR)
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compr);
+					}
+					else if (GR >= BR)
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compg);
+					}
+					else
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compb);
+					}
+
+					std::vector<BGRA8888> upper(buckets[i].begin() + (buckets[i].size() / 2), buckets[i].end());
+					std::vector<BGRA8888> lower(buckets[i].begin(), buckets[i].begin() + (buckets[i].size() / 2));
+
+					tempBuckets.push_back(upper);
+					tempBuckets.push_back(lower);
+				}
+
+				buckets.clear();
+				buckets.insert(buckets.end(), tempBuckets.begin(), tempBuckets.end());
+				tempBuckets.clear();
+			}
+
+			// Average buckets
+			for (auto& i : buckets)
+			{
+				UInt64 R = 0;
+				UInt64 G = 0;
+				UInt64 B = 0;
+				UInt64 A = 0;
+				for (auto& j : i)
+				{
+					R += j.R;
+					G += j.G;
+					B += j.B;
+					A += j.A;
+				}
+				R /= i.size();
+				G /= i.size();
+				B /= i.size();
+				A /= i.size();
+
+				BGRA8888 out;
+				out.R = (UChar)R;
+				out.G = (UChar)G;
+				out.B = (UChar)B;
+				out.A = (UChar)A;
+				CMap.push_back(out);
+			}
+			// TODO: Alpha match
+			// Find closest pixel for each input
+			auto PixDistance = [](const BGRA8888& i, const BGRA8888& j) -> float
+			{
+				float r1 = i.R;
+				float g1 = i.G;
+				float b1 = i.B;
+				float a1 = i.A;
+				float r2 = j.R;
+				float g2 = j.G;
+				float b2 = j.B;
+				float a2 = j.A;
+
+				auto rdiff = r1 - r2;
+				auto gdiff = g1 - g2;
+				auto bdiff = b1 - b2;
+				auto adiff = a1 - a2;
+
+				// Fast tracks for speed (degrade accuracy but with very little visual difference)
+				if (rdiff > 128 || rdiff < -128) return FLT_MAX;
+				if (gdiff > 92 || gdiff < -92) return FLT_MAX;
+				if (bdiff > 128 || bdiff < -128) return FLT_MAX;
+				if (adiff > 64 || adiff < -64) return FLT_MAX;
+
+				return std::powf((rdiff * 0.15f), 2)
+					+ std::powf((gdiff * 0.30f), 2)
+					+ std::powf((bdiff * 0.05f), 2)
+					+ std::powf((adiff * 0.50f), 2);
+			};
+
+			IMap.resize(length);
+
+			auto DoDistanceCalc = [&](const UInt64& start, const UInt64& count)
+			{
+				// close enough ¯\_(:_:)_/¯
+				float eps = 0.00001f;
+				for (UInt64 i = start; i < start + count; ++i)
+				{
+					float distance = FLT_MAX;
+					UChar bestMatch = 0;
+
+					for (UInt16 j = 0; j < CMap.size(); ++j)
+					{
+						auto d = PixDistance(iPtr[i], CMap[j]);
+						if (d < distance)
+						{
+							distance = d;
+							bestMatch = (UChar)j;
+							if (d < 0 + eps && d > 0 - eps) break;
+						}
+					}
+
+					Lock.lock();
+					IMap[i] = bestMatch;
+					Lock.unlock();
+				}
+			};
+
+			// Spawn Threads
+			for (UChar i = 0; i < CoreCount; i++)
+			{
+				std::thread* t = nullptr;
+				if (i == CoreCount - 1)
+				{
+					UInt64 count = length - (i * slice);
+					t = new std::thread(DoDistanceCalc, i * slice, count);
+				}
+				else
+				{
+					t = new std::thread(DoDistanceCalc, i * slice, slice);
+				}
+				threads.push_back(t);
+			}
+
+			// Wait for threads
+			for (auto& i : threads)
+			{
+				i->join();
+				delete i;
+			}
+
+			threads.clear();
+		}
+
+	notForced:;
 		ColorMap = new BGRA8888[CMap.size()];
 		BGRA8888* cPtr = (BGRA8888*)ColorMap;
 
-		for (UInt32 i = 0; i < CMap.size(); ++i)
+		for (UInt16 i = 0; i < CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
-		if (depth == 8)
-		{
-			outBuff = new UChar[IMap.size()];
-			for (UInt32 i = 0; i < IMap.size(); ++i)
-				((UChar*)outBuff)[i] = (UChar)IMap[i];
-		}
-		else
-		{
-			outBuff = new UInt16[IMap.size()];
-			for (UInt32 i = 0; i < IMap.size(); ++i)
-				((UInt16*)outBuff)[i] = IMap[i];
-		}
+		outBuff = new UChar[IMap.size()];
+		for (UInt64 i = 0; i < IMap.size(); ++i)
+			((UChar*)outBuff)[i] = (UChar)IMap[i];
 
 		Size = (UInt16)CMap.size();
 		
@@ -839,11 +1105,7 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 	UInt32 pCount = header->IMAGE_WIDTH * header->IMAGE_HEIGHT;
 	auto tErr = ERRORCODE::NONE;
 
-	UChar depth;
-	if (ImgFrmt == IMAGETYPE::COLOR_MAPPED_RLE || ImgFrmt == IMAGETYPE::COLOR_MAPPED)
-		depth = IndexDepth(header->COLOR_MAP_LENGTH, &tErr);
-	else
-		depth = header->IMAGE_DEPTH;
+	UChar depth = header->IMAGE_DEPTH;
 
 	if (tErr != ERRORCODE::NONE)
 	{
@@ -869,12 +1131,12 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 		if (output)
 		{
 			auto tmp = output;
-			output = DecodeColorMap(output, pCount, colormap, header->IMAGE_DEPTH, depth, &tErr);
+			output = DecodeColorMap(output, pCount, colormap, header->COLOR_MAP_BITS_PER_ENTRY, &tErr);
 			delete[] tmp;
 		}
 		else
 		{
-			output = DecodeColorMap(input, pCount, colormap, header->IMAGE_DEPTH, depth, &tErr);
+			output = DecodeColorMap(input, pCount, colormap, header->COLOR_MAP_BITS_PER_ENTRY, &tErr);
 		}
 
 		if (tErr != ERRORCODE::NONE)
@@ -888,17 +1150,19 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 
 	// Order Pixels
 	auto OrderType = header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN;
+	if (ImgFrmt == IMAGETYPE::COLOR_MAPPED || ImgFrmt == IMAGETYPE::COLOR_MAPPED_RLE)
+		depth = header->COLOR_MAP_BITS_PER_ENTRY;
 	if (OrderType == IMAGEORIGIN::BOTTOM_LEFT)
 	{
 		if (output)
 		{
 			auto tmp = output;
-			output = Convert_BottomLeft_To_TopLeft(tmp, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, header->IMAGE_DEPTH, &tErr);
+			output = Convert_BottomLeft_To_TopLeft(tmp, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
 			delete[] tmp;
 		}
 		else
 		{
-			output = Convert_BottomLeft_To_TopLeft(input, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, header->IMAGE_DEPTH, &tErr);
+			output = Convert_BottomLeft_To_TopLeft(input, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
 		}
 	}
 	else if (OrderType == IMAGEORIGIN::BOTTOM_RIGHT)
@@ -906,12 +1170,12 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 		if (output)
 		{
 			auto tmp = output;
-			output = Convert_BottomRight_To_TopLeft(tmp, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, header->IMAGE_DEPTH, &tErr);
+			output = Convert_BottomRight_To_TopLeft(tmp, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
 			delete[] tmp;
 		}
 		else
 		{
-			output = Convert_BottomRight_To_TopLeft(input, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, header->IMAGE_DEPTH, &tErr);
+			output = Convert_BottomRight_To_TopLeft(input, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
 		}
 	}
 	else if (OrderType == IMAGEORIGIN::TOP_RIGHT)
@@ -919,12 +1183,12 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 		if (output)
 		{
 			auto tmp = output;
-			output = Convert_TopRight_To_TopLeft(tmp, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, header->IMAGE_DEPTH, &tErr);
+			output = Convert_TopRight_To_TopLeft(tmp, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
 			delete[] tmp;
 		}
 		else
 		{
-			output = Convert_TopRight_To_TopLeft(input, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, header->IMAGE_DEPTH, &tErr);
+			output = Convert_TopRight_To_TopLeft(input, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
 		}
 	}
 
@@ -941,39 +1205,43 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 	{
 		XTGA_SETERROR(AlphaType, extensions->ALPHATYPE);
 	}
-	else if (header->IMAGE_DEPTH == 32)
+	
+	if (depth == 32)
 	{
-		if (header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 8)
+		if (!extensions)
 		{
-			XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
-		}
-		else
-		{
-			XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
+			if (header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 8)
+			{
+				XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
+			}
+			else
+			{
+				XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
+			}
 		}
 		XTGA_SETERROR(PixelType, PIXELFORMATS::BGRA8888);
 	}
-	else if (header->IMAGE_DEPTH == 24)
+	else if (depth == 24)
 	{
-		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
+		if (!extensions) XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
 		XTGA_SETERROR(PixelType, PIXELFORMATS::BGR888);
 	}
-	else if (header->IMAGE_DEPTH == 16)
+	else if (depth == 16)
 	{
 		if (header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 8)
 		{
-			XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
+			if (!extensions) XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
 			XTGA_SETERROR(PixelType, PIXELFORMATS::IA88);
 		}
 		else
 		{
-			XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
+			if (!extensions) XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
 			XTGA_SETERROR(PixelType, PIXELFORMATS::BGRA5551);
 		}
 	}
-	else if (header->IMAGE_DEPTH == 8)
+	else if (depth == 8)
 	{
-		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
+		if (!extensions) XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
 		XTGA_SETERROR(PixelType, PIXELFORMATS::I8);
 	}
 	else

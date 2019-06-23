@@ -17,21 +17,20 @@
 
 int main()
 {
+	using namespace xtga;
+	using namespace xtga::pixelformats;
+
 	auto start = std::chrono::high_resolution_clock::now();
 
-	auto a = xtga::TGAFile::Alloc("C:\\Users\\Aorus\\Desktop\\xTGA Data\\24_NoAlpha.tga");
-	xtga::ERRORCODE terr;
-
-	auto res1 = a->GenerateColorMap(&terr);
-
-	auto res = a->SaveFile("testout.tga", &terr);
+	auto a = TGAFile::Alloc("C:\\Users\\AORUS\\Desktop\\xTGA Data\\animegirl.tga");
+	a->GenerateColorMap(true);
+	//a->CompressWithRLE();
+	a->SaveFile("OUT.tga");
 
 	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<float> dur = end - start;
 
-	std::chrono::duration<double, std::milli> dur = end - start;
-
-	std::cout << "Time Taken: " << dur.count() / 1000 << "s\n";
-
+	std::cout << "Time Taken: " << dur.count() << "s\n";
 	std::cin.get();
 
 	return 0;
