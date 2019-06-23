@@ -659,10 +659,366 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 			if ((UInt16)CMap.size() >= 256)
 			{
+				if (force)
+				{
+					CMap.clear();
+					IMap.clear();
+					break;
+				}
+
 				XTGA_SETERROR(error, ERRORCODE::COLORMAP_TOO_LARGE);
 				return false;
 			}
 		}
+
+		if (!force)
+			goto notForced;
+
+		// Force ColorMap
+		// Using the 'median cut' algorithm here
+		{
+			struct comp
+			{
+				bool operator()(const BGRA5551& i, const BGRA5551& j) const
+				{
+					return *(UInt16*)& i < *(UInt16*)& j;
+				}
+			};
+
+			auto compr = [](const BGRA5551& i, const BGRA5551& j) -> bool
+			{
+				return i.R < j.R;
+			};
+
+			auto compg = [](const BGRA5551& i, const BGRA5551& j) -> bool
+			{
+				return i.G < j.G;
+			};
+
+			auto compb = [](const BGRA5551& i, const BGRA5551& j) -> bool
+			{
+				return i.B < j.B;
+			};
+
+			UInt32 CoreCount = std::thread::hardware_concurrency();
+
+			CoreCount = (UInt32)(CoreCount * 0.80f);
+
+			if (CoreCount % 2 != 0)
+				--CoreCount;
+
+			if (CoreCount == 0)
+			{
+				// assume 2
+				CoreCount = 2;
+			}
+
+			std::vector<std::set<BGRA5551, comp>> sets;
+			std::vector<std::thread*> threads;
+			std::mutex Lock;
+
+			bool PureAlpha = false;
+			bool PureWhite = false;
+			bool PureBlack = false;
+
+			auto InitSet = [&](const UInt64& start, const UInt64& count)
+			{
+				std::set<BGRA5551, comp> s;
+				for (UInt64 i = start; i < start + count; ++i)
+				{
+					auto val = iPtr[i];
+
+					if (!PureWhite)
+						if (val.R == 0xFF && val.G == 0xFF && val.B == 0xFF)
+							PureWhite = true;
+						else if (!PureBlack)
+							if (val.R == 0x00 && val.G == 0x00 && val.B == 0x00)
+								PureBlack = true;
+
+					s.insert(val);
+				}
+
+				Lock.lock();
+				sets.push_back(s);
+				Lock.unlock();
+			};
+
+			UInt64 slice = length / CoreCount;
+
+			// Init Threads for starting sets
+			for (UChar i = 0; i < CoreCount; ++i)
+			{
+				std::thread* t = nullptr;
+				if (i == CoreCount - 1)
+				{
+					UInt64 count = length - (i * slice);
+					t = new std::thread(InitSet, i * slice, count);
+				}
+				else
+				{
+					t = new std::thread(InitSet, i * slice, slice);
+				}
+				threads.push_back(t);
+			}
+
+			// Join threads
+			for (auto& i : threads)
+			{
+				i->join();
+				delete i;
+			}
+
+			threads.clear();
+
+			auto CombineSets = [](std::set<BGRA5551, comp>& s1, const std::set<BGRA5551, comp>& s2)
+			{
+				s1.insert(s2.begin(), s2.end());
+			};
+
+			// Combine sets
+			while (sets.size() > 1)
+			{
+				// spawn threads
+				for (UChar c = 0; c < sets.size() / 2; ++c)
+				{
+					std::thread* t = new std::thread(CombineSets, std::ref(sets[(UInt64)c * 2]), std::ref(sets[(UInt64)c * 2 + 1]));
+					threads.push_back(t);
+				}
+
+				// join threads
+				for (auto& i : threads)
+				{
+					i->join();
+					delete i;
+				}
+
+				threads.clear();
+
+				// Remove unused sets
+				for (UChar c = 0; c < sets.size(); ++c)
+				{
+					if (c % 2 == 1)
+						sets.erase(sets.begin() + c);
+				}
+			}
+
+			auto CheckRange = [](const std::vector<BGRA5551>& set, UInt16 mask) -> UChar
+			{
+				UChar lo = 0xFF;
+				UChar hi = 0x00;
+
+				UChar shift = 0;
+				UInt16 tmask = mask;
+				while (tmask != 0x7C && tmask != 0x3E && tmask != 0x1F)
+				{
+					tmask >>= 1;
+					shift++;
+				}
+
+				for (const BGRA5551& i : set)
+				{
+					auto pix = ((*(UInt32*)& i) & mask) >> shift;
+					if (pix > hi) hi = pix;
+					else if (pix < lo) lo = pix;
+				}
+				return hi - lo;
+			};
+
+			std::vector<BGRA5551> VUniqueValues(sets[0].begin(), sets[0].end());
+
+			std::vector<std::vector<BGRA5551>> buckets;
+			buckets.push_back(VUniqueValues);
+
+			while (buckets.size() < 256)
+			{
+				std::vector<std::vector<BGRA5551>> tempBuckets;
+				for (UInt16 i = 0; i < buckets.size(); ++i)
+				{
+					auto RR = CheckRange(buckets[i], 0x7C00);
+					auto GR = CheckRange(buckets[i], 0x03E0);
+					auto BR = CheckRange(buckets[i], 0x001F);
+
+					if (RR >= GR && RR >= BR)
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compr);
+					}
+					else if (GR >= BR)
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compg);
+					}
+					else
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compb);
+					}
+
+					std::vector<BGRA5551> upper(buckets[i].begin() + (buckets[i].size() / 2), buckets[i].end());
+					std::vector<BGRA5551> lower(buckets[i].begin(), buckets[i].begin() + (buckets[i].size() / 2));
+
+					tempBuckets.push_back(upper);
+					tempBuckets.push_back(lower);
+				}
+
+				buckets.clear();
+				buckets.insert(buckets.end(), tempBuckets.begin(), tempBuckets.end());
+
+				for (auto& i : tempBuckets)
+				{
+					if (i.size() == 1)
+					{
+						tempBuckets.clear();
+						goto minSize;
+					}
+				}
+
+				tempBuckets.clear();
+			}
+
+		minSize:;
+			// Average buckets
+			for (auto& i : buckets)
+			{
+				UInt64 R = 0;
+				UInt64 G = 0;
+				UInt64 B = 0;
+				for (auto& j : i)
+				{
+					R += j.R;
+					G += j.G;
+					B += j.B;
+				}
+				R /= i.size();
+				G /= i.size();
+				B /= i.size();
+
+				BGRA5551 out;
+				out.R = (UChar)R;
+				out.G = (UChar)G;
+				out.B = (UChar)B;
+				CMap.push_back(out);
+			}
+
+			// Insert Black/White If Needed
+			BGRA5551 black; black.R = black.G = black.B = 0x00;
+			BGRA5551 white; white.R = white.G = white.B = 0xFF;
+			bool hW = false, hB = false;
+			UChar lW = 0, lB = 0;
+			for (UInt16 i = 0; i < CMap.size(); ++i)
+			{
+				if (CMap[i] == black)
+				{
+					hB = true;
+					lB = (UChar)i;
+				}
+				else if (CMap[i] == white)
+				{
+					hW = true;
+					lW = (UChar)i;
+				}
+			}
+
+			if (PureBlack && !hB)
+			{
+				CMap[0] = black;
+				lB = 0;
+			}
+			if (PureWhite && !hW)
+			{
+				CMap[1] = white;
+				lW = 1;
+			}
+
+			// Find closest pixel for each input
+			auto PixDistance = [](const BGRA5551& i, const BGRA5551& j) -> float
+			{
+				float r1 = i.R;
+				float g1 = i.G;
+				float b1 = i.B;
+				float r2 = j.R;
+				float g2 = j.G;
+				float b2 = j.B;
+
+				auto rdiff = r1 - r2;
+				auto gdiff = g1 - g2;
+				auto bdiff = b1 - b2;
+
+				// Fast tracks for speed (degrade accuracy but with very little visual difference)
+				if (rdiff > 128 || rdiff < -128) return FLT_MAX;
+				if (gdiff > 92 || gdiff < -92) return FLT_MAX;
+				if (bdiff > 128 || bdiff < -128) return FLT_MAX;
+
+				return std::powf((rdiff * 0.30f), 2)
+					+ std::powf((gdiff * 0.60f), 2)
+					+ std::powf((bdiff * 0.10f), 2);
+			};
+
+			IMap.resize(length);
+
+			auto DoDistanceCalc = [&](const UInt64& start, const UInt64& count)
+			{
+				// close enough ¯\_(:_:)_/¯
+				float eps = 0.00001f;
+				for (UInt64 i = start; i < start + count; ++i)
+				{
+					float distance = FLT_MAX;
+					UChar bestMatch = 0;
+
+					auto val = iPtr[i];
+					if (val == black)
+					{
+						bestMatch = lB;
+						goto found;
+					}
+					else if (val == white)
+					{
+						bestMatch = lW;
+						goto found;
+					}
+
+					for (UInt16 j = 0; j < CMap.size(); ++j)
+					{
+						auto d = PixDistance(iPtr[i], CMap[j]);
+						if (d < distance)
+						{
+							distance = d;
+							bestMatch = (UChar)j;
+							if (d < 0 + eps && d > 0 - eps) break;
+						}
+					}
+
+				found:;
+					Lock.lock();
+					IMap[i] = bestMatch;
+					Lock.unlock();
+				}
+			};
+
+			// Spawn Threads
+			for (UChar i = 0; i < CoreCount; i++)
+			{
+				std::thread* t = nullptr;
+				if (i == CoreCount - 1)
+				{
+					UInt64 count = length - (i * slice);
+					t = new std::thread(DoDistanceCalc, i * slice, count);
+				}
+				else
+				{
+					t = new std::thread(DoDistanceCalc, i * slice, slice);
+				}
+				threads.push_back(t);
+			}
+
+			// Wait for threads
+			for (auto& i : threads)
+			{
+				i->join();
+				delete i;
+			}
+
+			threads.clear();
+		}
+
+	notForced:;
 
 		ColorMap = new BGRA5551[CMap.size()];
 		BGRA5551* cPtr = (BGRA5551*)ColorMap;
@@ -691,7 +1047,6 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		for (UInt64 i = 0; i < length; ++i)
 		{
 			auto val = iPtr[i];
-			auto test = iPtr + i;
 
 			for (UInt16 j = 0; j < CMap.size(); ++j)
 			{
@@ -708,10 +1063,372 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		indexed:;
 			if (CMap.size() >= 256)
 			{
+				if (force)
+				{
+					CMap.clear();
+					IMap.clear();
+					break;
+				}
+
 				XTGA_SETERROR(error, ERRORCODE::COLORMAP_TOO_LARGE);
 				return false;
 			}
 		}
+
+		if (!force)
+			goto notForced;
+
+		// Force ColorMap
+		// Using the 'median cut' algorithm here
+		{
+			struct comp
+			{
+				bool operator()(const BGR888& i, const BGR888& j) const
+				{
+					UChar id[4];	UChar jd[4];
+					id[0] = 0;		jd[0] = 0;
+					id[1] = i.B;	jd[1] = j.B;
+					id[2] = i.G;	jd[2] = j.G;
+					id[3] = i.R;	jd[3] = j.R;
+					return *(UInt32*)&id < *(UInt32*)&jd;
+				}
+			};
+
+			auto compr = [](const BGR888& i, const BGR888& j) -> bool
+			{
+				return i.R < j.R;
+			};
+
+			auto compg = [](const BGR888& i, const BGR888& j) -> bool
+			{
+				return i.G < j.G;
+			};
+
+			auto compb = [](const BGR888& i, const BGR888& j) -> bool
+			{
+				return i.B < j.B;
+			};
+
+			UInt32 CoreCount = std::thread::hardware_concurrency();
+
+			CoreCount = (UInt32)(CoreCount * 0.80f);
+
+			if (CoreCount % 2 != 0)
+				--CoreCount;
+
+			if (CoreCount == 0)
+			{
+				// assume 2
+				CoreCount = 2;
+			}
+
+			std::vector<std::set<BGR888, comp>> sets;
+			std::vector<std::thread*> threads;
+			std::mutex Lock;
+
+			bool PureAlpha = false;
+			bool PureWhite = false;
+			bool PureBlack = false;
+
+			auto InitSet = [&](const UInt64& start, const UInt64& count)
+			{
+				std::set<BGR888, comp> s;
+				for (UInt64 i = start; i < start + count; ++i)
+				{
+					auto val = iPtr[i];
+
+					if (!PureWhite)
+						if (val.R == 0xFF && val.G == 0xFF && val.B == 0xFF)
+							PureWhite = true;
+						else if (!PureBlack)
+							if (val.R == 0x00 && val.G == 0x00 && val.B == 0x00)
+								PureBlack = true;
+
+					s.insert(val);
+				}
+
+				Lock.lock();
+				sets.push_back(s);
+				Lock.unlock();
+			};
+
+			UInt64 slice = length / CoreCount;
+
+			// Init Threads for starting sets
+			for (UChar i = 0; i < CoreCount; ++i)
+			{
+				std::thread* t = nullptr;
+				if (i == CoreCount - 1)
+				{
+					UInt64 count = length - (i * slice);
+					t = new std::thread(InitSet, i * slice, count);
+				}
+				else
+				{
+					t = new std::thread(InitSet, i * slice, slice);
+				}
+				threads.push_back(t);
+			}
+
+			// Join threads
+			for (auto& i : threads)
+			{
+				i->join();
+				delete i;
+			}
+
+			threads.clear();
+
+			auto CombineSets = [](std::set<BGR888, comp>& s1, const std::set<BGR888, comp>& s2)
+			{
+				s1.insert(s2.begin(), s2.end());
+			};
+
+			// Combine sets
+			while (sets.size() > 1)
+			{
+				// spawn threads
+				for (UChar c = 0; c < sets.size() / 2; ++c)
+				{
+					std::thread* t = new std::thread(CombineSets, std::ref(sets[(UInt64)c * 2]), std::ref(sets[(UInt64)c * 2 + 1]));
+					threads.push_back(t);
+				}
+
+				// join threads
+				for (auto& i : threads)
+				{
+					i->join();
+					delete i;
+				}
+
+				threads.clear();
+
+				// Remove unused sets
+				for (UChar c = 0; c < sets.size(); ++c)
+				{
+					if (c % 2 == 1)
+						sets.erase(sets.begin() + c);
+				}
+			}
+
+			auto CheckRange = [](const std::vector<BGR888>& set, UInt32 mask) -> UChar
+			{
+				UChar lo = 0xFF;
+				UChar hi = 0x00;
+
+				UChar shift = 0;
+				UInt32 tmask = mask;
+				while (tmask != 0xFF)
+				{
+					tmask >>= 1;
+					shift++;
+				}
+
+				for (const BGR888& i : set)
+				{
+					auto pix = ((*(UInt32*)& i) & mask) >> shift;
+					if (pix > hi) hi = pix;
+					else if (pix < lo) lo = pix;
+				}
+				return hi - lo;
+			};
+
+			std::vector<BGR888> VUniqueValues(sets[0].begin(), sets[0].end());
+
+			std::vector<std::vector<BGR888>> buckets;
+			buckets.push_back(VUniqueValues);
+
+			while (buckets.size() < 256)
+			{
+				std::vector<std::vector<BGR888>> tempBuckets;
+				for (UInt16 i = 0; i < buckets.size(); ++i)
+				{
+					auto RR = CheckRange(buckets[i], 0xFF0000);
+					auto GR = CheckRange(buckets[i], 0x00FF00);
+					auto BR = CheckRange(buckets[i], 0x0000FF);
+					
+					if (RR >= GR && RR >= BR)
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compr);
+					}
+					else if (GR >= BR)
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compg);
+					}
+					else
+					{
+						std::sort(buckets[i].begin(), buckets[i].end(), compb);
+					}
+
+					std::vector<BGR888> upper(buckets[i].begin() + (buckets[i].size() / 2), buckets[i].end());
+					std::vector<BGR888> lower(buckets[i].begin(), buckets[i].begin() + (buckets[i].size() / 2));
+
+					tempBuckets.push_back(upper);
+					tempBuckets.push_back(lower);
+				}
+
+				buckets.clear();
+				buckets.insert(buckets.end(), tempBuckets.begin(), tempBuckets.end());
+
+				for (auto& i : tempBuckets)
+				{
+					if (i.size() == 1)
+					{
+						tempBuckets.clear();
+						goto minSize;
+					}
+				}
+
+				tempBuckets.clear();
+			}
+
+		minSize:;
+			// Average buckets
+			for (auto& i : buckets)
+			{
+				UInt64 R = 0;
+				UInt64 G = 0;
+				UInt64 B = 0;
+				UInt64 A = 0;
+				for (auto& j : i)
+				{
+					R += j.R;
+					G += j.G;
+					B += j.B;
+				}
+				R /= i.size();
+				G /= i.size();
+				B /= i.size();
+
+				BGR888 out;
+				out.R = (UChar)R;
+				out.G = (UChar)G;
+				out.B = (UChar)B;
+				CMap.push_back(out);
+			}
+
+			// Insert Black/White If Needed
+			BGR888 black; black.R = black.G = black.B = 0x00;
+			BGR888 white; white.R = white.G = white.B = 0xFF;
+			bool hW = false, hB = false;
+			UChar lW = 0, lB = 0;
+			for (UInt16 i = 0; i < CMap.size(); ++i)
+			{
+				if (CMap[i] == black)
+				{
+					hB = true;
+					lB = (UChar)i;
+				}
+				else if (CMap[i] == white)
+				{
+					hW = true;
+					lW = (UChar)i;
+				}
+			}
+
+			if (PureBlack && !hB)
+			{
+				CMap[0] = black;
+				lB = 0;
+			}
+			if (PureWhite && !hW)
+			{
+				CMap[1] = white;
+				lW = 1;
+			}
+
+			// Find closest pixel for each input
+			auto PixDistance = [](const BGR888& i, const BGR888& j) -> float
+			{
+				float r1 = i.R;
+				float g1 = i.G;
+				float b1 = i.B;
+				float r2 = j.R;
+				float g2 = j.G;
+				float b2 = j.B;
+
+				auto rdiff = r1 - r2;
+				auto gdiff = g1 - g2;
+				auto bdiff = b1 - b2;
+
+				// Fast tracks for speed (degrade accuracy but with very little visual difference)
+				if (rdiff > 128 || rdiff < -128) return FLT_MAX;
+				if (gdiff > 92 || gdiff < -92) return FLT_MAX;
+				if (bdiff > 128 || bdiff < -128) return FLT_MAX;
+
+				return std::powf((rdiff * 0.30f), 2)
+					+ std::powf((gdiff * 0.60f), 2)
+					+ std::powf((bdiff * 0.10f), 2);
+			};
+
+			IMap.resize(length);
+
+			auto DoDistanceCalc = [&](const UInt64& start, const UInt64& count)
+			{
+				// close enough ¯\_(:_:)_/¯
+				float eps = 0.00001f;
+				for (UInt64 i = start; i < start + count; ++i)
+				{
+					float distance = FLT_MAX;
+					UChar bestMatch = 0;
+
+					auto val = iPtr[i];
+					if (val == black)
+					{
+						bestMatch = lB;
+						goto found;
+					}
+					else if (val == white)
+					{
+						bestMatch = lW;
+						goto found;
+					}
+
+					for (UInt16 j = 0; j < CMap.size(); ++j)
+					{
+						auto d = PixDistance(val, CMap[j]);
+						if (d < distance)
+						{
+							distance = d;
+							bestMatch = (UChar)j;
+							if (d < 0 + eps && d > 0 - eps) break;
+						}
+					}
+
+				found:;
+					Lock.lock();
+					IMap[i] = bestMatch;
+					Lock.unlock();
+				}
+			};
+
+			// Spawn Threads
+			for (UChar i = 0; i < CoreCount; i++)
+			{
+				std::thread* t = nullptr;
+				if (i == CoreCount - 1)
+				{
+					UInt64 count = length - (i * slice);
+					t = new std::thread(DoDistanceCalc, i * slice, count);
+				}
+				else
+				{
+					t = new std::thread(DoDistanceCalc, i * slice, slice);
+				}
+				threads.push_back(t);
+			}
+
+			// Wait for threads
+			for (auto& i : threads)
+			{
+				i->join();
+				delete i;
+			}
+
+			threads.clear();
+		}
+
+	notForced:;
 
 		ColorMap = new BGR888[CMap.size()];
 		BGR888* cPtr = (BGR888*)ColorMap;
@@ -723,7 +1440,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		for (UInt64 i = 0; i < IMap.size(); ++i)
 			((UChar*)outBuff)[i] = IMap[i];
 
-		Size = (UChar)CMap.size();
+		Size = (UInt16)CMap.size();
 
 		XTGA_SETERROR(error, ERRORCODE::NONE);
 
@@ -804,7 +1521,10 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 			UInt32 CoreCount = std::thread::hardware_concurrency();
 
-			CoreCount = (UInt32)(CoreCount * 0.75);
+			CoreCount = (UInt32)(CoreCount * 0.80f);
+
+			if (CoreCount % 2 != 0)
+				--CoreCount;
 
 			if (CoreCount == 0)
 			{
@@ -812,19 +1532,31 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				CoreCount = 2;
 			}
 
-			if (CoreCount % 2 != 0)
-				--CoreCount;
-
-
 			std::vector<std::set<BGRA8888, comp>> sets;
 			std::vector<std::thread*> threads;
 			std::mutex Lock;
+
+			bool PureAlpha = false;
+			bool PureWhite = false;
+			bool PureBlack = false;
 
 			auto InitSet = [&](const UInt64& start, const UInt64& count)
 			{
 				std::set<BGRA8888, comp> s;
 				for (UInt64 i = start; i < start + count; ++i)
-					s.insert(iPtr[i]);
+				{
+					auto val = iPtr[i];
+
+					if (!PureAlpha) if (val.A == 0x00) PureAlpha = true;
+					else if (!PureWhite) 
+						if (val.R == 0xFF && val.G == 0xFF && val.B == 0xFF && val.A == 0xFF)
+							PureWhite = true;
+					else if (!PureBlack)
+						if (val.R == 0x00 && val.G == 0x00 && val.B == 0x00 && val.A == 0xFF)
+							PureBlack = true;
+
+					s.insert(val);
+				}
 
 				Lock.lock();
 				sets.push_back(s);
@@ -953,9 +1685,20 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 				buckets.clear();
 				buckets.insert(buckets.end(), tempBuckets.begin(), tempBuckets.end());
+
+				for (auto& i : tempBuckets)
+				{
+					if (i.size() == 1)
+					{
+						tempBuckets.clear();
+						goto minSize;
+					}
+				}
+
 				tempBuckets.clear();
 			}
 
+		minSize:;
 			// Average buckets
 			for (auto& i : buckets)
 			{
@@ -982,7 +1725,48 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				out.A = (UChar)A;
 				CMap.push_back(out);
 			}
-			// TODO: Alpha match
+
+			// Insert Alpha/Black/White If Needed
+			BGRA8888 alpha; alpha.R = alpha.G = alpha.B = 0xFF; alpha.A = 0x00;
+			BGRA8888 black; black.R = black.G = black.B = 0x00; black.A = 0xFF;
+			BGRA8888 white; white.R = white.G = white.B = 0xFF; white.A = 0xFF;
+			bool hA = false, hW = false , hB = false;
+			UChar lA = 0, lW = 0, lB = 0;
+			for (UInt16 i = 0; i < CMap.size(); ++i)
+			{
+				if (CMap[i].A == 0x00)
+				{
+					hA = true;
+					lA = (UChar)i;
+				}
+				else if (CMap[i] == black)
+				{
+					hB = true;
+					lB = (UChar)i;
+				}
+				else if (CMap[i] == white)
+				{
+					hW = true;
+					lW = (UChar)i;
+				}
+			}
+
+			if (PureAlpha && !hA)
+			{
+				CMap[0] = alpha;
+				lA = 0;
+			}
+			if (PureBlack && !hB)
+			{
+				CMap[1] = black;
+				lB = 1;
+			}
+			if (PureWhite && !hW)
+			{
+				CMap[2] = white;
+				lW = 2;
+			}
+
 			// Find closest pixel for each input
 			auto PixDistance = [](const BGRA8888& i, const BGRA8888& j) -> float
 			{
@@ -1023,9 +1807,26 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 					float distance = FLT_MAX;
 					UChar bestMatch = 0;
 
+					auto val = iPtr[i];
+					if (val.A == 0x00)
+					{
+						bestMatch = lA;
+						goto found;
+					}
+					else if (val == black)
+					{
+						bestMatch = lB;
+						goto found;
+					}
+					else if (val == white)
+					{
+						bestMatch = lW;
+						goto found;
+					}
+
 					for (UInt16 j = 0; j < CMap.size(); ++j)
 					{
-						auto d = PixDistance(iPtr[i], CMap[j]);
+						auto d = PixDistance(val, CMap[j]);
 						if (d < distance)
 						{
 							distance = d;
@@ -1034,6 +1835,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 						}
 					}
 
+				found:;
 					Lock.lock();
 					IMap[i] = bestMatch;
 					Lock.unlock();
