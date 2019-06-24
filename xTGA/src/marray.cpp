@@ -13,17 +13,17 @@ template <class T>
 class xtga::ManagedArray<T>::__ManagedArrayImpl
 {
 public:
-	__ManagedArrayImpl(UInt64 size);
-	__ManagedArrayImpl(T* data, UInt64 size);
+	__ManagedArrayImpl(addressable size);
+	__ManagedArrayImpl(T* data, addressable size);
 	virtual ~__ManagedArrayImpl();
 
 	T* _rawData;
-	UInt64 _size;
-	UInt32 _eSize;
+	addressable _size;
+	uint16 _eSize;
 };
 
 template <class T>
-xtga::ManagedArray<T>::__ManagedArrayImpl::__ManagedArrayImpl(UInt64 size)
+xtga::ManagedArray<T>::__ManagedArrayImpl::__ManagedArrayImpl(addressable size)
 {
 	this->_rawData = new T[size];
 	this->_size = size;
@@ -31,7 +31,7 @@ xtga::ManagedArray<T>::__ManagedArrayImpl::__ManagedArrayImpl(UInt64 size)
 }
 
 template <class T>
-xtga::ManagedArray<T>::__ManagedArrayImpl::__ManagedArrayImpl(T* data, UInt64 size)
+xtga::ManagedArray<T>::__ManagedArrayImpl::__ManagedArrayImpl(T* data, addressable size)
 {
 	this->_rawData = data;
 	this->_size = size;
@@ -45,7 +45,7 @@ xtga::ManagedArray<T>::__ManagedArrayImpl::~__ManagedArrayImpl()
 }
 
 template <class T>
-xtga::ManagedArray<T>* xtga::ManagedArray<T>::Alloc(UInt64 size)
+xtga::ManagedArray<T>* xtga::ManagedArray<T>::Alloc(addressable size)
 {
 	auto rval = new xtga::ManagedArray<T>();
 	rval->_impl = new __ManagedArrayImpl(size);
@@ -53,7 +53,7 @@ xtga::ManagedArray<T>* xtga::ManagedArray<T>::Alloc(UInt64 size)
 }
 
 template <class T>
-xtga::ManagedArray<T>* xtga::ManagedArray<T>::Alloc(T* data, UInt64 size)
+xtga::ManagedArray<T>* xtga::ManagedArray<T>::Alloc(T* data, addressable size)
 {
 	auto rval = new xtga::ManagedArray<T>();
 	rval->_impl = new __ManagedArrayImpl(data, size);
@@ -70,7 +70,7 @@ void xtga::ManagedArray<T>::Free(ManagedArray<T>*& obj)
 }
 
 template <typename T>
-T& xtga::ManagedArray<T>::at(UInt64 index, ERRORCODE* error)
+T& xtga::ManagedArray<T>::at(addressable index, ERRORCODE* error)
 {
 	if (index >= this->_impl->_size)
 	{
@@ -78,17 +78,17 @@ T& xtga::ManagedArray<T>::at(UInt64 index, ERRORCODE* error)
 		return *this->_impl->_rawData;
 	}
 
-	return *(T*)((UChar*)this->_impl->_rawData + (index * this->_impl->_eSize));
+	return *(T*)((uchar*)this->_impl->_rawData + (index * this->_impl->_eSize));
 }
 
 template <typename T>
-T& xtga::ManagedArray<T>::operator[](UInt64 index)
+T& xtga::ManagedArray<T>::operator[](addressable index)
 {
 	return this->at(index);
 }
 
 template <typename T>
-UInt64 xtga::ManagedArray<T>::size() const
+addressable xtga::ManagedArray<T>::size() const
 {
 	return this->_impl->_size;
 }

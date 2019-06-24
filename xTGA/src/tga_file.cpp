@@ -18,10 +18,15 @@
 #include <string.h>
 #include <vector>
 
-constexpr UChar TGA2SIG[] = "TRUEVISION-XFILE.";
-constexpr UChar XTGASIG[] = "xTGA by xNWP";
-constexpr UChar XTGALET = ' ';
-constexpr UInt16 XTGAVER = 100;
+constexpr uchar TGA2SIG[] = "TRUEVISION-XFILE.";
+constexpr uchar XTGASIG[] = "xTGA by xNWP";
+constexpr uchar XTGALET = ' ';
+constexpr uint16 XTGAVER = 100;
+
+struct DeveloperDirectoryEntryImpl : xtga::structs::DeveloperDirectoryEntry
+{
+	void* DATA;
+};
 
 xtga::Parameters xtga::Parameters::BGR24()
 {
@@ -362,18 +367,17 @@ public:
 
 	std::vector<void*> __DanglingArrays;
 	std::vector<void*> __DanglingPtrs;
+	std::vector<DeveloperDirectoryEntryImpl*> __DeveloperEntries;
 
 	void* _RawData;
 	structs::Header* _Header;
 	structs::Footer* _Footer;
 	structs::ExtensionArea* _Extensions;
-	structs::DeveloperDirectoryEntry* _DeveloperDirectory;
-	UInt16 _DeveloperDirectorySize;
-	UChar* _ImageId;
+	uchar* _ImageId;
 	void* _ColorMapData;
 	void* _ImageData;
 	structs::ColorCorrectionEntry* _ColorCorrectionTable;
-	UInt32* _ScanLineTable;
+	uint32* _ScanLineTable;
 	void* _ThumbnailData;
 };
 
@@ -383,8 +387,6 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl()
 	_Header = nullptr;
 	_Footer = nullptr;
 	_Extensions = nullptr;
-	_DeveloperDirectory = nullptr;
-	_DeveloperDirectorySize = 0;
 	_ImageId = nullptr;
 	_ColorMapData = nullptr;
 	_ImageData = nullptr;
@@ -408,10 +410,10 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 
 	// Get filesize
 	fseek(File, 0, SEEK_END);
-	UInt32 DataSize = ftell(File);
+	uint32 DataSize = ftell(File);
 
 	// Read the entire file into memory
-	_RawData = new UChar[DataSize];
+	_RawData = new uchar[DataSize];
 	fseek(File, 0, SEEK_SET);
 	fread(_RawData, 1, DataSize, File);
 
@@ -419,25 +421,31 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 	fclose(File);
 
 	// Read the header
-	_Header = (structs::Header*)((UChar*)_RawData);
+	_Header = (structs::Header*)((uchar*)_RawData);
 
 	// Set some pointers
 	if (_Header->ID_LENGTH)
-		_ImageId = (UChar*)_RawData + sizeof(structs::Header);
+		_ImageId = (uchar*)_RawData + sizeof(structs::Header);
 
 	if (_Header->COLOR_MAP_TYPE)
 	{
-		_ColorMapData = (void*)((UChar*)_RawData + sizeof(structs::Header) + _Header->ID_LENGTH);
-		_ImageData = (void*)( (UChar*)_ColorMapData + ((UInt64)_Header->COLOR_MAP_BITS_PER_ENTRY / 8 * _Header->COLOR_MAP_LENGTH) );
+		if (_Header->IMAGE_DEPTH != 8)
+		{
+			XTGA_SETERROR(error, ERRORCODE::COLORMAP_TOO_LARGE);
+			return;
+		}
+
+		_ColorMapData = (void*)((uchar*)_RawData + sizeof(structs::Header) + _Header->ID_LENGTH);
+		_ImageData = (void*)( (uchar*)_ColorMapData + ((uint64)_Header->COLOR_MAP_BITS_PER_ENTRY / 8 * _Header->COLOR_MAP_LENGTH) );
 	}
 	else
 	{
-		_ImageData = (void*)((UChar*)_RawData + sizeof(structs::Header) + _Header->ID_LENGTH);
+		_ImageData = (void*)((uchar*)_RawData + sizeof(structs::Header) + _Header->ID_LENGTH);
 	}
 
 
 	// Try to read the footer (TGA 2.0 File)
-	_Footer = (structs::Footer*)( (UChar*)_RawData + DataSize - 26 );
+	_Footer = (structs::Footer*)( (uchar*)_RawData + DataSize - 26 );
 
 	// Check the signature
 	if (memcmp(_Footer->SIGNATURE, TGA2SIG, 18) != 0)
@@ -449,28 +457,41 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 	{
 		if (_Footer->EXTENSION_AREA_OFFSET)
 		{
-			_Extensions = (structs::ExtensionArea*)((UChar*)_RawData + _Footer->EXTENSION_AREA_OFFSET);
+			_Extensions = (structs::ExtensionArea*)((uchar*)_RawData + _Footer->EXTENSION_AREA_OFFSET);
 
 			if (_Extensions->COLOR_CORRECTION_TABLE)
 			{
-				_ColorCorrectionTable = (structs::ColorCorrectionEntry*)((UChar*)_RawData + _Extensions->COLOR_CORRECTION_TABLE);
+				_ColorCorrectionTable = (structs::ColorCorrectionEntry*)((uchar*)_RawData + _Extensions->COLOR_CORRECTION_TABLE);
 			}
 
 			if (_Extensions->THUMBNAIL_OFFSET)
 			{
-				_ThumbnailData = (void*)((UChar*)_RawData + _Extensions->THUMBNAIL_OFFSET);
+				_ThumbnailData = (void*)((uchar*)_RawData + _Extensions->THUMBNAIL_OFFSET);
 			}
 
 			if (_Extensions->SCAN_LINE_OFFSET)
 			{
-				_ScanLineTable = (UInt32*)((UChar*)_RawData + _Extensions->SCAN_LINE_OFFSET);
+				_ScanLineTable = (uint32*)((uchar*)_RawData + _Extensions->SCAN_LINE_OFFSET);
 			}
 		}
 
 		if (_Footer->DEVELOPER_DIRECTORY_OFFSET)
 		{
-			_DeveloperDirectorySize = *(UInt16*)((UChar*)_RawData + _Footer->DEVELOPER_DIRECTORY_OFFSET);
-			_DeveloperDirectory = (structs::DeveloperDirectoryEntry*)((UChar*)_RawData + _Footer->DEVELOPER_DIRECTORY_OFFSET + 2);
+			auto DeveloperDirectorySize = *(uint16*)((uchar*)_RawData + _Footer->DEVELOPER_DIRECTORY_OFFSET);
+			auto DeveloperDirectory = (DeveloperDirectoryEntryImpl*)((uchar*)_RawData + _Footer->DEVELOPER_DIRECTORY_OFFSET + 2);
+
+			// Push each developer entry into array, this is done so that adding/removing entries can be done
+			// more easily. It does use a bit more memory, but really a negligible amount in practice.
+			for (uint16 i = 0; i < DeveloperDirectorySize; ++i)
+			{
+				auto* entry = new DeveloperDirectoryEntryImpl;
+
+				memcpy(entry, &DeveloperDirectory[i], sizeof(structs::DeveloperDirectoryEntry));
+				entry->DATA = new uchar[entry->ENTRY_SIZE];
+				memcpy(entry->DATA, (uchar*)_RawData + entry->ENTRY_OFFSET, entry->ENTRY_SIZE);
+
+				__DeveloperEntries.push_back(entry);
+			}
 		}
 	}
 
@@ -487,6 +508,14 @@ xtga::TGAFile::__TGAFileImpl::~__TGAFileImpl()
 	for (auto& i : this->__DanglingPtrs)
 	{
 		if (i) delete i;
+	}
+	for (auto& i : this->__DeveloperEntries)
+	{
+		if (i)
+		{
+			delete[] i->DATA;
+			delete i;
+		}
 	}
 }
 
@@ -557,27 +586,45 @@ bool xtga::TGAFile::SaveFile(const char* filename, ERRORCODE* error)
 		return false;
 	}
 
-	fwrite(this->_impl->_ImageData, 1, iSize, file);
+	fwrite(this->_impl->_ImageData, 1, (size_t)iSize, file);
 
 	// TGA 2.0 Stuffs
 	if (this->_impl->_Footer)
 	{
 		// Write Developer Fields
-		UInt32 devDirOffset = ftell(file);
-		if (this->_impl->_DeveloperDirectory)
+		uint32 devDirOffset = 0;
+		if (this->_impl->__DeveloperEntries.size() > 0)
 		{
-			// TODO: Need proper list of developer entries
+			// Data
+			for (auto& entry : _impl->__DeveloperEntries)
+			{
+				uint32 offset = ftell(file);
+				fwrite(entry->DATA, 1, entry->ENTRY_SIZE, file);
+				entry->ENTRY_OFFSET = offset;
+			}
+
+			// Directory
+			devDirOffset = ftell(file);
+			auto size = (uint16)_impl->__DeveloperEntries.size();
+			fwrite(&size, 1, sizeof(uint16), file);
+
+			for (auto& entry : _impl->__DeveloperEntries)
+			{
+				fwrite(entry, 1, sizeof(structs::DeveloperDirectoryEntry), file);
+			}
+
+		uint32 devDirOffset = ftell(file);
 		}
 
 		// Write Scanline Table
-		UInt32 scanLineOffset = ftell(file);
+		uint32 scanLineOffset = ftell(file);
 		if (this->_impl->_ScanLineTable)
 		{
-			fwrite(this->_impl->_ScanLineTable, 1, Header->IMAGE_HEIGHT * sizeof(UInt32), file);
+			fwrite(this->_impl->_ScanLineTable, 1, Header->IMAGE_HEIGHT * sizeof(uint32), file);
 		}
 
 		// Write Thumbnail
-		UInt32 thumbnailOffset = ftell(file);
+		uint32 thumbnailOffset = ftell(file);
 		if (this->_impl->_ThumbnailData)
 		{
 			// TODO: Get Thumbnail Size FCN
@@ -585,25 +632,25 @@ bool xtga::TGAFile::SaveFile(const char* filename, ERRORCODE* error)
 		}
 
 		// Write Color Correction Table
-		UInt32 ccTableOffset = ftell(file);
+		uint32 ccTableOffset = ftell(file);
 		if (this->_impl->_ColorCorrectionTable)
 		{
 			fwrite(this->_impl->_ColorCorrectionTable, 1, 256 * sizeof(structs::ColorCorrectionEntry), file);
 		}
 
 		// Write Extensions
-		UInt32 extOffset = ftell(file);
+		uint32 extOffset = ftell(file);
 		if (this->_impl->_Extensions)
 		{
 			time_t t = time(NULL);
 			tm* tPtr = localtime(&t);
 
-			UInt16 year = tPtr->tm_year + 1900;
-			UInt16 month = tPtr->tm_mon + 1;
-			UInt16 day = tPtr->tm_mday;
-			UInt16 hour = tPtr->tm_hour;
-			UInt16 min = tPtr->tm_min;
-			UInt16 sec = tPtr->tm_sec;
+			uint16 year = tPtr->tm_year + 1900;
+			uint16 month = tPtr->tm_mon + 1;
+			uint16 day = tPtr->tm_mday;
+			uint16 hour = tPtr->tm_hour;
+			uint16 min = tPtr->tm_min;
+			uint16 sec = tPtr->tm_sec;
 
 			this->_impl->_Extensions->SAVE_DATE_YEAR = year;
 			this->_impl->_Extensions->SAVE_DATE_MONTH = month;
@@ -627,9 +674,10 @@ bool xtga::TGAFile::SaveFile(const char* filename, ERRORCODE* error)
 		// Write footer
 		if (this->_impl->_Extensions)
 			this->_impl->_Footer->EXTENSION_AREA_OFFSET = extOffset;
+		else
+			this->_impl->_Footer->EXTENSION_AREA_OFFSET = 0;
 
-		if (this->_impl->_DeveloperDirectory)
-			this->_impl->_Footer->DEVELOPER_DIRECTORY_OFFSET = devDirOffset;
+		this->_impl->_Footer->DEVELOPER_DIRECTORY_OFFSET = devDirOffset;
 
 		fwrite(this->_impl->_Footer, 1, sizeof(structs::Footer), file);
 	}
@@ -642,18 +690,18 @@ bool xtga::TGAFile::SaveFile(const char* filename, ERRORCODE* error)
 	return true;
 }
 
-UChar const * xtga::TGAFile::GetImageID()
+uchar const * xtga::TGAFile::GetImageID()
 {
 	return this->_impl->_ImageId;
 }
 
-void xtga::TGAFile::SetImageID(const void* data, UChar size)
+void xtga::TGAFile::SetImageID(const void* data, uchar size)
 {
-	this->_impl->_ImageId = new UChar[size];
+	this->_impl->_ImageId = new uchar[size];
 
-	for (UChar i = 0; i < size && i < 256; ++i)
+	for (uchar i = 0; i < size && i < 256; ++i)
 	{
-		this->_impl->_ImageId[i] = ((UChar*)data)[i];
+		this->_impl->_ImageId[i] = ((uchar*)data)[i];
 	}
 
 	this->_impl->__DanglingArrays.push_back(this->_impl->_ImageId);
@@ -678,6 +726,7 @@ bool xtga::TGAFile::GenerateColorMap(bool force, xtga::ERRORCODE* error)
 		return false;
 	}
 
+
 	using namespace flags;
 	using namespace codecs;
 	using namespace pixelformats;
@@ -686,9 +735,15 @@ bool xtga::TGAFile::GenerateColorMap(bool force, xtga::ERRORCODE* error)
 	auto pCount = Header->IMAGE_WIDTH * Header->IMAGE_HEIGHT;
 	auto depth = Header->IMAGE_DEPTH;
 
+	if (Header->IMAGE_TYPE == IMAGETYPE::GRAYSCALE || Header->IMAGE_TYPE == IMAGETYPE::GRAYSCALE_RLE)
+	{
+		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
+		return false;
+	}
+
 	void* iBuff = this->_impl->_ImageData;
 	void* EncBuff = nullptr;
-	UInt16 CSize = 0;
+	uint16 CSize = 0;
 
 	bool RLE = false;
 	if (Header->IMAGE_TYPE == IMAGETYPE::TRUE_COLOR_RLE)
@@ -759,20 +814,20 @@ void* xtga::TGAFile::GetImageData()
 	return this->_impl->_ImageData;
 }
 
-UInt64 xtga::TGAFile::GetImageDataSize(ERRORCODE* error)
+uint64 xtga::TGAFile::GetImageDataSize(ERRORCODE* error)
 {
 	using namespace flags;
 	using namespace codecs;
 
 	auto Header = this->_impl->_Header;
 	auto Frmt = Header->IMAGE_TYPE;
-	UInt64 pCount = (UInt64)Header->IMAGE_WIDTH * Header->IMAGE_HEIGHT;
+	uint64 pCount = (uint64)Header->IMAGE_WIDTH * Header->IMAGE_HEIGHT;
 	ERRORCODE terr = ERRORCODE::NONE;
 
 	// Consider RLE
 	if (Frmt == IMAGETYPE::COLOR_MAPPED_RLE || Frmt == IMAGETYPE::GRAYSCALE_RLE || Frmt == IMAGETYPE::TRUE_COLOR_RLE)
 	{		
-		UChar depth = Header->IMAGE_DEPTH;
+		uchar depth = Header->IMAGE_DEPTH;
 
 		if (terr != ERRORCODE::NONE)
 		{
@@ -780,15 +835,15 @@ UInt64 xtga::TGAFile::GetImageDataSize(ERRORCODE* error)
 			return 0;
 		}
 
-		UChar BPP = depth / 8;
-		UInt32 count = 0;
-		UInt32 it = 0;
+		uchar BPP = depth / 8;
+		uint32 count = 0;
+		uint32 it = 0;
 
 		while (count < pCount)
 		{
-			auto Packet = (structs::RLEPacket*)((UChar*)this->_impl->_ImageData + it);
+			auto Packet = (structs::RLEPacket*)((uchar*)this->_impl->_ImageData + it);
 			++it;
-			UInt32 size = BPP * (Packet->PIXEL_COUNT_MINUS_ONE + 1);
+			uint32 size = BPP * (Packet->PIXEL_COUNT_MINUS_ONE + 1);
 
 			if (Packet->RUN_LENGTH)
 			{
@@ -826,7 +881,7 @@ bool xtga::TGAFile::CompressWithRLE(xtga::ERRORCODE* error)
 		return false;
 	}
 
-	UChar depth = Header->IMAGE_DEPTH;;
+	uchar depth = Header->IMAGE_DEPTH;;
 	ERRORCODE terr;
 
 	void* out = nullptr;
@@ -868,37 +923,113 @@ xtga::flags::ALPHATYPE xtga::TGAFile::HasAlpha() const
 		return flags::ALPHATYPE::NOALPHA;
 }
 
-UInt16 xtga::TGAFile::GetWidth() const
+uint16 xtga::TGAFile::GetWidth() const
 {
 	return this->_impl->_Header->IMAGE_WIDTH;
 }
 
-UInt16 xtga::TGAFile::GetHeight() const
+uint16 xtga::TGAFile::GetHeight() const
 {
 	return this->_impl->_Header->IMAGE_HEIGHT;
 }
 
-UChar xtga::TGAFile::GetBitDepth() const
+uchar xtga::TGAFile::GetBitDepth() const
 {
 	return this->_impl->_Header->IMAGE_DEPTH;
 }
 
-UInt16 xtga::TGAFile::GetDeveloperEntryCount() const
+uint16 xtga::TGAFile::GetDeveloperEntryCount() const
 {
-	return this->_impl->_DeveloperDirectorySize;
+	return (uint16)this->_impl->__DeveloperEntries.size();
 }
 
-void* xtga::TGAFile::GetDeveloperEntry(UInt16 index, UInt16* tag, UInt32* size)
+const void* xtga::TGAFile::GetDeveloperEntry(uint16 index, uint16* tag, uint32* size, ERRORCODE* error)
 {
-	// TODO: Need to make this modular, developer entries should be stored in a vector.
-	auto entry = this->_impl->_DeveloperDirectory + index;
+	if (index >= this->_impl->__DeveloperEntries.size())
+	{
+		XTGA_SETERROR(error, ERRORCODE::INDEX_OUT_OF_RANGE);
+		return nullptr;
+	}
 
-	if (tag)
-		*tag = entry->TAG;
-	if (size)
-		*size = entry->ENTRY_SIZE;
+	auto entry = _impl->__DeveloperEntries[index];
+	XTGA_SETERROR(tag, entry->TAG);
+	XTGA_SETERROR(size, entry->ENTRY_SIZE);
+	XTGA_SETERROR(error, ERRORCODE::NONE);
 	
-	return (void*)( (UChar*)this->_impl->_RawData + entry->ENTRY_OFFSET );
+	return entry->DATA;
+}
+
+const void* xtga::TGAFile::GetDeveloperEntryByTag(uint16 tag, uint32* size)
+{
+	for (auto& i : _impl->__DeveloperEntries)
+	{
+		if (i->TAG == tag)
+		{
+			XTGA_SETERROR(size, i->ENTRY_SIZE);
+			return i->DATA;
+		}
+	}
+
+	return nullptr;
+}
+
+bool xtga::TGAFile::EditDeveloperEntry(uint16 index, const void* data, uint32 size, uint16* tag, ERRORCODE* error)
+{
+	if (index >= this->_impl->__DeveloperEntries.size())
+	{
+		XTGA_SETERROR(error, ERRORCODE::INDEX_OUT_OF_RANGE);
+		return false;
+	}
+
+	auto entry = _impl->__DeveloperEntries[index];
+	if (tag) entry->TAG = *tag;
+	entry->ENTRY_SIZE = size;
+	delete[] entry->DATA;
+	entry->DATA = new uchar[size];
+	memcpy(entry->DATA, data, size);
+
+	XTGA_SETERROR(error, ERRORCODE::NONE);
+
+	return true;
+}
+
+bool xtga::TGAFile::AddDeveloperEntry(uint16 tag, const void* data, uint32 size, uint16* index, ERRORCODE* error)
+{
+	if (!_impl->_Footer)
+	{
+		this->UpgradeToTGATwo();
+	}
+
+	if (_impl->__DeveloperEntries.size() >= UINT16_MAX)
+	{
+		XTGA_SETERROR(error, ERRORCODE::CONTAINER_FULL);
+		return false;
+	}
+
+	auto* e = new DeveloperDirectoryEntryImpl;
+	e->ENTRY_OFFSET = 0;
+	e->ENTRY_SIZE = size;
+	e->TAG = tag;
+	e->DATA = new uchar[size];
+	memcpy(e->DATA, data, size);
+
+	_impl->__DeveloperEntries.push_back(e);
+
+	XTGA_SETERROR(index, (uint16)_impl->__DeveloperEntries.size() - 1);
+
+	return true;
+}
+
+bool xtga::TGAFile::RemoveDeveloperEntry(uint16 index, ERRORCODE* error)
+{
+	if (index >= _impl->__DeveloperEntries.size())
+	{
+		XTGA_SETERROR(error, ERRORCODE::INDEX_OUT_OF_RANGE);
+		return false;
+	}
+
+	_impl->__DeveloperEntries.erase(_impl->__DeveloperEntries.begin() + index);
+	return true;
 }
 
 xtga::structs::ExtensionArea* xtga::TGAFile::GetExtensionArea()
@@ -906,14 +1037,136 @@ xtga::structs::ExtensionArea* xtga::TGAFile::GetExtensionArea()
 	return this->_impl->_Extensions;
 }
 
-UInt32* xtga::TGAFile::GetScanLineTable()
+const uint32* xtga::TGAFile::GetScanLineTable()
 {
 	return this->_impl->_ScanLineTable;
 }
 
-void* xtga::TGAFile::GetThumbnailData()
+const void* xtga::TGAFile::GetThumbnailData()
 {
 	return this->_impl->_ThumbnailData;
+}
+
+bool xtga::TGAFile::GenerateThumbnail(uint16 LongEdgeLength, bool Clip, ERRORCODE* error)
+{
+	using namespace flags;
+	using namespace codecs;
+	using namespace pixelformats;
+
+	ERRORCODE terr;
+	if (!_impl->_Footer)
+		this->UpgradeToTGATwo(&terr);
+
+	if (terr != ERRORCODE::NONE)
+	{
+		XTGA_SETERROR(error, terr);
+		return false;
+	}
+
+	float scale = 1;
+	auto header = _impl->_Header;
+
+	if (header->IMAGE_HEIGHT > header->IMAGE_WIDTH)
+		scale = (float)LongEdgeLength / header->IMAGE_HEIGHT;
+	else
+		scale = (float)LongEdgeLength / header->IMAGE_WIDTH;
+
+	void* tbuff = nullptr;
+
+	if (header->IMAGE_TYPE == IMAGETYPE::TRUE_COLOR_RLE || header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE || header->IMAGE_TYPE == IMAGETYPE::GRAYSCALE_RLE)
+	{
+		tbuff = DecodeRLE(this->_impl->_ImageData, header->IMAGE_DEPTH, header->IMAGE_HEIGHT * header->IMAGE_WIDTH, &terr);
+
+		if (terr != ERRORCODE::NONE)
+		{
+			XTGA_SETERROR(error, terr);
+			return false;
+		}
+	}
+
+	bool CMAP = false;
+	if (header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED || header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE)
+	{
+		auto tmp = tbuff;
+		CMAP = true;
+
+		if (tbuff)
+		{
+			tbuff = DecodeColorMap(tbuff, header->IMAGE_HEIGHT * header->IMAGE_WIDTH, _impl->_ColorMapData, header->COLOR_MAP_BITS_PER_ENTRY, &terr);
+			delete[] tmp;
+		}
+		else
+		{
+			tbuff = DecodeColorMap(this->_impl->_ImageData, header->IMAGE_HEIGHT * header->IMAGE_WIDTH, _impl->_ColorMapData, header->COLOR_MAP_BITS_PER_ENTRY, &terr);
+		}
+
+		if (terr != ERRORCODE::NONE)
+		{
+			XTGA_SETERROR(error, terr);
+			return false;
+		}
+	}
+
+	PIXELFORMATS pf = PIXELFORMATS::RGB565;
+	uchar depth = 0;
+	if (CMAP)
+	{
+		depth = header->COLOR_MAP_BITS_PER_ENTRY;
+	}
+	else
+	{
+		depth = header->IMAGE_DEPTH;
+	}
+
+	if (depth == 24)
+		pf = PIXELFORMATS::BGR888;
+	else if (depth == 32)
+		pf = PIXELFORMATS::BGRA8888;
+	else if (depth == 16)
+	{
+		if (header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 1)
+			pf = PIXELFORMATS::BGRA5551;
+		else
+			pf = PIXELFORMATS::IA88;
+	}
+	else
+		pf = PIXELFORMATS::I8;
+
+	auto tmp = tbuff;
+	if (!tbuff)
+		tbuff = _impl->_ImageData;
+
+	tbuff = ScaleImageBicubic(tbuff, pf,
+		header->IMAGE_WIDTH, header->IMAGE_HEIGHT, scale, &terr);
+
+	if (tmp) delete[] tmp;
+
+	if (terr != ERRORCODE::NONE)
+	{
+		XTGA_SETERROR(error, terr);
+		return false;
+	}
+
+	if (CMAP)
+	{
+		// TODO: determine if the array should be color map indices or just straight values
+		tmp = tbuff;
+		tbuff = ApplyColorMap(tbuff, (addressable)header->IMAGE_HEIGHT * header->IMAGE_WIDTH, _impl->_ColorMapData, header->COLOR_MAP_LENGTH, header->COLOR_MAP_BITS_PER_ENTRY, &terr);
+
+		delete[] tmp;
+
+		if (terr != ERRORCODE::NONE)
+		{
+			XTGA_SETERROR(error, terr);
+			return false;
+		}
+	}
+
+	// TODO: add some member vars to hold the postage stamp w / h
+
+	_impl->_ThumbnailData = tbuff;
+	_impl->__DanglingArrays.push_back(tbuff);
+	return true;
 }
 
 xtga::structs::ColorCorrectionEntry* xtga::TGAFile::GetColorCorrectionTable()
@@ -923,12 +1176,14 @@ xtga::structs::ColorCorrectionEntry* xtga::TGAFile::GetColorCorrectionTable()
 
 void xtga::TGAFile::GenerateColorCorrectionTable()
 {
+	// TODO: verify that this works + make return a bool for redundant task
+
 	if (this->_impl->_ColorCorrectionTable)
 		return;
 
 	this->_impl->_ColorCorrectionTable = new structs::ColorCorrectionEntry[256];
 
-	for (UInt16 i = 0; i < 256; ++i)
+	for (uint16 i = 0; i < 256; ++i)
 	{
 		this->_impl->_ColorCorrectionTable[i].B = i * 256;
 		this->_impl->_ColorCorrectionTable[i].G = i * 256;
@@ -956,7 +1211,7 @@ xtga::ManagedArray<xtga::pixelformats::IPixel>* xtga::TGAFile::GetImage(xtga::pi
 		return nullptr;
 	}
 
-	UInt64 pCount = (UInt64)this->_impl->_Header->IMAGE_WIDTH * this->_impl->_Header->IMAGE_HEIGHT;
+	addressable pCount = (addressable)this->_impl->_Header->IMAGE_WIDTH * this->_impl->_Header->IMAGE_HEIGHT;
 	ManagedArray<IPixel>* rarr = nullptr;
 
 	if (tPf == PIXELFORMATS::BGRA8888)
@@ -1004,14 +1259,14 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 		return nullptr;
 	}
 
-	UInt64 pCount = (UInt64)this->_impl->_Header->IMAGE_WIDTH * this->_impl->_Header->IMAGE_HEIGHT;
+	addressable pCount = (uint64)this->_impl->_Header->IMAGE_WIDTH * this->_impl->_Header->IMAGE_HEIGHT;
 	auto rarr = ManagedArray<RGBA8888>::Alloc(pCount);
 
 	// Convert from various pixel formats to RGBA
 	if (tPf == PIXELFORMATS::BGRA8888)
 	{
 		auto buff = ManagedArray<BGRA8888>::Alloc((BGRA8888*)ReturnBuff, pCount);
-		for (UInt64 i = 0; i < pCount; ++i)
+		for (addressable i = 0; i < pCount; ++i)
 		{
 			rarr->at(i) = BGRA_To_RGBA(buff->at(i));
 		}
@@ -1020,7 +1275,7 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 	else if (tPf == PIXELFORMATS::BGR888)
 	{
 		auto buff = ManagedArray<BGR888>::Alloc((BGR888*)ReturnBuff, pCount);
-		for (UInt64 i = 0; i < pCount; ++i)
+		for (addressable i = 0; i < pCount; ++i)
 		{
 			rarr->at(i) = BGR_To_RGBA(buff->at(i));
 		}
@@ -1029,7 +1284,7 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 	else if (tPf == PIXELFORMATS::BGRA5551)
 	{
 		auto buff = ManagedArray<BGRA5551>::Alloc((BGRA5551*)ReturnBuff, pCount);
-		for (UInt64 i = 0; i < pCount; ++i)
+		for (addressable i = 0; i < pCount; ++i)
 		{
 			rarr->at(i) = BGRA16_To_RGBA(buff->at(i));
 		}
@@ -1038,7 +1293,7 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 	else if (tPf == PIXELFORMATS::I8)
 	{
 		auto buff = ManagedArray<I8>::Alloc((I8*)ReturnBuff, pCount);
-		for (UInt64 i = 0; i < pCount; ++i)
+		for (addressable i = 0; i < pCount; ++i)
 		{
 			rarr->at(i) = I_To_RGBA(buff->at(i));
 		}
@@ -1047,7 +1302,7 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 	else if (tPf == PIXELFORMATS::IA88)
 	{
 		auto buff = ManagedArray<IA88>::Alloc((IA88*)ReturnBuff, pCount);
-		for (UInt64 i = 0; i < pCount; ++i)
+		for (addressable i = 0; i < pCount; ++i)
 		{
 			rarr->at(i) = IA_To_RGBA(buff->at(i));
 		}
@@ -1060,12 +1315,12 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 	return rarr;
 }
 
-bool xtga::TGAFile::UpgradeToTGATwo(xtga::ERRORCODE* error)
+void xtga::TGAFile::UpgradeToTGATwo(xtga::ERRORCODE* error)
 {
 	if (this->_impl->_Footer)
 	{
 		XTGA_SETERROR(error, ERRORCODE::REDUNDANT_OPERATION);
-		return false;
+		return;
 	}
 	else
 	{
@@ -1087,8 +1342,6 @@ bool xtga::TGAFile::UpgradeToTGATwo(xtga::ERRORCODE* error)
 
 		this->_impl->__DanglingPtrs.push_back(this->_impl->_Footer);
 		this->_impl->__DanglingPtrs.push_back(this->_impl->_Extensions);
-
-		return true;
 	}
 }
 

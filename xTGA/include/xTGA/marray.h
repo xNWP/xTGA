@@ -27,7 +27,7 @@ namespace xtga
 		/// @param[in] size				The number of elements the array contains.
 		/// @return ManagedArray<T>*	The created managed array.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI static ManagedArray* Alloc(UInt64 size);
+		XTGAAPI static ManagedArray* Alloc(addressable size);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Allocates a new ManagedArray of type 'T' with 'size' elements while taking ownership of an exiting array.
@@ -36,7 +36,7 @@ namespace xtga
 		/// @param[in] size				The number of elements the array contains.
 		/// @return ManagedArray<T>*	The created managed array.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI static ManagedArray* Alloc(T* data, UInt64 size);
+		XTGAAPI static ManagedArray* Alloc(T* data, addressable size);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Frees the given object.
@@ -52,7 +52,7 @@ namespace xtga
 		/// @param[out] error			The error/status code. Can be nullptr.
 		/// @return T&					The returned element [editable]. If index is out of range the first item is returned.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI T& at(UInt64 index, ERRORCODE* error = nullptr);
+		XTGAAPI T& at(addressable index, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Identical to ::at(). However does not provide error checking.
@@ -60,13 +60,13 @@ namespace xtga
 		/// @param[in] index			The index of the element.
 		/// @return T*					The returned element [editable]. If index is out of range the first item is returned.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI T& operator[](UInt64 index);
+		XTGAAPI T& operator[](addressable index);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the size of the array.
-		/// @return UInt64				The size of the array.
+		/// @return uint64				The size of the array.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI UInt64 size() const;
+		XTGAAPI addressable size() const;
 
 		//==================================================================================================
 		/// INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL

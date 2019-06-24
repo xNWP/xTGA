@@ -16,7 +16,7 @@ namespace xtga
 {
 	namespace flags
 	{
-		enum class IMAGETYPE : UChar
+		enum class IMAGETYPE : uchar
 		{
 			NONE				= 0x00,			/* No image data present. */
 			COLOR_MAPPED		= 0x01,			/* Uncompressed Color Mapped. */
@@ -27,7 +27,7 @@ namespace xtga
 			GRAYSCALE_RLE		= 0x0B			/* Run-length encoded Grayscale. */
 		};
 
-		enum class IMAGEORIGIN : UChar
+		enum class IMAGEORIGIN : uchar
 		{
 			BOTTOM_LEFT			= 0x00,			/* First pixel goes in the bottom left. */
 			BOTTOM_RIGHT		= 0x01,			/* First pixel goes in the bottom right. */
@@ -35,7 +35,7 @@ namespace xtga
 			TOP_RIGHT			= 0x03			/* First pixel goes in the top right. */
 		};
 
-		enum class ALPHATYPE : UChar
+		enum class ALPHATYPE : uchar
 		{
 			NOALPHA					= 0x00,			/* There is no alpha in the image. */
 			UNDEFINED_ALPHA_IGNORE	= 0x01,			/* The data in the alpha channel is undefined and can be ignored. */

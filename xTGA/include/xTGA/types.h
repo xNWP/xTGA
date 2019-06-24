@@ -13,17 +13,34 @@
 #ifdef __cplusplus
 #	include <cstdint>
 #	include <cfloat>
-	typedef std::uint8_t UChar;
-	typedef std::uint16_t UInt16;
-	typedef std::uint32_t UInt32;
-	typedef std::uint64_t UInt64;
+	typedef std::uint8_t uchar;
+	typedef std::uint16_t uint16;
+	typedef std::uint32_t uint32;
+	typedef std::uint64_t uint64;
 #else
 #	include <stdint.h>
 #	include <float.h>
-	typedef uint8_t UChar;
-	typedef uint16_t UInt16;
-	typedef uint32_t UInt32;
-	typedef uint64_t UInt64;
+	typedef uint8_t uchar;
+	typedef uint16_t uint16;
+	typedef uint32_t uint32;
+	typedef uint64_t uint64;
 #endif
 
-#endif // !XTGA_TYPES_H__
+// Determine Addressable Memory Size
+#ifdef _WIN32
+#	ifdef _WIN64
+		typedef uint64 addressable;
+#	else
+		typedef uint32 addressable;
+#	endif
+#endif
+
+#ifdef __GNUC__
+#	ifdef __x86_64__
+		typedef uint64 addressable;
+#	else ifdef __ppc64__
+		typedef uint64 addressable;
+#	endif
+#endif
+
+#endif // !XTGA_TYPES_H_

@@ -42,8 +42,8 @@ bool xtga::pixelformats::operator!=(const xtga::pixelformats::BGR888& lhs, const
 
 bool xtga::pixelformats::operator==(const xtga::pixelformats::RGBA8888& lhs, const xtga::pixelformats::RGBA8888& rhs)
 {
-	UInt32 l = *(UInt32*)&lhs;
-	UInt32 r = *(UInt32*)&rhs;
+	uint32 l = *(uint32*)&lhs;
+	uint32 r = *(uint32*)&rhs;
 	if (l == r)
 		return true;
 	else
@@ -57,8 +57,8 @@ bool xtga::pixelformats::operator!=(const xtga::pixelformats::RGBA8888& lhs, con
 
 bool xtga::pixelformats::operator==(const xtga::pixelformats::ABGR8888& lhs, const xtga::pixelformats::ABGR8888& rhs)
 {
-	UInt32 l = *(UInt32*)& lhs;
-	UInt32 r = *(UInt32*)& rhs;
+	uint32 l = *(uint32*)& lhs;
+	uint32 r = *(uint32*)& rhs;
 	if (l == r)
 		return true;
 	else
@@ -72,8 +72,8 @@ bool xtga::pixelformats::operator!=(const xtga::pixelformats::ABGR8888& lhs, con
 
 bool xtga::pixelformats::operator==(const xtga::pixelformats::ARGB8888& lhs, const xtga::pixelformats::ARGB8888& rhs)
 {
-	UInt32 l = *(UInt32*)& lhs;
-	UInt32 r = *(UInt32*)& rhs;
+	uint32 l = *(uint32*)& lhs;
+	uint32 r = *(uint32*)& rhs;
 	if (l == r)
 		return true;
 	else
@@ -87,8 +87,8 @@ bool xtga::pixelformats::operator!=(const xtga::pixelformats::ARGB8888& lhs, con
 
 bool xtga::pixelformats::operator==(const xtga::pixelformats::BGRA8888& lhs, const xtga::pixelformats::BGRA8888& rhs)
 {
-	UInt32 l = *(UInt32*)& lhs;
-	UInt32 r = *(UInt32*)& rhs;
+	uint32 l = *(uint32*)& lhs;
+	uint32 r = *(uint32*)& rhs;
 	if (l == r)
 		return true;
 	else
@@ -102,8 +102,8 @@ bool xtga::pixelformats::operator!=(const xtga::pixelformats::BGRA8888& lhs, con
 
 bool xtga::pixelformats::operator==(const xtga::pixelformats::ARGB1555& lhs, const xtga::pixelformats::ARGB1555& rhs)
 {
-	UInt16 l = *(UInt16*)& lhs;
-	UInt16 r = *(UInt16*)& rhs;
+	uint16 l = *(uint16*)& lhs;
+	uint16 r = *(uint16*)& rhs;
 	if (l == r)
 		return true;
 	else
@@ -117,8 +117,8 @@ bool xtga::pixelformats::operator!=(const xtga::pixelformats::ARGB1555& lhs, con
 
 bool xtga::pixelformats::operator==(const xtga::pixelformats::BGRA5551& lhs, const xtga::pixelformats::BGRA5551& rhs)
 {
-	UInt16 l = *(UInt16*)& lhs;
-	UInt16 r = *(UInt16*)& rhs;
+	uint16 l = *(uint16*)& lhs;
+	uint16 r = *(uint16*)& rhs;
 	if (l == r)
 		return true;
 	else
@@ -132,8 +132,8 @@ bool xtga::pixelformats::operator!=(const xtga::pixelformats::BGRA5551& lhs, con
 
 bool xtga::pixelformats::operator==(const xtga::pixelformats::RGB565& lhs, const xtga::pixelformats::RGB565& rhs)
 {
-	UInt16 l = *(UInt16*)& lhs;
-	UInt16 r = *(UInt16*)& rhs;
+	uint16 l = *(uint16*)& lhs;
+	uint16 r = *(uint16*)& rhs;
 	if (l == r)
 		return true;
 	else
@@ -147,8 +147,8 @@ bool xtga::pixelformats::operator!=(const xtga::pixelformats::RGB565& lhs, const
 
 bool xtga::pixelformats::operator==(const xtga::pixelformats::BGR565& lhs, const xtga::pixelformats::BGR565& rhs)
 {
-	UInt16 l = *(UInt16*)& lhs;
-	UInt16 r = *(UInt16*)& rhs;
+	uint16 l = *(uint16*)& lhs;
+	uint16 r = *(uint16*)& rhs;
 	if (l == r)
 		return true;
 	else

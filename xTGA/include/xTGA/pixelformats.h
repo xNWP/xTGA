@@ -17,7 +17,7 @@ namespace xtga
 {
 	namespace pixelformats
 	{
-		enum class PIXELFORMATS : UChar
+		enum class PIXELFORMATS : uchar
 		{
 			DEFAULT		= 0x09,
 			RGB888		= 0x00,		/* An RGB pixel with 8-bits per primary. */
@@ -45,9 +45,9 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		struct RGB888 : IPixel
 		{
-			UChar R;
-			UChar G;
-			UChar B;
+			uchar R;
+			uchar G;
+			uchar B;
 		};
 		XTGAAPI bool operator==(const RGB888& lhs, const RGB888& rhs);
 		XTGAAPI bool operator!=(const RGB888& lhs, const RGB888& rhs);
@@ -57,9 +57,9 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		struct BGR888 : IPixel
 		{
-			UChar B;
-			UChar G;
-			UChar R;
+			uchar B;
+			uchar G;
+			uchar R;
 		};
 		XTGAAPI bool operator==(const BGR888& lhs, const BGR888& rhs);
 		XTGAAPI bool operator!=(const BGR888& lhs, const BGR888& rhs);
@@ -69,10 +69,10 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		struct RGBA8888 : IPixel
 		{
-			UChar R;
-			UChar G;
-			UChar B;
-			UChar A;
+			uchar R;
+			uchar G;
+			uchar B;
+			uchar A;
 		};
 		XTGAAPI bool operator==(const RGBA8888& lhs, const RGBA8888& rhs);
 		XTGAAPI bool operator!=(const RGBA8888& lhs, const RGBA8888& rhs);
@@ -82,10 +82,10 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		struct ABGR8888 : IPixel
 		{
-			UChar A;
-			UChar B;
-			UChar G;
-			UChar R;
+			uchar A;
+			uchar B;
+			uchar G;
+			uchar R;
 		};
 		XTGAAPI bool operator==(const ABGR8888& lhs, const ABGR8888& rhs);
 		XTGAAPI bool operator!=(const ABGR8888& lhs, const ABGR8888& rhs);
@@ -95,10 +95,10 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		struct ARGB8888 : IPixel
 		{
-			UChar A;
-			UChar R;
-			UChar G;
-			UChar B;
+			uchar A;
+			uchar R;
+			uchar G;
+			uchar B;
 		};
 		XTGAAPI bool operator==(const ARGB8888& lhs, const ARGB8888& rhs);
 		XTGAAPI bool operator!=(const ARGB8888& lhs, const ARGB8888& rhs);
@@ -108,10 +108,10 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		struct BGRA8888 : IPixel
 		{
-			UChar B;
-			UChar G;
-			UChar R;
-			UChar A;
+			uchar B;
+			uchar G;
+			uchar R;
+			uchar A;
 		};
 		XTGAAPI bool operator==(const BGRA8888& lhs, const BGRA8888& rhs);
 		XTGAAPI bool operator!=(const BGRA8888& lhs, const BGRA8888& rhs);
@@ -123,13 +123,13 @@ namespace xtga
 		{
 			union
 			{
-				UInt16 RawBits;
+				uint16 RawBits;
 				struct
 				{
-					UInt16 A : 1;
-					UInt16 R : 5;
-					UInt16 G : 5;
-					UInt16 B : 5;
+					uint16 A : 1;
+					uint16 R : 5;
+					uint16 G : 5;
+					uint16 B : 5;
 				};
 			};
 		};
@@ -143,13 +143,13 @@ namespace xtga
 		{
 			union
 			{
-				UInt16 RawBits;
+				uint16 RawBits;
 				struct
 				{
-					UInt16 B : 5;
-					UInt16 G : 5;
-					UInt16 R : 5;
-					UInt16 A : 1;
+					uint16 B : 5;
+					uint16 G : 5;
+					uint16 R : 5;
+					uint16 A : 1;
 				};
 			};
 		};
@@ -163,12 +163,12 @@ namespace xtga
 		{
 			union
 			{
-				UInt16 RawBits;
+				uint16 RawBits;
 				struct
 				{
-					UInt16 R : 5;
-					UInt16 G : 6;
-					UInt16 B : 5;
+					uint16 R : 5;
+					uint16 G : 6;
+					uint16 B : 5;
 				};
 			};
 		};
@@ -182,12 +182,12 @@ namespace xtga
 		{
 			union
 			{
-				UInt16 RawBits;
+				uint16 RawBits;
 				struct
 				{
-					UInt16 B : 5;
-					UInt16 G : 6;
-					UInt16 R : 5;
+					uint16 B : 5;
+					uint16 G : 6;
+					uint16 R : 5;
 				};
 			};
 		};
@@ -199,7 +199,7 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		struct I8 : IPixel
 		{
-			UChar I;
+			uchar I;
 		};
 		XTGAAPI bool operator==(const I8& lhs, const I8& rhs);
 		XTGAAPI bool operator!=(const I8& lhs, const I8& rhs);
@@ -209,8 +209,8 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		struct IA88 : IPixel
 		{
-			UChar I;
-			UChar A;
+			uchar I;
+			uchar A;
 		};
 		XTGAAPI bool operator==(const IA88& lhs, const IA88& rhs);
 		XTGAAPI bool operator!=(const IA88& lhs, const IA88& rhs);
@@ -220,8 +220,8 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		struct AI88 : IPixel
 		{
-			UChar A;
-			UChar I;
+			uchar A;
+			uchar I;
 		};
 		XTGAAPI bool operator==(const AI88& lhs, const AI88& rhs);
 		XTGAAPI bool operator!=(const AI88& lhs, const AI88& rhs);

@@ -19,10 +19,10 @@
 #include <thread>
 #include <vector>
 
-constexpr UChar LUT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132,
+constexpr uchar LUT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132,
 								 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
 
-void* xtga::codecs::DecodeRLE(void const * buffer, UChar depth, UInt32 length, ERRORCODE* error)
+void* xtga::codecs::DecodeRLE(void const * buffer, uchar depth, uint32 length, ERRORCODE* error)
 {
 	if (!(depth == 8 || depth == 16 || depth == 24 || depth == 32))
 	{
@@ -30,22 +30,22 @@ void* xtga::codecs::DecodeRLE(void const * buffer, UChar depth, UInt32 length, E
 		return nullptr;
 	}
 
-	UInt32 count = 0;
-	UInt32 it = 0;
-	UChar BPP = depth / 8;
+	uint32 count = 0;
+	uint32 it = 0;
+	uchar BPP = depth / 8;
 
-	UChar* rval = new UChar[length * (UInt64)BPP];
+	uchar* rval = new uchar[length * (uint64)BPP];
 
 	while (count < length)
 	{
-		auto Packet = (structs::RLEPacket*)( (UChar*)buffer + it );
+		auto Packet = (structs::RLEPacket*)( (uchar*)buffer + it );
 		++it;
-		UInt32 size = BPP * (Packet->PIXEL_COUNT_MINUS_ONE + 1);
+		uint32 size = BPP * (Packet->PIXEL_COUNT_MINUS_ONE + 1);
 		
 		if (Packet->RUN_LENGTH)
 		{
-			auto pix = ((UChar*)buffer + it);
-			for (UInt32 i = 0; i < size; ++i)
+			auto pix = ((uchar*)buffer + it);
+			for (uint32 i = 0; i < size; ++i)
 			{
 				rval[count * BPP + i] = pix[i % BPP];
 			}
@@ -53,9 +53,9 @@ void* xtga::codecs::DecodeRLE(void const * buffer, UChar depth, UInt32 length, E
 		}
 		else
 		{
-			for (UInt32 i = 0; i < size; ++i)
+			for (uint32 i = 0; i < size; ++i)
 			{
-				rval[count * BPP + i] = *((UChar*)buffer + it + i);
+				rval[count * BPP + i] = *((uchar*)buffer + it + i);
 			}
 			it += size;
 		}
@@ -67,7 +67,7 @@ void* xtga::codecs::DecodeRLE(void const * buffer, UChar depth, UInt32 length, E
 	return rval;
 }
 
-bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, UInt16 height, UChar depth, ERRORCODE* error)
+bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, uint16 height, uchar depth, ERRORCODE* error)
 {
 	using namespace structs;
 	using namespace pixelformats;
@@ -97,17 +97,17 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 		void* pixels;
 	};
 
-	UChar BPP = depth / 8;
+	uchar BPP = depth / 8;
 	std::vector<PacketPixels> output;
 
-	auto EncodeLine8 = [&](const UInt64 lineStart)
+	auto EncodeLine8 = [&](const uint64 lineStart)
 	{
-		auto GetPixel = [&](const UInt16 lineOffset) -> I8 *
+		auto GetPixel = [&](const uint16 lineOffset) -> I8 *
 		{
 			return ((I8*)buffer + lineStart + lineOffset);
 		};
 
-		auto IsRLE = [&](const UInt16 lineOffset) -> bool
+		auto IsRLE = [&](const uint16 lineOffset) -> bool
 		{
 			if (lineOffset + 2 < width)
 			{
@@ -123,7 +123,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 			}
 		};
 
-		for (UInt16 i = 0; i < width;)
+		for (uint16 i = 0; i < width;)
 		{
 			auto pivot = GetPixel(i);
 			bool RL = false;
@@ -173,14 +173,14 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 		}
 	};
 
-	auto EncodeLine16 = [&](const UInt64 lineStart)
+	auto EncodeLine16 = [&](const uint64 lineStart)
 	{
-		auto GetPixel = [&](const UInt16 lineOffset) -> IA88 *
+		auto GetPixel = [&](const uint16 lineOffset) -> IA88 *
 		{
-			return ((IA88*)((UChar*)buffer + lineStart) + lineOffset);
+			return ((IA88*)((uchar*)buffer + lineStart) + lineOffset);
 		};
 
-		auto IsRLE = [&](const UInt16 lineOffset) -> bool
+		auto IsRLE = [&](const uint16 lineOffset) -> bool
 		{
 			if (lineOffset + 2 < width)
 			{
@@ -196,7 +196,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 			}
 		};
 
-		for (UInt16 i = 0; i < width;)
+		for (uint16 i = 0; i < width;)
 		{
 			auto pivot = GetPixel(i);
 			bool RL = false;
@@ -246,14 +246,14 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 		}
 	};
 
-	auto EncodeLine24 = [&](const UInt64 lineStart)
+	auto EncodeLine24 = [&](const uint64 lineStart)
 	{
-		auto GetPixel = [&](const UInt16 lineOffset) -> RGB888 *
+		auto GetPixel = [&](const uint16 lineOffset) -> RGB888 *
 		{
-			return ((RGB888*)((UChar*)buffer + lineStart) + lineOffset);
+			return ((RGB888*)((uchar*)buffer + lineStart) + lineOffset);
 		};
 
-		auto IsRLE = [&](const UInt16 lineOffset) -> bool
+		auto IsRLE = [&](const uint16 lineOffset) -> bool
 		{
 			if (lineOffset + 2 < width)
 			{
@@ -269,80 +269,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 			}
 		};
 
-		for (UInt16 i = 0; i < width;)
-		{
-			auto pivot = GetPixel(i);
-			bool RL = false;
-			auto starti = i;
-
-			while (IsRLE(i))
-			{
-				RL = true;
-				++i;
-
-				if (i == width)
-					break;
-			}
-
-			if (RL)
-			{
-				i += 2;
-				goto constructPkt;
-			}
-
-			while (!IsRLE(i))
-			{
-				++i;
-
-				if (i == width)
-					break;
-			}
-
-		constructPkt:;
-			PacketPixels p;
-			p.pixels = pivot;
-			
-			auto size = i - starti;
-			if (size > 128)
-			{
-				p.pkt.PIXEL_COUNT_MINUS_ONE = 0x7F;
-				i = starti + 128;
-			}
-			else
-			{
-				p.pkt.PIXEL_COUNT_MINUS_ONE = size - 1;
-			}
-
-			p.pkt.RUN_LENGTH = RL;
-
-			output.push_back(p);
-		}
-	};
-
-	auto EncodeLine32 = [&](const UInt64 lineStart)
-	{
-		auto GetPixel = [&](const UInt16 lineOffset) -> RGBA8888 *
-		{
-			return ((RGBA8888*)((UChar*)buffer + lineStart) + lineOffset);
-		};
-
-		auto IsRLE = [&](const UInt16 lineOffset) -> bool
-		{
-			if (lineOffset + 2 < width)
-			{
-				auto p1 = *GetPixel(lineOffset);
-				auto p2 = *GetPixel(lineOffset + 1);
-				auto p3 = *GetPixel(lineOffset + 2);
-
-				return (p1 == p2 && p1 == p3);
-			}
-			else
-			{
-				return false;
-			}
-		};
-
-		for (UInt16 i = 0; i < width;)
+		for (uint16 i = 0; i < width;)
 		{
 			auto pivot = GetPixel(i);
 			bool RL = false;
@@ -392,9 +319,82 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 		}
 	};
 
-	for (UInt16 line = 0; line < height; ++line)
+	auto EncodeLine32 = [&](const uint64 lineStart)
 	{
-		UInt64 LineStart = (UInt64)line * width * BPP;
+		auto GetPixel = [&](const uint16 lineOffset) -> RGBA8888 *
+		{
+			return ((RGBA8888*)((uchar*)buffer + lineStart) + lineOffset);
+		};
+
+		auto IsRLE = [&](const uint16 lineOffset) -> bool
+		{
+			if (lineOffset + 2 < width)
+			{
+				auto p1 = *GetPixel(lineOffset);
+				auto p2 = *GetPixel(lineOffset + 1);
+				auto p3 = *GetPixel(lineOffset + 2);
+
+				return (p1 == p2 && p1 == p3);
+			}
+			else
+			{
+				return false;
+			}
+		};
+
+		for (uint16 i = 0; i < width;)
+		{
+			auto pivot = GetPixel(i);
+			bool RL = false;
+			auto starti = i;
+
+			while (IsRLE(i))
+			{
+				RL = true;
+				++i;
+
+				if (i == width)
+					break;
+			}
+
+			if (RL)
+			{
+				i += 2;
+				goto constructPkt;
+			}
+
+			while (!IsRLE(i))
+			{
+				++i;
+
+				if (i == width)
+					break;
+			}
+
+		constructPkt:;
+			PacketPixels p;
+			p.pixels = pivot;
+			
+			auto size = i - starti;
+			if (size > 128)
+			{
+				p.pkt.PIXEL_COUNT_MINUS_ONE = 0x7F;
+				i = starti + 128;
+			}
+			else
+			{
+				p.pkt.PIXEL_COUNT_MINUS_ONE = size - 1;
+			}
+
+			p.pkt.RUN_LENGTH = RL;
+
+			output.push_back(p);
+		}
+	};
+
+	for (uint16 line = 0; line < height; ++line)
+	{
+		uint64 LineStart = (uint64)line * width * BPP;
 
 		if (BPP == 1)
 			EncodeLine8(LineStart);
@@ -406,37 +406,37 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 			EncodeLine32(LineStart);
 	}
 
-	UInt64 outputSize = 0;
+	addressable outputSize = 0;
 	for (auto& i : output)
 	{
 		if (i.pkt.RUN_LENGTH)
-			outputSize += (UInt64)1 + BPP;
+			outputSize += (addressable)1 + BPP;
 		else
-			outputSize += (UInt64)1 + ((UInt64)i.pkt.PIXEL_COUNT_MINUS_ONE + 1) * BPP;
+			outputSize += (addressable)1 + ((addressable)i.pkt.PIXEL_COUNT_MINUS_ONE + 1) * BPP;
 	}
 
-	UChar* OutBuffer = new UChar[outputSize];
-	UInt64 it = 0;
+	uchar* OutBuffer = new uchar[outputSize];
+	uint64 it = 0;
 
 	for (auto& i : output)
 	{
 		if (i.pkt.RUN_LENGTH)
 		{
-			OutBuffer[it] = *(UChar*) & (i.pkt); ++it;
-			for (UChar b = 0; b < BPP; ++b)
+			OutBuffer[it] = *(uchar*) & (i.pkt); ++it;
+			for (uchar b = 0; b < BPP; ++b)
 			{
-				OutBuffer[it] = ((UChar*)i.pixels)[b];
+				OutBuffer[it] = ((uchar*)i.pixels)[b];
 				++it;
 			}
 		}
 		else
 		{
-			OutBuffer[it] = *(UChar*) & (i.pkt); ++it;
-			for (UChar j = 0; j < i.pkt.PIXEL_COUNT_MINUS_ONE + 1; ++j)
+			OutBuffer[it] = *(uchar*) & (i.pkt); ++it;
+			for (uchar j = 0; j < i.pkt.PIXEL_COUNT_MINUS_ONE + 1; ++j)
 			{
-				for (UChar b = 0; b < BPP; ++b)
+				for (uchar b = 0; b < BPP; ++b)
 				{
-					OutBuffer[it] = ((UChar*)i.pixels)[j * BPP + b];
+					OutBuffer[it] = ((uchar*)i.pixels)[j * BPP + b];
 					++it;
 				}
 			}
@@ -450,7 +450,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, U
 	return true;
 }
 
-void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, UInt32 length, void const* ColorMap, UChar depth, ERRORCODE* error)
+void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, uint32 length, void const* ColorMap, uchar depth, ERRORCODE* error)
 {
 	if (!(depth == 16 || depth == 24 || depth == 32))
 	{
@@ -458,15 +458,15 @@ void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, UInt32 length, void 
 		return nullptr;
 	}
 
-	UChar BPP = depth / 8;
-	UChar* rval = new UChar[(UInt64)BPP * length];
+	uchar BPP = depth / 8;
+	uchar* rval = new uchar[(uint64)BPP * length];
 
-	for (UInt64 i = 0, it = 0; i < length * (UInt64)BPP; ++it, i += BPP)
+	for (uint64 i = 0, it = 0; i < length * (uint64)BPP; ++it, i += BPP)
 	{
-		auto index = *((UChar*)ImageBuffer + it);
-		for (UChar j = 0; j < BPP; ++j)
+		auto index = *((uchar*)ImageBuffer + it);
+		for (uchar j = 0; j < BPP; ++j)
 		{
-			rval[i + j] = *( (UChar*)ColorMap + (index * (UInt64)BPP) + j );
+			rval[i + j] = *( (uchar*)ColorMap + (index * (uint64)BPP) + j );
 		}
 	}
 
@@ -474,7 +474,7 @@ void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, UInt32 length, void 
 	return rval;
 }
 
-void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, UInt32 width, UInt32 height, UChar depth, ERRORCODE* error)
+void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, uint32 width, uint32 height, uchar depth, ERRORCODE* error)
 {
 	if (!(depth == 8 || depth == 16 || depth == 24 || depth == 32))
 	{
@@ -482,19 +482,19 @@ void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, UInt32 wid
 		return nullptr;
 	}
 
-	UInt32 BPP = depth / 8;
-	UChar* rval = new UChar[(UInt64)width * height * BPP];
+	uint32 BPP = depth / 8;
+	uchar* rval = new uchar[(uint64)width * height * BPP];
 
 	// For each scanline
-	for (UInt32 v = 0; v < height; ++v)
+	for (uint32 v = 0; v < height; ++v)
 	{
 		// For each pixel
-		for (UInt32 p = 0; p < width; ++p)
+		for (uint32 p = 0; p < width; ++p)
 		{
-			auto Pix = (UChar*)buffer + ((UInt64)v * width + p) * BPP;
+			auto Pix = (uchar*)buffer + ((uint64)v * width + p) * BPP;
 
 			// For each channel
-			for (UChar b = 0; b < BPP; ++b)
+			for (uchar b = 0; b < BPP; ++b)
 			{
 				rval[((height - 1 - v) * width + p) * BPP + b] = Pix[b];
 			}
@@ -505,7 +505,7 @@ void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, UInt32 wid
 	return rval;
 }
 
-void* xtga::codecs::Convert_BottomRight_To_TopLeft(void const* buffer, UInt32 width, UInt32 height, UChar depth, ERRORCODE* error)
+void* xtga::codecs::Convert_BottomRight_To_TopLeft(void const* buffer, uint32 width, uint32 height, uchar depth, ERRORCODE* error)
 {
 	if (!(depth == 8 || depth == 16 || depth == 24 || depth == 32))
 	{
@@ -513,19 +513,19 @@ void* xtga::codecs::Convert_BottomRight_To_TopLeft(void const* buffer, UInt32 wi
 		return nullptr;
 	}
 
-	UInt32 BPP = depth / 8;
-	UChar* rval = new UChar[(UInt64)width * height * BPP];
+	uint32 BPP = depth / 8;
+	uchar* rval = new uchar[(uint64)width * height * BPP];
 
 	// For each scanline
-	for (UInt32 v = 0; v < height; ++v)
+	for (uint32 v = 0; v < height; ++v)
 	{
 		// For each pixel
-		for (UInt32 p = 0; p < width; ++p)
+		for (uint32 p = 0; p < width; ++p)
 		{
-			auto Pix = (UChar*)buffer + ((UInt64)v * width + p) * BPP;
+			auto Pix = (uchar*)buffer + ((uint64)v * width + p) * BPP;
 
 			// For each channel
-			for (UChar b = 0; b < BPP; ++b)
+			for (uchar b = 0; b < BPP; ++b)
 			{
 				rval[((height - 1 - v) * width + (width - 1 - p)) * BPP + b] = Pix[b];
 			}
@@ -536,7 +536,7 @@ void* xtga::codecs::Convert_BottomRight_To_TopLeft(void const* buffer, UInt32 wi
 	return rval;
 }
 
-void* xtga::codecs::Convert_TopRight_To_TopLeft(void const* buffer, UInt32 width, UInt32 height, UChar depth, ERRORCODE* error)
+void* xtga::codecs::Convert_TopRight_To_TopLeft(void const* buffer, uint32 width, uint32 height, uchar depth, ERRORCODE* error)
 {
 	if (!(depth == 8 || depth == 16 || depth == 24 || depth == 32))
 	{
@@ -544,19 +544,19 @@ void* xtga::codecs::Convert_TopRight_To_TopLeft(void const* buffer, UInt32 width
 		return nullptr;
 	}
 
-	UInt32 BPP = depth / 8;
-	UChar* rval = new UChar[(UInt64)width * height * BPP];
+	uint32 BPP = depth / 8;
+	uchar* rval = new uchar[(uint64)width * height * BPP];
 
 	// For each scanline
-	for (UInt32 v = 0; v < height; ++v)
+	for (uint32 v = 0; v < height; ++v)
 	{
 		// For each pixel
-		for (UInt32 p = 0; p < width; ++p)
+		for (uint32 p = 0; p < width; ++p)
 		{
-			auto Pix = (UChar*)buffer + ((UInt64)v * width + p) * BPP;
+			auto Pix = (uchar*)buffer + ((uint64)v * width + p) * BPP;
 
 			// For each channel
-			for (UChar b = 0; b < BPP; ++b)
+			for (uchar b = 0; b < BPP; ++b)
 			{
 				rval[(v * width + (width - 1 - p)) * BPP + b] = Pix[b];
 			}
@@ -622,7 +622,7 @@ xtga::pixelformats::RGBA8888 xtga::codecs::IA_To_RGBA(xtga::pixelformats::IA88 p
 	return rval;
 }
 
-bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& ColorMap, UInt64 length, UChar depth, UInt16& Size, bool force, ERRORCODE* error)
+bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& ColorMap, addressable length, uchar depth, uint16& Size, bool force, ERRORCODE* error)
 {
 	if (!(depth == 16 || depth == 24 || depth == 32))
 	{
@@ -635,29 +635,29 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 	auto Generate16BitColorMap = [&]() -> bool
 	{
 		std::vector<BGRA5551> CMap; CMap.reserve(256);
-		std::vector<UChar> IMap; IMap.reserve(length);
+		std::vector<uchar> IMap; IMap.reserve(length);
 
 		BGRA5551* iPtr = (BGRA5551*)inBuff;
 
-		for (UInt64 i = 0; i < length; ++i)
+		for (addressable i = 0; i < length; ++i)
 		{
 			auto val = iPtr[i];
 
-			for (UInt16 j = 0; j < (UInt16)CMap.size(); ++j)
+			for (uint16 j = 0; j < (uint16)CMap.size(); ++j)
 			{
 				if (CMap[j] == val)
 				{
-					IMap.push_back((UChar)j);
+					IMap.push_back((uchar)j);
 					goto indexed;
 				}
 			}
 
 			CMap.push_back(val);
-			IMap.push_back((UChar)(CMap.size() - 1));
+			IMap.push_back((uchar)(CMap.size() - 1));
 
 		indexed:;
 
-			if ((UInt16)CMap.size() >= 256)
+			if ((uint16)CMap.size() >= 256)
 			{
 				if (force)
 				{
@@ -681,7 +681,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			{
 				bool operator()(const BGRA5551& i, const BGRA5551& j) const
 				{
-					return *(UInt16*)& i < *(UInt16*)& j;
+					return *(uint16*)& i < *(uint16*)& j;
 				}
 			};
 
@@ -700,9 +700,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				return i.B < j.B;
 			};
 
-			UInt32 CoreCount = std::thread::hardware_concurrency();
+			uint32 CoreCount = std::thread::hardware_concurrency();
 
-			CoreCount = (UInt32)(CoreCount * 0.80f);
+			CoreCount = (uint32)(CoreCount * 0.80f);
 
 			if (CoreCount % 2 != 0)
 				--CoreCount;
@@ -721,10 +721,10 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			bool PureWhite = false;
 			bool PureBlack = false;
 
-			auto InitSet = [&](const UInt64& start, const UInt64& count)
+			auto InitSet = [&](const addressable& start, const addressable& count)
 			{
 				std::set<BGRA5551, comp> s;
-				for (UInt64 i = start; i < start + count; ++i)
+				for (addressable i = start; i < start + count; ++i)
 				{
 					auto val = iPtr[i];
 
@@ -743,15 +743,15 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				Lock.unlock();
 			};
 
-			UInt64 slice = length / CoreCount;
+			addressable slice = length / CoreCount;
 
 			// Init Threads for starting sets
-			for (UChar i = 0; i < CoreCount; ++i)
+			for (uchar i = 0; i < CoreCount; ++i)
 			{
 				std::thread* t = nullptr;
 				if (i == CoreCount - 1)
 				{
-					UInt64 count = length - (i * slice);
+					addressable count = length - (i * slice);
 					t = new std::thread(InitSet, i * slice, count);
 				}
 				else
@@ -779,9 +779,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			while (sets.size() > 1)
 			{
 				// spawn threads
-				for (UChar c = 0; c < sets.size() / 2; ++c)
+				for (uchar c = 0; c < sets.size() / 2; ++c)
 				{
-					std::thread* t = new std::thread(CombineSets, std::ref(sets[(UInt64)c * 2]), std::ref(sets[(UInt64)c * 2 + 1]));
+					std::thread* t = new std::thread(CombineSets, std::ref(sets[(addressable)c * 2]), std::ref(sets[(addressable)c * 2 + 1]));
 					threads.push_back(t);
 				}
 
@@ -795,20 +795,20 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				threads.clear();
 
 				// Remove unused sets
-				for (UChar c = 0; c < sets.size(); ++c)
+				for (uchar c = 0; c < sets.size(); ++c)
 				{
 					if (c % 2 == 1)
 						sets.erase(sets.begin() + c);
 				}
 			}
 
-			auto CheckRange = [](const std::vector<BGRA5551>& set, UInt16 mask) -> UChar
+			auto CheckRange = [](const std::vector<BGRA5551>& set, uint16 mask) -> uchar
 			{
-				UChar lo = 0xFF;
-				UChar hi = 0x00;
+				uchar lo = 0xFF;
+				uchar hi = 0x00;
 
-				UChar shift = 0;
-				UInt16 tmask = mask;
+				uchar shift = 0;
+				uint16 tmask = mask;
 				while (tmask != 0x7C && tmask != 0x3E && tmask != 0x1F)
 				{
 					tmask >>= 1;
@@ -817,7 +817,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 				for (const BGRA5551& i : set)
 				{
-					auto pix = ((*(UInt32*)& i) & mask) >> shift;
+					auto pix = ((*(uint32*)& i) & mask) >> shift;
 					if (pix > hi) hi = pix;
 					else if (pix < lo) lo = pix;
 				}
@@ -832,7 +832,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			while (buckets.size() < 256)
 			{
 				std::vector<std::vector<BGRA5551>> tempBuckets;
-				for (UInt16 i = 0; i < buckets.size(); ++i)
+				for (uint16 i = 0; i < buckets.size(); ++i)
 				{
 					auto RR = CheckRange(buckets[i], 0x7C00);
 					auto GR = CheckRange(buckets[i], 0x03E0);
@@ -877,9 +877,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			// Average buckets
 			for (auto& i : buckets)
 			{
-				UInt64 R = 0;
-				UInt64 G = 0;
-				UInt64 B = 0;
+				uint64 R = 0;
+				uint64 G = 0;
+				uint64 B = 0;
 				for (auto& j : i)
 				{
 					R += j.R;
@@ -891,9 +891,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				B /= i.size();
 
 				BGRA5551 out;
-				out.R = (UChar)R;
-				out.G = (UChar)G;
-				out.B = (UChar)B;
+				out.R = (uchar)R;
+				out.G = (uchar)G;
+				out.B = (uchar)B;
 				CMap.push_back(out);
 			}
 
@@ -901,18 +901,18 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			BGRA5551 black; black.R = black.G = black.B = 0x00;
 			BGRA5551 white; white.R = white.G = white.B = 0xFF;
 			bool hW = false, hB = false;
-			UChar lW = 0, lB = 0;
-			for (UInt16 i = 0; i < CMap.size(); ++i)
+			uchar lW = 0, lB = 0;
+			for (uint16 i = 0; i < CMap.size(); ++i)
 			{
 				if (CMap[i] == black)
 				{
 					hB = true;
-					lB = (UChar)i;
+					lB = (uchar)i;
 				}
 				else if (CMap[i] == white)
 				{
 					hW = true;
-					lW = (UChar)i;
+					lW = (uchar)i;
 				}
 			}
 
@@ -953,14 +953,14 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 			IMap.resize(length);
 
-			auto DoDistanceCalc = [&](const UInt64& start, const UInt64& count)
+			auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 			{
 				// close enough ¯\_(:_:)_/¯
 				float eps = 0.00001f;
-				for (UInt64 i = start; i < start + count; ++i)
+				for (addressable i = start; i < start + count; ++i)
 				{
 					float distance = FLT_MAX;
-					UChar bestMatch = 0;
+					uchar bestMatch = 0;
 
 					auto val = iPtr[i];
 					if (val == black)
@@ -974,13 +974,13 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 						goto found;
 					}
 
-					for (UInt16 j = 0; j < CMap.size(); ++j)
+					for (uint16 j = 0; j < CMap.size(); ++j)
 					{
 						auto d = PixDistance(iPtr[i], CMap[j]);
 						if (d < distance)
 						{
 							distance = d;
-							bestMatch = (UChar)j;
+							bestMatch = (uchar)j;
 							if (d < 0 + eps && d > 0 - eps) break;
 						}
 					}
@@ -993,12 +993,12 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			};
 
 			// Spawn Threads
-			for (UChar i = 0; i < CoreCount; i++)
+			for (uchar i = 0; i < CoreCount; i++)
 			{
 				std::thread* t = nullptr;
 				if (i == CoreCount - 1)
 				{
-					UInt64 count = length - (i * slice);
+					addressable count = length - (i * slice);
 					t = new std::thread(DoDistanceCalc, i * slice, count);
 				}
 				else
@@ -1023,14 +1023,14 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		ColorMap = new BGRA5551[CMap.size()];
 		BGRA5551* cPtr = (BGRA5551*)ColorMap;
 
-		for (UInt16 i = 0; i < CMap.size(); ++i)
+		for (uint16 i = 0; i < CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
-		outBuff = new UChar[IMap.size()];
-		for (UInt64 i = 0; i < IMap.size(); ++i)
-			((UChar*)outBuff)[i] = IMap[i];
+		outBuff = new uchar[IMap.size()];
+		for (addressable i = 0; i < (addressable)IMap.size(); ++i)
+			((uchar*)outBuff)[i] = IMap[i];
 
-		Size = (UInt16)CMap.size();
+		Size = (uint16)CMap.size();
 
 		XTGA_SETERROR(error, ERRORCODE::NONE);
 
@@ -1040,25 +1040,25 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 	auto Generate24bitColorMap = [&]() -> bool
 	{
 		std::vector<BGR888> CMap; CMap.reserve(256);
-		std::vector<UChar> IMap; IMap.reserve(length);
+		std::vector<uchar> IMap; IMap.reserve(length);
 
 		BGR888* iPtr = (BGR888*)inBuff;
 
-		for (UInt64 i = 0; i < length; ++i)
+		for (addressable i = 0; i < length; ++i)
 		{
 			auto val = iPtr[i];
 
-			for (UInt16 j = 0; j < CMap.size(); ++j)
+			for (uint16 j = 0; j < CMap.size(); ++j)
 			{
 				if (CMap[j] == val)
 				{
-					IMap.push_back((UChar)j);
+					IMap.push_back((uchar)j);
 					goto indexed;
 				}
 			}
 
 			CMap.push_back(val);
-			IMap.push_back((UChar)(CMap.size() - 1));
+			IMap.push_back((uchar)(CMap.size() - 1));
 
 		indexed:;
 			if (CMap.size() >= 256)
@@ -1085,12 +1085,12 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			{
 				bool operator()(const BGR888& i, const BGR888& j) const
 				{
-					UChar id[4];	UChar jd[4];
+					uchar id[4];	uchar jd[4];
 					id[0] = 0;		jd[0] = 0;
 					id[1] = i.B;	jd[1] = j.B;
 					id[2] = i.G;	jd[2] = j.G;
 					id[3] = i.R;	jd[3] = j.R;
-					return *(UInt32*)&id < *(UInt32*)&jd;
+					return *(uint32*)&id < *(uint32*)&jd;
 				}
 			};
 
@@ -1109,9 +1109,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				return i.B < j.B;
 			};
 
-			UInt32 CoreCount = std::thread::hardware_concurrency();
+			uint32 CoreCount = std::thread::hardware_concurrency();
 
-			CoreCount = (UInt32)(CoreCount * 0.80f);
+			CoreCount = (uint32)(CoreCount * 0.80f);
 
 			if (CoreCount % 2 != 0)
 				--CoreCount;
@@ -1130,10 +1130,10 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			bool PureWhite = false;
 			bool PureBlack = false;
 
-			auto InitSet = [&](const UInt64& start, const UInt64& count)
+			auto InitSet = [&](const addressable& start, const addressable& count)
 			{
 				std::set<BGR888, comp> s;
-				for (UInt64 i = start; i < start + count; ++i)
+				for (addressable i = start; i < start + count; ++i)
 				{
 					auto val = iPtr[i];
 
@@ -1152,15 +1152,15 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				Lock.unlock();
 			};
 
-			UInt64 slice = length / CoreCount;
+			addressable slice = length / CoreCount;
 
 			// Init Threads for starting sets
-			for (UChar i = 0; i < CoreCount; ++i)
+			for (uchar i = 0; i < CoreCount; ++i)
 			{
 				std::thread* t = nullptr;
 				if (i == CoreCount - 1)
 				{
-					UInt64 count = length - (i * slice);
+					addressable count = length - (i * slice);
 					t = new std::thread(InitSet, i * slice, count);
 				}
 				else
@@ -1188,9 +1188,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			while (sets.size() > 1)
 			{
 				// spawn threads
-				for (UChar c = 0; c < sets.size() / 2; ++c)
+				for (uchar c = 0; c < sets.size() / 2; ++c)
 				{
-					std::thread* t = new std::thread(CombineSets, std::ref(sets[(UInt64)c * 2]), std::ref(sets[(UInt64)c * 2 + 1]));
+					std::thread* t = new std::thread(CombineSets, std::ref(sets[(addressable)c * 2]), std::ref(sets[(addressable)c * 2 + 1]));
 					threads.push_back(t);
 				}
 
@@ -1204,20 +1204,20 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				threads.clear();
 
 				// Remove unused sets
-				for (UChar c = 0; c < sets.size(); ++c)
+				for (uchar c = 0; c < sets.size(); ++c)
 				{
 					if (c % 2 == 1)
 						sets.erase(sets.begin() + c);
 				}
 			}
 
-			auto CheckRange = [](const std::vector<BGR888>& set, UInt32 mask) -> UChar
+			auto CheckRange = [](const std::vector<BGR888>& set, uint32 mask) -> uchar
 			{
-				UChar lo = 0xFF;
-				UChar hi = 0x00;
+				uchar lo = 0xFF;
+				uchar hi = 0x00;
 
-				UChar shift = 0;
-				UInt32 tmask = mask;
+				uchar shift = 0;
+				uint32 tmask = mask;
 				while (tmask != 0xFF)
 				{
 					tmask >>= 1;
@@ -1226,7 +1226,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 				for (const BGR888& i : set)
 				{
-					auto pix = ((*(UInt32*)& i) & mask) >> shift;
+					auto pix = ((*(uint32*)& i) & mask) >> shift;
 					if (pix > hi) hi = pix;
 					else if (pix < lo) lo = pix;
 				}
@@ -1241,7 +1241,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			while (buckets.size() < 256)
 			{
 				std::vector<std::vector<BGR888>> tempBuckets;
-				for (UInt16 i = 0; i < buckets.size(); ++i)
+				for (uint16 i = 0; i < buckets.size(); ++i)
 				{
 					auto RR = CheckRange(buckets[i], 0xFF0000);
 					auto GR = CheckRange(buckets[i], 0x00FF00);
@@ -1286,10 +1286,10 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			// Average buckets
 			for (auto& i : buckets)
 			{
-				UInt64 R = 0;
-				UInt64 G = 0;
-				UInt64 B = 0;
-				UInt64 A = 0;
+				uint64 R = 0;
+				uint64 G = 0;
+				uint64 B = 0;
+				uint64 A = 0;
 				for (auto& j : i)
 				{
 					R += j.R;
@@ -1301,9 +1301,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				B /= i.size();
 
 				BGR888 out;
-				out.R = (UChar)R;
-				out.G = (UChar)G;
-				out.B = (UChar)B;
+				out.R = (uchar)R;
+				out.G = (uchar)G;
+				out.B = (uchar)B;
 				CMap.push_back(out);
 			}
 
@@ -1311,18 +1311,18 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			BGR888 black; black.R = black.G = black.B = 0x00;
 			BGR888 white; white.R = white.G = white.B = 0xFF;
 			bool hW = false, hB = false;
-			UChar lW = 0, lB = 0;
-			for (UInt16 i = 0; i < CMap.size(); ++i)
+			uchar lW = 0, lB = 0;
+			for (uint16 i = 0; i < CMap.size(); ++i)
 			{
 				if (CMap[i] == black)
 				{
 					hB = true;
-					lB = (UChar)i;
+					lB = (uchar)i;
 				}
 				else if (CMap[i] == white)
 				{
 					hW = true;
-					lW = (UChar)i;
+					lW = (uchar)i;
 				}
 			}
 
@@ -1363,14 +1363,14 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 			IMap.resize(length);
 
-			auto DoDistanceCalc = [&](const UInt64& start, const UInt64& count)
+			auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 			{
 				// close enough ¯\_(:_:)_/¯
 				float eps = 0.00001f;
-				for (UInt64 i = start; i < start + count; ++i)
+				for (addressable i = start; i < start + count; ++i)
 				{
 					float distance = FLT_MAX;
-					UChar bestMatch = 0;
+					uchar bestMatch = 0;
 
 					auto val = iPtr[i];
 					if (val == black)
@@ -1384,13 +1384,13 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 						goto found;
 					}
 
-					for (UInt16 j = 0; j < CMap.size(); ++j)
+					for (uint16 j = 0; j < CMap.size(); ++j)
 					{
 						auto d = PixDistance(val, CMap[j]);
 						if (d < distance)
 						{
 							distance = d;
-							bestMatch = (UChar)j;
+							bestMatch = (uchar)j;
 							if (d < 0 + eps && d > 0 - eps) break;
 						}
 					}
@@ -1403,12 +1403,12 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			};
 
 			// Spawn Threads
-			for (UChar i = 0; i < CoreCount; i++)
+			for (uchar i = 0; i < CoreCount; i++)
 			{
 				std::thread* t = nullptr;
 				if (i == CoreCount - 1)
 				{
-					UInt64 count = length - (i * slice);
+					addressable count = length - (i * slice);
 					t = new std::thread(DoDistanceCalc, i * slice, count);
 				}
 				else
@@ -1433,14 +1433,14 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		ColorMap = new BGR888[CMap.size()];
 		BGR888* cPtr = (BGR888*)ColorMap;
 
-		for (UInt16 i = 0; i < CMap.size(); ++i)
+		for (uint16 i = 0; i < CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
-		outBuff = new UChar[IMap.size()];
-		for (UInt64 i = 0; i < IMap.size(); ++i)
-			((UChar*)outBuff)[i] = IMap[i];
+		outBuff = new uchar[IMap.size()];
+		for (addressable i = 0; i < IMap.size(); ++i)
+			((uchar*)outBuff)[i] = IMap[i];
 
-		Size = (UInt16)CMap.size();
+		Size = (uint16)CMap.size();
 
 		XTGA_SETERROR(error, ERRORCODE::NONE);
 
@@ -1450,25 +1450,25 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 	auto Generate32BitColorMap = [&]() -> bool
 	{
 		std::vector<BGRA8888> CMap; CMap.reserve(256);
-		std::vector<UChar> IMap; IMap.reserve(length);
+		std::vector<uchar> IMap; IMap.reserve(length);
 
 		BGRA8888* iPtr = (BGRA8888*)inBuff;
 
-		for (UInt64 i = 0; i < length; ++i)
+		for (addressable i = 0; i < length; ++i)
 		{
 			auto val = iPtr[i];
 
-			for (UInt16 j = 0; j < CMap.size(); ++j)
+			for (uint16 j = 0; j < CMap.size(); ++j)
 			{
 				if (CMap[j] == val)
 				{
-					IMap.push_back((UChar)j);
+					IMap.push_back((uchar)j);
 					goto indexed;
 				}
 			}
 
 			CMap.push_back(val);
-			IMap.push_back((UChar)(CMap.size() - 1));
+			IMap.push_back((uchar)(CMap.size() - 1));
 
 		indexed:;
 			if (CMap.size() >= 256)
@@ -1495,7 +1495,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			{
 				bool operator()(const BGRA8888& i, const BGRA8888& j) const
 				{
-					return *(UInt32*)&i < *(UInt32*)&j;
+					return *(uint32*)&i < *(uint32*)&j;
 				}
 			};
 
@@ -1519,9 +1519,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				return i.B < j.B;
 			};
 
-			UInt32 CoreCount = std::thread::hardware_concurrency();
+			uint32 CoreCount = std::thread::hardware_concurrency();
 
-			CoreCount = (UInt32)(CoreCount * 0.80f);
+			CoreCount = (uint32)(CoreCount * 0.80f);
 
 			if (CoreCount % 2 != 0)
 				--CoreCount;
@@ -1540,10 +1540,10 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			bool PureWhite = false;
 			bool PureBlack = false;
 
-			auto InitSet = [&](const UInt64& start, const UInt64& count)
+			auto InitSet = [&](const addressable& start, const addressable& count)
 			{
 				std::set<BGRA8888, comp> s;
-				for (UInt64 i = start; i < start + count; ++i)
+				for (addressable i = start; i < start + count; ++i)
 				{
 					auto val = iPtr[i];
 
@@ -1563,15 +1563,15 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				Lock.unlock();
 			};
 
-			UInt64 slice = length / CoreCount;
+			addressable slice = length / CoreCount;
 
 			// Init Threads for starting sets
-			for (UChar i = 0; i < CoreCount; ++i)
+			for (uchar i = 0; i < CoreCount; ++i)
 			{
 				std::thread* t = nullptr;
 				if (i == CoreCount - 1)
 				{
-					UInt64 count = length - (i * slice);
+					addressable count = length - (i * slice);
 					t = new std::thread(InitSet, i * slice, count);
 				}
 				else
@@ -1599,9 +1599,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			while (sets.size() > 1)
 			{
 				// spawn threads
-				for (UChar c = 0; c < sets.size() / 2; ++c)
+				for (uchar c = 0; c < sets.size() / 2; ++c)
 				{
-					std::thread* t = new std::thread(CombineSets, std::ref(sets[(UInt64)c * 2]), std::ref(sets[(UInt64)c * 2 + 1]));
+					std::thread* t = new std::thread(CombineSets, std::ref(sets[(addressable)c * 2]), std::ref(sets[(addressable)c * 2 + 1]));
 					threads.push_back(t);
 				}
 
@@ -1615,20 +1615,20 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				threads.clear();
 
 				// Remove unused sets
-				for (UChar c = 0; c < sets.size(); ++c)
+				for (uchar c = 0; c < sets.size(); ++c)
 				{
 					if (c % 2 == 1)
 						sets.erase(sets.begin() + c);
 				}
 			}
 
-			auto CheckRange = [](const std::vector<BGRA8888>& set, UInt32 mask) -> UChar
+			auto CheckRange = [](const std::vector<BGRA8888>& set, uint32 mask) -> uchar
 			{
-				UChar lo = 0xFF;
-				UChar hi = 0x00;
+				uchar lo = 0xFF;
+				uchar hi = 0x00;
 
-				UChar shift = 0;
-				UInt32 tmask = mask;
+				uchar shift = 0;
+				uint32 tmask = mask;
 				while (tmask != 0xFF)
 				{
 					tmask >>= 1;
@@ -1637,7 +1637,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 				for (const BGRA8888& i : set)
 				{
-					auto pix = ((*(UInt32*)&i) & mask) >> shift;
+					auto pix = ((*(uint32*)&i) & mask) >> shift;
 					if (pix > hi) hi = pix;
 					else if (pix < lo) lo = pix;
 				}
@@ -1652,7 +1652,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			while (buckets.size() < 256)
 			{
 				std::vector<std::vector<BGRA8888>> tempBuckets;
-				for (UInt16 i = 0; i < buckets.size(); ++i)
+				for (uint16 i = 0; i < buckets.size(); ++i)
 				{
 					auto AR		= CheckRange(buckets[i], 0xFF000000);
 					auto RR	= CheckRange(buckets[i], 0x00FF0000);
@@ -1702,10 +1702,10 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			// Average buckets
 			for (auto& i : buckets)
 			{
-				UInt64 R = 0;
-				UInt64 G = 0;
-				UInt64 B = 0;
-				UInt64 A = 0;
+				uint64 R = 0;
+				uint64 G = 0;
+				uint64 B = 0;
+				uint64 A = 0;
 				for (auto& j : i)
 				{
 					R += j.R;
@@ -1719,10 +1719,10 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				A /= i.size();
 
 				BGRA8888 out;
-				out.R = (UChar)R;
-				out.G = (UChar)G;
-				out.B = (UChar)B;
-				out.A = (UChar)A;
+				out.R = (uchar)R;
+				out.G = (uchar)G;
+				out.B = (uchar)B;
+				out.A = (uchar)A;
 				CMap.push_back(out);
 			}
 
@@ -1731,23 +1731,23 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			BGRA8888 black; black.R = black.G = black.B = 0x00; black.A = 0xFF;
 			BGRA8888 white; white.R = white.G = white.B = 0xFF; white.A = 0xFF;
 			bool hA = false, hW = false , hB = false;
-			UChar lA = 0, lW = 0, lB = 0;
-			for (UInt16 i = 0; i < CMap.size(); ++i)
+			uchar lA = 0, lW = 0, lB = 0;
+			for (uint16 i = 0; i < CMap.size(); ++i)
 			{
 				if (CMap[i].A == 0x00)
 				{
 					hA = true;
-					lA = (UChar)i;
+					lA = (uchar)i;
 				}
 				else if (CMap[i] == black)
 				{
 					hB = true;
-					lB = (UChar)i;
+					lB = (uchar)i;
 				}
 				else if (CMap[i] == white)
 				{
 					hW = true;
-					lW = (UChar)i;
+					lW = (uchar)i;
 				}
 			}
 
@@ -1798,14 +1798,14 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 			IMap.resize(length);
 
-			auto DoDistanceCalc = [&](const UInt64& start, const UInt64& count)
+			auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 			{
 				// close enough ¯\_(:_:)_/¯
 				float eps = 0.00001f;
-				for (UInt64 i = start; i < start + count; ++i)
+				for (addressable i = start; i < start + count; ++i)
 				{
 					float distance = FLT_MAX;
-					UChar bestMatch = 0;
+					uchar bestMatch = 0;
 
 					auto val = iPtr[i];
 					if (val.A == 0x00)
@@ -1824,13 +1824,13 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 						goto found;
 					}
 
-					for (UInt16 j = 0; j < CMap.size(); ++j)
+					for (uint16 j = 0; j < CMap.size(); ++j)
 					{
 						auto d = PixDistance(val, CMap[j]);
 						if (d < distance)
 						{
 							distance = d;
-							bestMatch = (UChar)j;
+							bestMatch = (uchar)j;
 							if (d < 0 + eps && d > 0 - eps) break;
 						}
 					}
@@ -1843,12 +1843,12 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			};
 
 			// Spawn Threads
-			for (UChar i = 0; i < CoreCount; i++)
+			for (uchar i = 0; i < CoreCount; i++)
 			{
 				std::thread* t = nullptr;
 				if (i == CoreCount - 1)
 				{
-					UInt64 count = length - (i * slice);
+					addressable count = length - (i * slice);
 					t = new std::thread(DoDistanceCalc, i * slice, count);
 				}
 				else
@@ -1872,14 +1872,14 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		ColorMap = new BGRA8888[CMap.size()];
 		BGRA8888* cPtr = (BGRA8888*)ColorMap;
 
-		for (UInt16 i = 0; i < CMap.size(); ++i)
+		for (uint16 i = 0; i < CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
-		outBuff = new UChar[IMap.size()];
-		for (UInt64 i = 0; i < IMap.size(); ++i)
-			((UChar*)outBuff)[i] = (UChar)IMap[i];
+		outBuff = new uchar[IMap.size()];
+		for (addressable i = 0; i < IMap.size(); ++i)
+			((uchar*)outBuff)[i] = (uchar)IMap[i];
 
-		Size = (UInt16)CMap.size();
+		Size = (uint16)CMap.size();
 		
 		XTGA_SETERROR(error, ERRORCODE::NONE);
 
@@ -1896,6 +1896,274 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		return false;
 }
 
+void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const void* colormap, uint16 clength, uchar depth, ERRORCODE* error)
+{
+	if (!(depth == 16 || depth == 24 || depth == 32))
+	{
+		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
+		return nullptr;
+	}
+
+	using namespace pixelformats;
+
+	uint32 CoreCount = std::thread::hardware_concurrency();
+	CoreCount = (uint32)(CoreCount * 0.80f);
+
+	if (CoreCount % 2 != 0)
+		--CoreCount;
+
+	if (CoreCount == 0)
+	{
+		// assume 2
+		CoreCount = 2;
+	}
+
+	addressable slice = ilength / CoreCount;
+	std::vector<std::thread*> threads;
+
+	auto IMap = new uchar[ilength];
+
+	if (depth == 16)
+	{
+		auto PixDistance = [](const BGRA5551& i, const BGRA5551& j) -> float
+		{
+			float r1 = i.R;
+			float g1 = i.G;
+			float b1 = i.B;
+			float r2 = j.R;
+			float g2 = j.G;
+			float b2 = j.B;
+
+			auto rdiff = r1 - r2;
+			auto gdiff = g1 - g2;
+			auto bdiff = b1 - b2;
+
+			// Fast tracks for speed (degrade accuracy but with very little visual difference)
+			if (rdiff > 128 || rdiff < -128) return FLT_MAX;
+			if (gdiff > 92 || gdiff < -92) return FLT_MAX;
+			if (bdiff > 128 || bdiff < -128) return FLT_MAX;
+
+			return std::powf((rdiff * 0.30f), 2)
+				+ std::powf((gdiff * 0.60f), 2)
+				+ std::powf((bdiff * 0.10f), 2);
+		};
+
+		auto iPtr = (BGRA5551*)buff;
+		auto cPtr = (BGRA5551*)colormap;
+
+		auto DoDistanceCalc = [&](const uint64& start, const uint64& count)
+		{
+			// close enough ¯\_(:_:)_/¯
+			float eps = 0.00001f;
+			for (uint64 i = start; i < start + count; ++i)
+			{
+				float distance = FLT_MAX;
+				uchar bestMatch = 0;
+
+				auto val = iPtr[i];
+
+				for (uint16 j = 0; j < clength; ++j)
+				{
+					auto d = PixDistance(iPtr[i], cPtr[j]);
+					if (d < distance)
+					{
+						distance = d;
+						bestMatch = (uchar)j;
+						if (d < 0 + eps && d > 0 - eps) break;
+					}
+				}
+
+				IMap[i] = bestMatch;
+			}
+		};
+
+		// Spawn Threads
+		for (uchar i = 0; i < CoreCount; i++)
+		{
+			std::thread* t = nullptr;
+			if (i == CoreCount - 1)
+			{
+				uint64 count = ilength - (i * slice);
+				t = new std::thread(DoDistanceCalc, i * slice, count);
+			}
+			else
+			{
+				t = new std::thread(DoDistanceCalc, i * slice, slice);
+			}
+			threads.push_back(t);
+		}
+
+		// Wait for threads
+		for (auto& i : threads)
+		{
+			i->join();
+			delete i;
+		}
+
+		threads.clear();
+	}
+	else if (depth == 24)
+	{
+		auto PixDistance = [](const BGR888& i, const BGR888& j) -> float
+		{
+			float r1 = i.R;
+			float g1 = i.G;
+			float b1 = i.B;
+			float r2 = j.R;
+			float g2 = j.G;
+			float b2 = j.B;
+
+			auto rdiff = r1 - r2;
+			auto gdiff = g1 - g2;
+			auto bdiff = b1 - b2;
+
+			// Fast tracks for speed (degrade accuracy but with very little visual difference)
+			if (rdiff > 128 || rdiff < -128) return FLT_MAX;
+			if (gdiff > 92 || gdiff < -92) return FLT_MAX;
+			if (bdiff > 128 || bdiff < -128) return FLT_MAX;
+
+			return std::powf((rdiff * 0.30f), 2)
+				+ std::powf((gdiff * 0.60f), 2)
+				+ std::powf((bdiff * 0.10f), 2);
+		};
+
+		auto iPtr = (BGR888*)buff;
+		auto cPtr = (BGR888*)colormap;
+
+		auto DoDistanceCalc = [&](const uint64& start, const uint64& count)
+		{
+			// close enough ¯\_(:_:)_/¯
+			float eps = 0.00001f;
+			for (uint64 i = start; i < start + count; ++i)
+			{
+				float distance = FLT_MAX;
+				uchar bestMatch = 0;
+
+				auto val = iPtr[i];
+
+				for (uint16 j = 0; j < clength; ++j)
+				{
+					auto d = PixDistance(iPtr[i], cPtr[j]);
+					if (d < distance)
+					{
+						distance = d;
+						bestMatch = (uchar)j;
+						if (d < 0 + eps && d > 0 - eps) break;
+					}
+				}
+
+				IMap[i] = bestMatch;
+			}
+		};
+
+		// Spawn Threads
+		for (uchar i = 0; i < CoreCount; i++)
+		{
+			std::thread* t = nullptr;
+			if (i == CoreCount - 1)
+			{
+				uint64 count = ilength - (i * slice);
+				t = new std::thread(DoDistanceCalc, i * slice, count);
+			}
+			else
+			{
+				t = new std::thread(DoDistanceCalc, i * slice, slice);
+			}
+			threads.push_back(t);
+		}
+
+		// Wait for threads
+		for (auto& i : threads)
+		{
+			i->join();
+			delete i;
+		}
+
+		threads.clear();
+	}
+	else
+	{
+		auto PixDistance = [](const BGRA8888& i, const BGRA8888& j) -> float
+		{
+			float r1 = i.R;
+			float g1 = i.G;
+			float b1 = i.B;
+			float r2 = j.R;
+			float g2 = j.G;
+			float b2 = j.B;
+
+			auto rdiff = r1 - r2;
+			auto gdiff = g1 - g2;
+			auto bdiff = b1 - b2;
+
+			// Fast tracks for speed (degrade accuracy but with very little visual difference)
+			if (rdiff > 128 || rdiff < -128) return FLT_MAX;
+			if (gdiff > 92 || gdiff < -92) return FLT_MAX;
+			if (bdiff > 128 || bdiff < -128) return FLT_MAX;
+
+			return std::powf((rdiff * 0.30f), 2)
+				+ std::powf((gdiff * 0.60f), 2)
+				+ std::powf((bdiff * 0.10f), 2);
+		};
+
+		auto iPtr = (BGRA8888*)buff;
+		auto cPtr = (BGRA8888*)colormap;
+
+		auto DoDistanceCalc = [&](const uint64& start, const uint64& count)
+		{
+			// close enough ¯\_(:_:)_/¯
+			float eps = 0.00001f;
+			for (uint64 i = start; i < start + count; ++i)
+			{
+				float distance = FLT_MAX;
+				uchar bestMatch = 0;
+
+				auto val = iPtr[i];
+
+				for (uint16 j = 0; j < clength; ++j)
+				{
+					auto d = PixDistance(iPtr[i], cPtr[j]);
+					if (d < distance)
+					{
+						distance = d;
+						bestMatch = (uchar)j;
+						if (d < 0 + eps && d > 0 - eps) break;
+					}
+				}
+
+				IMap[i] = bestMatch;
+			}
+		};
+
+		// Spawn Threads
+		for (uchar i = 0; i < CoreCount; i++)
+		{
+			std::thread* t = nullptr;
+			if (i == CoreCount - 1)
+			{
+				uint64 count = ilength - (i * slice);
+				t = new std::thread(DoDistanceCalc, i * slice, count);
+			}
+			else
+			{
+				t = new std::thread(DoDistanceCalc, i * slice, slice);
+			}
+			threads.push_back(t);
+		}
+
+		// Wait for threads
+		for (auto& i : threads)
+		{
+			i->join();
+			delete i;
+		}
+
+		threads.clear();
+	}
+
+	return IMap;
+}
+
 bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const void* colormap, structs::ExtensionArea* extensions, void*& output,
 	xtga::pixelformats::PIXELFORMATS* PixelType, xtga::flags::ALPHATYPE* AlphaType, xtga::ERRORCODE* error)
 {
@@ -1904,10 +2172,10 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 	using namespace xtga::pixelformats;
 
 	auto ImgFrmt = header->IMAGE_TYPE;
-	UInt32 pCount = header->IMAGE_WIDTH * header->IMAGE_HEIGHT;
+	uint32 pCount = header->IMAGE_WIDTH * header->IMAGE_HEIGHT;
 	auto tErr = ERRORCODE::NONE;
 
-	UChar depth = header->IMAGE_DEPTH;
+	uchar depth = header->IMAGE_DEPTH;
 
 	if (tErr != ERRORCODE::NONE)
 	{
@@ -2055,14 +2323,452 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 
 	if (!output)
 	{
-		output = new UChar[pCount * (UInt64)header->IMAGE_DEPTH];
-		for (UInt64 i = 0; i < pCount * (UInt64)header->IMAGE_DEPTH; ++i)
+		output = new uchar[pCount * (uint64)header->IMAGE_DEPTH];
+		for (uint64 i = 0; i < pCount * (uint64)header->IMAGE_DEPTH; ++i)
 		{
-			((UChar*)output)[i] = ((UChar*)input)[i];
+			((uchar*)output)[i] = ((uchar*)input)[i];
 		}
 	}
 
 	XTGA_SETERROR(error, ERRORCODE::NONE);
 
 	return true;
+}
+
+void* xtga::codecs::ScaleImageBicubic(const void* data, xtga::pixelformats::PIXELFORMATS format, uint16 width, uint16 height, float scale, ERRORCODE* error)
+{
+	using namespace pixelformats;
+
+	uchar BPP = 0;
+	if (format == PIXELFORMATS::BGR888)
+		BPP = 3;
+	else if (format == PIXELFORMATS::BGRA5551)
+		BPP = 2;
+	else if (format == PIXELFORMATS::BGRA8888)
+		BPP = 4;
+	else if (format == PIXELFORMATS::I8)
+		BPP = 1;
+	else if (format == PIXELFORMATS::IA88)
+		BPP = 2;
+	else
+	{
+		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
+		return nullptr;
+	}
+
+	if (width <= 1 || height <= 1)
+	{
+		XTGA_SETERROR(error, ERRORCODE::REDUNDANT_OPERATION);
+		return nullptr;
+	}
+
+	if (scale == 1.0f)
+	{
+		auto rBuff = new uchar[(uint64)width * height * BPP];
+
+		for (uint64 i = 0; i < (uint64)width * height * BPP; ++i)
+			rBuff[i] = ( (uchar*)data )[i];
+
+		XTGA_SETERROR(error, ERRORCODE::REDUNDANT_OPERATION);
+
+		return rBuff;
+	}
+
+	// Check for overflow after scale
+	if (!(scale < 1.0f))
+	{
+		if (width > UINT16_MAX / scale)
+		{
+			XTGA_SETERROR(error, ERRORCODE::OVERFLOW_DETECTED);
+			return nullptr;
+		}
+
+		if (height > UINT16_MAX / scale)
+		{
+			XTGA_SETERROR(error, ERRORCODE::OVERFLOW_DETECTED);
+			return nullptr;
+		}
+	}
+
+	auto CubicInterpolate = [](const float in[4], float x) -> float
+	{
+		return (float)((-0.5 * in[0] + 1.5 * in[1] - 1.5 * in[2] + 0.5 * in[3]) * std::powf(x, 3)
+			+ (in[0] - 2.5 * in[1] + 2.0 * in[2] - 0.5 * in[3]) * std::powf(x, 2)
+			+ (-0.5 * in[0] + 0.5 * in[2]) * x
+			+ in[1]);
+	};
+
+	auto CubicInterpolateBGR24 = [&CubicInterpolate](const BGR888 in[4], float x) -> BGR888
+	{
+		float b[4] = { (float)in[0].B, (float)in[1].B, (float)in[2].B, (float)in[3].B };
+		float g[4] = { (float)in[0].G, (float)in[1].G, (float)in[2].G, (float)in[3].G };
+		float r[4] = { (float)in[0].R, (float)in[1].R, (float)in[2].R, (float)in[3].R };
+
+		float bx = CubicInterpolate(b, x);
+		float gx = CubicInterpolate(g, x);
+		float rx = CubicInterpolate(r, x);
+
+		bx = std::roundf(bx);
+		gx = std::roundf(gx);
+		rx = std::roundf(rx);
+
+		if (bx > 255) bx = 255;
+		else if (bx < 0) bx = 0;
+		if (gx > 255) gx = 255;
+		else if (gx < 0) gx = 0;
+		if (rx > 255) rx = 255;
+		else if (rx < 0) rx = 0;
+
+		BGR888 rval;
+		rval.B = (uchar)bx;
+		rval.G = (uchar)gx;
+		rval.R = (uchar)rx;
+
+		return rval;
+	};
+
+	auto BicubicInterpolateBGR24 = [&CubicInterpolateBGR24](const BGR888 in[4][4], float x, float y) -> BGR888
+	{
+		BGR888 arr[4];
+		arr[0] = CubicInterpolateBGR24(in[0], x);
+		arr[1] = CubicInterpolateBGR24(in[1], x);
+		arr[2] = CubicInterpolateBGR24(in[2], x);
+		arr[3] = CubicInterpolateBGR24(in[3], x);
+		return CubicInterpolateBGR24(arr, y);
+	};
+
+	auto CubicInterpolateBGRA32 = [&CubicInterpolate](const BGRA8888 in[4], float x) -> BGRA8888
+	{
+		float b[4] = { (float)in[0].B, (float)in[1].B, (float)in[2].B, (float)in[3].B };
+		float g[4] = { (float)in[0].G, (float)in[1].G, (float)in[2].G, (float)in[3].G };
+		float r[4] = { (float)in[0].R, (float)in[1].R, (float)in[2].R, (float)in[3].R };
+		float a[4] = { (float)in[0].A, (float)in[1].A, (float)in[2].A, (float)in[3].A };
+
+		float bx = CubicInterpolate(b, x);
+		float gx = CubicInterpolate(g, x);
+		float rx = CubicInterpolate(r, x);
+		float ax = CubicInterpolate(a, x);
+
+		bx = std::roundf(bx);
+		gx = std::roundf(gx);
+		rx = std::roundf(rx);
+		ax = std::roundf(ax);
+
+		if (bx > 255) bx = 255;
+		else if (bx < 0) bx = 0;
+		if (gx > 255) gx = 255;
+		else if (gx < 0) gx = 0;
+		if (rx > 255) rx = 255;
+		else if (rx < 0) rx = 0;
+		if (ax > 255) ax = 255;
+		else if (ax < 0) ax = 0;
+
+		BGRA8888 rval;
+		rval.B = (uchar)bx;
+		rval.G = (uchar)gx;
+		rval.R = (uchar)rx;
+		rval.A = (uchar)ax;
+
+		return rval;
+	};
+
+	auto BicubicInterpolateBGRA32 = [&CubicInterpolateBGRA32](const BGRA8888 in[4][4], float x, float y) -> BGRA8888
+	{
+		BGRA8888 arr[4];
+		arr[0] = CubicInterpolateBGRA32(in[0], x);
+		arr[1] = CubicInterpolateBGRA32(in[1], x);
+		arr[2] = CubicInterpolateBGRA32(in[2], x);
+		arr[3] = CubicInterpolateBGRA32(in[3], x);
+		return CubicInterpolateBGRA32(arr, y);
+	};
+
+	auto CubicInterpolateBGRA16 = [&CubicInterpolate](const BGRA5551 in[4], float x) -> BGRA5551
+	{
+		float b[4] = { (float)in[0].B, (float)in[1].B, (float)in[2].B, (float)in[3].B };
+		float g[4] = { (float)in[0].G, (float)in[1].G, (float)in[2].G, (float)in[3].G };
+		float r[4] = { (float)in[0].R, (float)in[1].R, (float)in[2].R, (float)in[3].R };
+		float a[4] = { (float)in[0].A, (float)in[1].A, (float)in[2].A, (float)in[3].A };
+
+		float bx = CubicInterpolate(b, x);
+		float gx = CubicInterpolate(g, x);
+		float rx = CubicInterpolate(r, x);
+		float ax = CubicInterpolate(a, x);
+
+		bx = std::roundf(bx);
+		gx = std::roundf(gx);
+		rx = std::roundf(rx);
+		if (ax >= 127.5) ax = 1;
+		else ax = 0;
+
+		if (bx > 255) bx = 255;
+		else if (bx < 0) bx = 0;
+		if (gx > 255) gx = 255;
+		else if (gx < 0) gx = 0;
+		if (rx > 255) rx = 255;
+		else if (rx < 0) rx = 0;
+
+		BGRA5551 rval;
+		rval.B = (uchar)bx;
+		rval.G = (uchar)gx;
+		rval.R = (uchar)rx;
+		rval.A = (uchar)ax;
+
+		return rval;
+	};
+
+	auto BicubicInterpolateBGRA16 = [&CubicInterpolateBGRA16](const BGRA5551 in[4][4], float x, float y) -> BGRA5551
+	{
+		BGRA5551 arr[4];
+		arr[0] = CubicInterpolateBGRA16(in[0], x);
+		arr[1] = CubicInterpolateBGRA16(in[1], x);
+		arr[2] = CubicInterpolateBGRA16(in[2], x);
+		arr[3] = CubicInterpolateBGRA16(in[3], x);
+		return CubicInterpolateBGRA16(arr, y);
+	};
+
+	auto CubicInterpolateI = [&CubicInterpolate](const I8 in[4], float x) -> I8
+	{
+		float i[4] = { (float)in[0].I, (float)in[1].I, (float)in[2].I, (float)in[3].I };
+
+		float ix = CubicInterpolate(i, x);
+
+		ix = std::roundf(ix);
+		if (ix > 255) ix = 255;
+		else if (ix < 0) ix = 0;
+
+		I8 rval;
+		rval.I = (uchar)ix;
+
+		return rval;
+	};
+
+	auto BicubicInterpolateI = [&CubicInterpolateI](const I8 in[4][4], float x, float y) -> I8
+	{
+		I8 arr[4];
+		arr[0] = CubicInterpolateI(in[0], x);
+		arr[1] = CubicInterpolateI(in[1], x);
+		arr[2] = CubicInterpolateI(in[2], x);
+		arr[3] = CubicInterpolateI(in[3], x);
+		return CubicInterpolateI(arr, y);
+	};
+
+	auto CubicInterpolateIA = [&CubicInterpolate](const IA88 in[4], float x) -> IA88
+	{
+		float i[4] = { (float)in[0].I, (float)in[1].I, (float)in[2].I, (float)in[3].I };
+		float a[4] = { (float)in[0].A, (float)in[1].A, (float)in[2].A, (float)in[3].A };
+
+		float ix = CubicInterpolate(i, x);
+		float ax = CubicInterpolate(a, x);
+
+		ix = std::roundf(ix);
+		ax = std::roundf(ax);
+		if (ix > 255) ix = 255;
+		else if (ix < 0) ix = 0;
+		if (ax > 255) ax = 255;
+		else if (ax < 0) ax = 0;
+
+		IA88 rval;
+		rval.I = (uchar)ix;
+		rval.A = (uchar)ax;
+
+		return rval;
+	};
+
+	auto BicubicInterpolateIA = [&CubicInterpolateIA](const IA88 in[4][4], float x, float y) -> IA88
+	{
+		IA88 arr[4];
+		arr[0] = CubicInterpolateIA(in[0], x);
+		arr[1] = CubicInterpolateIA(in[1], x);
+		arr[2] = CubicInterpolateIA(in[2], x);
+		arr[3] = CubicInterpolateIA(in[3], x);
+		return CubicInterpolateIA(arr, y);
+	};
+
+	uint16 nWidth = (uint16)(width * scale);
+	uint16 nHeight = (uint16)(height * scale);
+
+	auto rval = new uchar[(uint64)nWidth * nHeight * BPP];
+
+	// For Each Scanline
+	for (uint16 y = 0; y < nHeight; ++y)
+	{
+		float sy = height * ((float)y / nHeight);
+		uint16 sy0 = (uint16)(sy - 1);
+		uint16 sy1 = (uint16)sy;
+		uint16 sy2 = (uint16)(sy + 1);
+		uint16 sy3 = (uint16)(sy + 2);
+
+		// overflow / boundary checks
+		if (sy0 < 0) sy0 = 0;
+		if (sy2 >= height) sy2 = height - 1;
+		if (sy3 >= height) sy3 = height - 1;
+		if (sy0 > sy1) sy0 = 0;
+		if (sy2 < sy1) sy2 = height - 1;
+		if (sy3 < sy2) sy3 = height - 1;
+
+		float yLoc = sy - sy1;
+
+		// For Each Pixel
+		for (uint16 x = 0; x < nWidth; ++x)
+		{
+			float sx = width * ((float)x / nWidth);
+			uint16 sx0 = (uint16)(sx - 1);
+			uint16 sx1 = (uint16)sx;
+			uint16 sx2 = (uint16)(sx + 1);
+			uint16 sx3 = (uint16)(sx + 2);
+
+			// overflow / boundary checks
+			if (sx0 < 0) sx0 = 0;
+			if (sx2 >= width) sx2 = width - 1;
+			if (sx3 >= width) sx3 = width - 1;
+			if (sx0 > sx1) sx0 = 0;
+			if (sx2 < sx1) sx2 = width - 1;
+			if (sx3 < sx2) sx3 = width - 1;
+
+			float xLoc = sx - sx1;
+
+			if (format == PIXELFORMATS::BGR888)
+			{
+				auto iptr = (BGR888*)data;
+				auto optr = (BGR888*)rval;
+
+				BGR888 cluster[4][4];
+				cluster[0][0] = iptr[sy0 * width + sx0];
+				cluster[0][1] = iptr[sy0 * width + sx1];
+				cluster[0][2] = iptr[sy0 * width + sx2];
+				cluster[0][3] = iptr[sy0 * width + sx3];
+
+				cluster[1][0] = iptr[sy1 * width + sx0];
+				cluster[1][1] = iptr[sy1 * width + sx1];
+				cluster[1][2] = iptr[sy1 * width + sx2];
+				cluster[1][3] = iptr[sy1 * width + sx3];
+
+				cluster[2][0] = iptr[sy2 * width + sx0];
+				cluster[2][1] = iptr[sy2 * width + sx1];
+				cluster[2][2] = iptr[sy2 * width + sx2];
+				cluster[2][3] = iptr[sy2 * width + sx3];
+
+				cluster[3][0] = iptr[sy3 * width + sx0];
+				cluster[3][1] = iptr[sy3 * width + sx1];
+				cluster[3][2] = iptr[sy3 * width + sx2];
+				cluster[3][3] = iptr[sy3 * width + sx3];
+
+				optr[y * nWidth + x] = BicubicInterpolateBGR24(cluster, xLoc, yLoc);
+			}
+			else if (format == PIXELFORMATS::BGRA8888)
+			{
+				auto iptr = (BGRA8888*)data;
+				auto optr = (BGRA8888*)rval;
+
+				BGRA8888 cluster[4][4];
+				cluster[0][0] = iptr[sy0 * width + sx0];
+				cluster[0][1] = iptr[sy0 * width + sx1];
+				cluster[0][2] = iptr[sy0 * width + sx2];
+				cluster[0][3] = iptr[sy0 * width + sx3];
+
+				cluster[1][0] = iptr[sy1 * width + sx0];
+				cluster[1][1] = iptr[sy1 * width + sx1];
+				cluster[1][2] = iptr[sy1 * width + sx2];
+				cluster[1][3] = iptr[sy1 * width + sx3];
+
+				cluster[2][0] = iptr[sy2 * width + sx0];
+				cluster[2][1] = iptr[sy2 * width + sx1];
+				cluster[2][2] = iptr[sy2 * width + sx2];
+				cluster[2][3] = iptr[sy2 * width + sx3];
+
+				cluster[3][0] = iptr[sy3 * width + sx0];
+				cluster[3][1] = iptr[sy3 * width + sx1];
+				cluster[3][2] = iptr[sy3 * width + sx2];
+				cluster[3][3] = iptr[sy3 * width + sx3];
+
+				optr[y * nWidth + x] = BicubicInterpolateBGRA32(cluster, xLoc, yLoc);
+			}
+			else if (format == PIXELFORMATS::BGRA5551)
+			{
+				auto iptr = (BGRA5551*)data;
+				auto optr = (BGRA5551*)rval;
+
+				BGRA5551 cluster[4][4];
+				cluster[0][0] = iptr[sy0 * width + sx0];
+				cluster[0][1] = iptr[sy0 * width + sx1];
+				cluster[0][2] = iptr[sy0 * width + sx2];
+				cluster[0][3] = iptr[sy0 * width + sx3];
+
+				cluster[1][0] = iptr[sy1 * width + sx0];
+				cluster[1][1] = iptr[sy1 * width + sx1];
+				cluster[1][2] = iptr[sy1 * width + sx2];
+				cluster[1][3] = iptr[sy1 * width + sx3];
+
+				cluster[2][0] = iptr[sy2 * width + sx0];
+				cluster[2][1] = iptr[sy2 * width + sx1];
+				cluster[2][2] = iptr[sy2 * width + sx2];
+				cluster[2][3] = iptr[sy2 * width + sx3];
+
+				cluster[3][0] = iptr[sy3 * width + sx0];
+				cluster[3][1] = iptr[sy3 * width + sx1];
+				cluster[3][2] = iptr[sy3 * width + sx2];
+				cluster[3][3] = iptr[sy3 * width + sx3];
+
+				optr[y * nWidth + x] = BicubicInterpolateBGRA16(cluster, xLoc, yLoc);
+			}
+			else if (format == PIXELFORMATS::I8)
+			{
+				auto iptr = (I8*)data;
+				auto optr = (I8*)rval;
+
+				I8 cluster[4][4];
+				cluster[0][0] = iptr[sy0 * width + sx0];
+				cluster[0][1] = iptr[sy0 * width + sx1];
+				cluster[0][2] = iptr[sy0 * width + sx2];
+				cluster[0][3] = iptr[sy0 * width + sx3];
+
+				cluster[1][0] = iptr[sy1 * width + sx0];
+				cluster[1][1] = iptr[sy1 * width + sx1];
+				cluster[1][2] = iptr[sy1 * width + sx2];
+				cluster[1][3] = iptr[sy1 * width + sx3];
+
+				cluster[2][0] = iptr[sy2 * width + sx0];
+				cluster[2][1] = iptr[sy2 * width + sx1];
+				cluster[2][2] = iptr[sy2 * width + sx2];
+				cluster[2][3] = iptr[sy2 * width + sx3];
+
+				cluster[3][0] = iptr[sy3 * width + sx0];
+				cluster[3][1] = iptr[sy3 * width + sx1];
+				cluster[3][2] = iptr[sy3 * width + sx2];
+				cluster[3][3] = iptr[sy3 * width + sx3];
+
+				optr[y * nWidth + x] = BicubicInterpolateI(cluster, xLoc, yLoc);
+			}
+			else
+			{
+				auto iptr = (IA88*)data;
+				auto optr = (IA88*)rval;
+
+				IA88 cluster[4][4];
+				cluster[0][0] = iptr[sy0 * width + sx0];
+				cluster[0][1] = iptr[sy0 * width + sx1];
+				cluster[0][2] = iptr[sy0 * width + sx2];
+				cluster[0][3] = iptr[sy0 * width + sx3];
+
+				cluster[1][0] = iptr[sy1 * width + sx0];
+				cluster[1][1] = iptr[sy1 * width + sx1];
+				cluster[1][2] = iptr[sy1 * width + sx2];
+				cluster[1][3] = iptr[sy1 * width + sx3];
+
+				cluster[2][0] = iptr[sy2 * width + sx0];
+				cluster[2][1] = iptr[sy2 * width + sx1];
+				cluster[2][2] = iptr[sy2 * width + sx2];
+				cluster[2][3] = iptr[sy2 * width + sx3];
+
+				cluster[3][0] = iptr[sy3 * width + sx0];
+				cluster[3][1] = iptr[sy3 * width + sx1];
+				cluster[3][2] = iptr[sy3 * width + sx2];
+				cluster[3][3] = iptr[sy3 * width + sx3];
+
+				optr[y * nWidth + x] = BicubicInterpolateIA(cluster, xLoc, yLoc);
+			}
+		}
+	}
+
+	return rval;
 }

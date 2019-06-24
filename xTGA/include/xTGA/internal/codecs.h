@@ -29,7 +29,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code should an error occur (can be nullptr).
 		/// @return void*					The decoded image buffer or nullptr if an error occured.
 		//----------------------------------------------------------------------------------------------------
-		void* DecodeRLE(void const * buffer, UChar depth, UInt32 length, ERRORCODE* error = nullptr);
+		void* DecodeRLE(void const * buffer, uchar depth, uint32 length, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Encodes the given image buffer with run-length encoding. (Scanlines Respected)
@@ -41,7 +41,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code should an error occur (can be nullptr).
 		/// @return bool					True if it was possible to encode the image.
 		//----------------------------------------------------------------------------------------------------
-		bool EncodeRLE(void const* buffer, void*& obuffer, UInt16 width, UInt16 height, UChar depth, ERRORCODE* error = nullptr);
+		bool EncodeRLE(void const* buffer, void*& obuffer, uint16 width, uint16 height, uchar depth, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Decodes a color mapped image buffer.
@@ -52,7 +52,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code should an error occur (can be nullptr).
 		/// @return void*					The decoded image buffer or nullptr if an error occured.
 		//----------------------------------------------------------------------------------------------------
-		void* DecodeColorMap(void const* ImageBuffer, UInt32 length, void const* ColorMap, UChar depth, ERRORCODE* error = nullptr);
+		void* DecodeColorMap(void const* ImageBuffer, uint32 length, void const* ColorMap, uchar depth, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Takes an array of pixels with the first entry being the bottom left pixel and converts it to
@@ -64,7 +64,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code should an error occur (can be nullptr).
 		/// @return void*					The converted image buffer (or nullptr if an error occured).
 		//----------------------------------------------------------------------------------------------------
-		void* Convert_BottomLeft_To_TopLeft(void const* buffer, UInt32 width, UInt32 height, UChar depth, ERRORCODE* error = nullptr);
+		void* Convert_BottomLeft_To_TopLeft(void const* buffer, uint32 width, uint32 height, uchar depth, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Takes an array of pixels with the first entry being the bottom right pixel and converts it to
@@ -76,7 +76,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code should an error occur (can be nullptr).
 		/// @return void*					The converted image buffer (or nullptr if an error occured).
 		//----------------------------------------------------------------------------------------------------
-		void* Convert_BottomRight_To_TopLeft(void const* buffer, UInt32 width, UInt32 height, UChar depth, ERRORCODE* error = nullptr);
+		void* Convert_BottomRight_To_TopLeft(void const* buffer, uint32 width, uint32 height, uchar depth, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Takes an array of pixels with the first entry being the bottom right pixel and converts it to
@@ -88,7 +88,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code should an error occur (can be nullptr).
 		/// @return void*					The converted image buffer (or nullptr if an error occured).
 		//----------------------------------------------------------------------------------------------------
-		void* Convert_TopRight_To_TopLeft(void const* buffer, UInt32 width, UInt32 height, UChar depth, ERRORCODE* error = nullptr);
+		void* Convert_TopRight_To_TopLeft(void const* buffer, uint32 width, uint32 height, uchar depth, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Converts a pixel of type BGRA to RGBA.
@@ -127,7 +127,7 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Generates a Color Map from an input buffer.
-		/// @param[in] inBuff				The input image buffer of type BGRA5551.
+		/// @param[in] inBuff				The input image buffer.
 		/// @param[out] outBuff				The encoded image buffer (Guaranteed 8-bits per pixel).
 		/// @param[out] colorBuff			The generated color map.
 		/// @param[in] length				The number of pixels the input buffer contains.
@@ -139,8 +139,21 @@ namespace xtga
 		/// @param[out] error				The error/status code (can be nullptr).
 		/// @return bool					True if the color map could be generated.
 		//----------------------------------------------------------------------------------------------------
-		bool GenerateColorMap(const void* inBuff, void*& outBuff, void*& colorBuff, UInt64 length, UChar depth, UInt16& Size, bool force = false, ERRORCODE* error = nullptr);
+		bool GenerateColorMap(const void* inBuff, void*& outBuff, void*& colorBuff, addressable length, uchar depth, uint16& Size, bool force = false, ERRORCODE* error = nullptr);
 	
+		//----------------------------------------------------------------------------------------------------
+		/// Applies a colormap to an existing image buffer.
+		/// @param[in] buff					The input image buffer.
+		/// @param[in] ilength				The length of the input buffer (in pixels).
+		/// @param[in] colormap				The input color map.
+		/// @param[in] clength				The length of the colormap buffer (in pixels).
+		/// @param[in] length				The number of pixels the input buffer contains.
+		/// @param[in] depth				The bits per pixel of the input image (must be 16/24/32).
+		/// @param[out] error				Holds the error/status code (can be nullptr).
+		/// @return void*					The converted image buffer.
+		//----------------------------------------------------------------------------------------------------
+		void* ApplyColorMap(const void* buff, addressable ilength, const void* colormap, uint16 clength, uchar depth, ERRORCODE* error = nullptr);
+
 		//----------------------------------------------------------------------------------------------------
 		/// Decodes an input image into its original format with the top left pixel being first.
 		/// @param[in] header				The header associated with the image.
@@ -155,6 +168,18 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		bool DecodeImage(structs::Header* header, const void* input, const void* colormap, structs::ExtensionArea* extensions, void*& output,
 			pixelformats::PIXELFORMATS* PixelType = nullptr, flags::ALPHATYPE* AlphaType = nullptr, ERRORCODE* error = nullptr);
+
+		//----------------------------------------------------------------------------------------------------
+		/// Scales an image using bicubic interpolation.
+		/// @param[in] data					The input data to scale.
+		/// @param[in] format				Must be BGR888, BGRA8888, BGRA5551, I8, or IA88.
+		/// @param[in] width				The width of the input image (in pixels).
+		/// @param[in] height				The height of the input image (in pixels).
+		/// @param[in] scale				The scale to use.
+		/// @param[out] error				Holds the error/status code (can be nullptr).
+		/// @return void*					The scaled image (or nullptr if an error occured).
+		//----------------------------------------------------------------------------------------------------
+		void* ScaleImageBicubic(const void* data, pixelformats::PIXELFORMATS format, uint16 width, uint16 height, float scale, ERRORCODE* error = nullptr);
 	}
 }
 

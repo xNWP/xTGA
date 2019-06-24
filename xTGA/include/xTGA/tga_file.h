@@ -81,7 +81,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code (can be nullptr).
 		/// @return TGAFile*				The created TGAFile (or nullptr if an error occured).
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI static TGAFile* Alloc(void* buffer, UInt32 width, UInt32 height, const Parameters& config, ERRORCODE* error = nullptr);
+		XTGAAPI static TGAFile* Alloc(void* buffer, uint32 width, uint32 height, const Parameters& config, ERRORCODE* error = nullptr);
 		
 		//----------------------------------------------------------------------------------------------------
 		/// Frees the supplied TGAFile object and sets its pointer to nullptr.
@@ -99,16 +99,16 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the Image ID (or nullptr if it does not exist).
-		/// @return UChar const *			The Image ID or nullptr.
+		/// @return uchar const *			The Image ID or nullptr.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI UChar const *  GetImageID();
+		XTGAAPI uchar const *  GetImageID();
 
 		//----------------------------------------------------------------------------------------------------
 		/// Sets the Image ID.
 		/// @param[in] data					The data to set the image id to.
 		/// @param[in] size					The size of the data, must be <= 255.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI void SetImageID(const void* data, UChar size);
+		XTGAAPI void SetImageID(const void* data, uchar size);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the Color Map Data (or nullptr if it does not exist).
@@ -137,9 +137,9 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the size of the raw image buffer.
 		/// @param[out] error			Holds the error/status code (can be nullptr).
-		/// @return UInt64				The size of the image buffer in bytes (or 0 if an error occured).
+		/// @return uint64				The size of the image buffer in bytes (or 0 if an error occured).
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI UInt64 GetImageDataSize(ERRORCODE* error = nullptr);
+		XTGAAPI uint64 GetImageDataSize(ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Compresses the image data with Run-length Encoding (RLE).
@@ -164,36 +164,56 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Convenience function to get the image width.
-		/// @return UInt16					The width of the image in pixels.
+		/// @return uint16					The width of the image in pixels.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI UInt16 GetWidth() const;
+		XTGAAPI uint16 GetWidth() const;
 
 		//----------------------------------------------------------------------------------------------------
 		/// Convenience function to get the image height.
-		/// @return UInt16					The height of the image in pixels.
+		/// @return uint16					The height of the image in pixels.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI UInt16 GetHeight() const;
+		XTGAAPI uint16 GetHeight() const;
 
 		//----------------------------------------------------------------------------------------------------
 		/// Convenience function to get the image pixel depth (includes attribute/alpha bits) in bits.
-		/// @return UChar					The number of bits each pixel occupies.
+		/// @return uchar					The number of bits each pixel occupies.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI UChar GetBitDepth() const;
+		XTGAAPI uchar GetBitDepth() const;
 
 		//----------------------------------------------------------------------------------------------------
 		/// Convenience function to get the number of developer entries.
-		/// @return UInt16					The height of the image in pixels.
+		/// @return uint16					The height of the image in pixels.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI UInt16 GetDeveloperEntryCount() const;
+		XTGAAPI uint16 GetDeveloperEntryCount() const;
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the developer entry at the given index.
 		/// @param[in] index				Must be less than GetDeveloperEntryCount().
 		/// @param[out] tag					The "tag" attached to the entry, can be nullptr.
 		/// @param[out] size				The size of the entry, can be nullptr.
-		/// @return void*					The fetched developer entry [editable].
+		/// @param[out] error				Holds the error/status code (can be nullptr).
+		/// @return const void*				The fetched developer entry or nullptr if an error occurred.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI void* GetDeveloperEntry(UInt16 index, UInt16* tag = nullptr, UInt32* size = nullptr);
+		XTGAAPI const void* GetDeveloperEntry(uint16 index, uint16* tag = nullptr, uint32* size = nullptr, ERRORCODE* error = nullptr);
+
+		//----------------------------------------------------------------------------------------------------
+		/// Returns the first developer entry with the requested tag.
+		/// @param[in] tag					The tag to search for.
+		/// @param[out] size				The size of the returned data in bytes (can be nullptr).
+		/// @return const void*				The fetched developer entry or nullptr if the tag could not be found.
+		//----------------------------------------------------------------------------------------------------
+		XTGAAPI const void* GetDeveloperEntryByTag(uint16 tag, uint32* size = nullptr);
+
+		//----------------------------------------------------------------------------------------------------
+		/// Modifies the specified developer entry.
+		/// @param[in] index				Must be less than GetDeveloperEntryCount().
+		/// @param[in] data					The new data to put in the entry.
+		/// @param[in] size					The size of the data (in bytes).
+		/// @param[in] tag					The new tag name (can be nullptr to maintain the original name).
+		/// @param[out] error				Holds the error/status code (can be nullptr).
+		/// @return bool					True if the operation completed without error.
+		//----------------------------------------------------------------------------------------------------
+		XTGAAPI bool EditDeveloperEntry(uint16 index, const void* data, uint32 size, uint16* tag = nullptr, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Creates a developer entry with the given data.
@@ -201,8 +221,19 @@ namespace xtga
 		/// @param[in] tag					The tag of the devloper entry.
 		/// @param[in] data					The data to put in the developer entry.
 		/// @param[in] size					The size of the data.
+		/// @param[out] index				The index of the newly added entry (can be nullptr).
+		/// @param[out] error				Holds the error / status code (can be nullptr).
+		/// @return bool					True if the entry was successfully added.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI void AddDeveloperEntry(UInt16 tag, const void* data, UInt32 size);
+		XTGAAPI bool AddDeveloperEntry(uint16 tag, const void* data, uint32 size, uint16* index = nullptr, ERRORCODE* error = nullptr);
+
+		//----------------------------------------------------------------------------------------------------
+		/// Removes the developer entry with the given index.
+		/// @param[in] index				The index of the entry to remove.
+		/// @param[out] error				Holds the error/status code (can be nullptr).
+		/// @return bool					True if the entry was removed.
+		//----------------------------------------------------------------------------------------------------
+		XTGAAPI bool RemoveDeveloperEntry(uint16 index, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the extension area (or nullptr if it does not exist).
@@ -212,27 +243,17 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the scan line table (or nullptr if it does not exist).
-		/// Only edit this if you know what you're doing!!!
-		/// @return UInt32					The fetched scan line table [editable].
+		/// @return const uint32*			The fetched scan line table.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI UInt32* GetScanLineTable();
-
-		//----------------------------------------------------------------------------------------------------
-		/// Generates a scanline table for the image if it does not exist already.
-		/// NOTE: Will convert the image to TGA 2.0 if it is not already.
-		/// @param[out] error				The error/status code of the operation (can be nullptr).
-		/// @return bool					True if the scanline table was generated. False if it already exists.
-		//----------------------------------------------------------------------------------------------------
-		XTGAAPI bool GenerateScanLineTable(ERRORCODE* error = nullptr);
+		XTGAAPI const uint32* GetScanLineTable();
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the raw postage stamp / thumbnail image (or nullptr if it does not exist).
-		/// Only edit this if you know what you're doing!!!
 		/// Use GetThumbnail to get the decoded thumbnail and GetThumbnailRGBA to get the decoded thumbail in
 		/// RGBA format.
-		/// @return void*					The fetched thumbnail [editable].
+		/// @return void*					The fetched thumbnail.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI void* GetThumbnailData();
+		XTGAAPI const void* GetThumbnailData();
 
 		//----------------------------------------------------------------------------------------------------
 		/// Generates a thumbnail using bicubic interpolation.
@@ -242,8 +263,9 @@ namespace xtga
 		///									If set to false the remaining space will be filled with white for non-alpha
 		///									images, and transparency for alpha images.
 		/// @param[out] error				The status/error code of the image, will indicate clipping (can be nullptr).
+		/// @return bool					True if the thumbnail was generated.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI void GenerateThumbnail(UInt16 LongEdgeLength, bool Clip = false, ERRORCODE* error = nullptr);
+		XTGAAPI bool GenerateThumbnail(uint16 LongEdgeLength, bool Clip = false, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the decoded thumbnail image in its original pixel format with the top left pixel being the first pixel.
@@ -264,7 +286,7 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the color correction table.
-		/// @return UInt16*					The fetched color correction table (or nullptr) [editable].
+		/// @return uint16*					The fetched color correction table (or nullptr) [editable].
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI	structs::ColorCorrectionEntry* GetColorCorrectionTable();
 
@@ -296,9 +318,8 @@ namespace xtga
 		/// Converts the current image to TGA 2.0 file format.
 		/// Will simply do nothing if the file is already of TGA 2.0 format.
 		/// @param[out] error				Holds the error/status code (can be nullptr).
-		/// @return bool					True if the file was converted.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI bool UpgradeToTGATwo(ERRORCODE* error = nullptr);
+		XTGAAPI void UpgradeToTGATwo(ERRORCODE* error = nullptr);
 
 		//==================================================================================================
 		/// INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL - INTERNAL
