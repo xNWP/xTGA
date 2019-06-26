@@ -29,6 +29,7 @@ namespace xtga
 		INDEX_OUT_OF_RANGE	= 0x00000002,	/* The requested index was out of range. */
 		REDUNDANT_OPERATION	= 0x00000003,	/* The requested operation would be redundant. */
 		OVERFLOW_DETECTED	= 0x00000004,	/* The requested operation causes an overflow. */
+		INVALID_OPERATION	= 0x00000005,	/* The requested operation is invalid for the object. */
 
 		// Image Errors
 		INVALID_DEPTH		= 0x00000010,	/* The supplied image bit depth was invalid. */

@@ -22,7 +22,7 @@
 constexpr uchar LUT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132,
 								 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
 
-void* xtga::codecs::DecodeRLE(void const * buffer, uchar depth, uint32 length, ERRORCODE* error)
+void* xtga::codecs::DecodeRLE(void const * buffer, uchar depth, addressable length, ERRORCODE* error)
 {
 	if (!(depth == 8 || depth == 16 || depth == 24 || depth == 32))
 	{
@@ -30,22 +30,22 @@ void* xtga::codecs::DecodeRLE(void const * buffer, uchar depth, uint32 length, E
 		return nullptr;
 	}
 
-	uint32 count = 0;
-	uint32 it = 0;
+	addressable count = 0;
+	addressable it = 0;
 	uchar BPP = depth / 8;
 
-	uchar* rval = new uchar[length * (uint64)BPP];
+	uchar* rval = new uchar[length * (addressable)BPP];
 
 	while (count < length)
 	{
 		auto Packet = (structs::RLEPacket*)( (uchar*)buffer + it );
 		++it;
-		uint32 size = BPP * (Packet->PIXEL_COUNT_MINUS_ONE + 1);
+		uint16 size = BPP * (Packet->PIXEL_COUNT_MINUS_ONE + 1);
 		
 		if (Packet->RUN_LENGTH)
 		{
 			auto pix = ((uchar*)buffer + it);
-			for (uint32 i = 0; i < size; ++i)
+			for (addressable i = 0; i < size; ++i)
 			{
 				rval[count * BPP + i] = pix[i % BPP];
 			}
@@ -53,7 +53,7 @@ void* xtga::codecs::DecodeRLE(void const * buffer, uchar depth, uint32 length, E
 		}
 		else
 		{
-			for (uint32 i = 0; i < size; ++i)
+			for (addressable i = 0; i < size; ++i)
 			{
 				rval[count * BPP + i] = *((uchar*)buffer + it + i);
 			}
@@ -100,7 +100,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 	uchar BPP = depth / 8;
 	std::vector<PacketPixels> output;
 
-	auto EncodeLine8 = [&](const uint64 lineStart)
+	auto EncodeLine8 = [&](const addressable lineStart)
 	{
 		auto GetPixel = [&](const uint16 lineOffset) -> I8 *
 		{
@@ -173,7 +173,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 		}
 	};
 
-	auto EncodeLine16 = [&](const uint64 lineStart)
+	auto EncodeLine16 = [&](const addressable lineStart)
 	{
 		auto GetPixel = [&](const uint16 lineOffset) -> IA88 *
 		{
@@ -246,7 +246,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 		}
 	};
 
-	auto EncodeLine24 = [&](const uint64 lineStart)
+	auto EncodeLine24 = [&](const addressable lineStart)
 	{
 		auto GetPixel = [&](const uint16 lineOffset) -> RGB888 *
 		{
@@ -319,7 +319,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 		}
 	};
 
-	auto EncodeLine32 = [&](const uint64 lineStart)
+	auto EncodeLine32 = [&](const addressable lineStart)
 	{
 		auto GetPixel = [&](const uint16 lineOffset) -> RGBA8888 *
 		{
@@ -394,7 +394,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 
 	for (uint16 line = 0; line < height; ++line)
 	{
-		uint64 LineStart = (uint64)line * width * BPP;
+		addressable LineStart = (addressable)line * width * BPP;
 
 		if (BPP == 1)
 			EncodeLine8(LineStart);
@@ -416,7 +416,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 	}
 
 	uchar* OutBuffer = new uchar[outputSize];
-	uint64 it = 0;
+	addressable it = 0;
 
 	for (auto& i : output)
 	{
@@ -436,7 +436,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 			{
 				for (uchar b = 0; b < BPP; ++b)
 				{
-					OutBuffer[it] = ((uchar*)i.pixels)[j * BPP + b];
+					OutBuffer[it] = ((uchar*)i.pixels)[(uint16)j * BPP + b];
 					++it;
 				}
 			}
@@ -450,7 +450,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 	return true;
 }
 
-void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, uint32 length, void const* ColorMap, uchar depth, ERRORCODE* error)
+void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, addressable length, void const* ColorMap, uchar depth, ERRORCODE* error)
 {
 	if (!(depth == 16 || depth == 24 || depth == 32))
 	{
@@ -459,14 +459,14 @@ void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, uint32 length, void 
 	}
 
 	uchar BPP = depth / 8;
-	uchar* rval = new uchar[(uint64)BPP * length];
+	uchar* rval = new uchar[(addressable)BPP * length];
 
-	for (uint64 i = 0, it = 0; i < length * (uint64)BPP; ++it, i += BPP)
+	for (addressable i = 0, it = 0; i < length * (addressable)BPP; ++it, i += BPP)
 	{
 		auto index = *((uchar*)ImageBuffer + it);
 		for (uchar j = 0; j < BPP; ++j)
 		{
-			rval[i + j] = *( (uchar*)ColorMap + (index * (uint64)BPP) + j );
+			rval[i + j] = *( (uchar*)ColorMap + (index * (addressable)BPP) + j );
 		}
 	}
 
@@ -474,7 +474,7 @@ void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, uint32 length, void 
 	return rval;
 }
 
-void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, uint32 width, uint32 height, uchar depth, ERRORCODE* error)
+void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, uint16 width, uint16 height, uchar depth, ERRORCODE* error)
 {
 	if (!(depth == 8 || depth == 16 || depth == 24 || depth == 32))
 	{
@@ -482,16 +482,16 @@ void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, uint32 wid
 		return nullptr;
 	}
 
-	uint32 BPP = depth / 8;
-	uchar* rval = new uchar[(uint64)width * height * BPP];
+	uchar BPP = depth / 8;
+	uchar* rval = new uchar[(addressable)width * height * BPP];
 
 	// For each scanline
-	for (uint32 v = 0; v < height; ++v)
+	for (uint16 v = 0; v < height; ++v)
 	{
 		// For each pixel
-		for (uint32 p = 0; p < width; ++p)
+		for (uint16 p = 0; p < width; ++p)
 		{
-			auto Pix = (uchar*)buffer + ((uint64)v * width + p) * BPP;
+			auto Pix = (uchar*)buffer + ((addressable)v * width + p) * BPP;
 
 			// For each channel
 			for (uchar b = 0; b < BPP; ++b)
@@ -505,7 +505,7 @@ void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, uint32 wid
 	return rval;
 }
 
-void* xtga::codecs::Convert_BottomRight_To_TopLeft(void const* buffer, uint32 width, uint32 height, uchar depth, ERRORCODE* error)
+void* xtga::codecs::Convert_BottomRight_To_TopLeft(void const* buffer, uint16 width, uint16 height, uchar depth, ERRORCODE* error)
 {
 	if (!(depth == 8 || depth == 16 || depth == 24 || depth == 32))
 	{
@@ -513,16 +513,16 @@ void* xtga::codecs::Convert_BottomRight_To_TopLeft(void const* buffer, uint32 wi
 		return nullptr;
 	}
 
-	uint32 BPP = depth / 8;
-	uchar* rval = new uchar[(uint64)width * height * BPP];
+	uchar BPP = depth / 8;
+	uchar* rval = new uchar[(addressable)width * height * BPP];
 
 	// For each scanline
-	for (uint32 v = 0; v < height; ++v)
+	for (uint16 v = 0; v < height; ++v)
 	{
 		// For each pixel
-		for (uint32 p = 0; p < width; ++p)
+		for (uint16 p = 0; p < width; ++p)
 		{
-			auto Pix = (uchar*)buffer + ((uint64)v * width + p) * BPP;
+			auto Pix = (uchar*)buffer + ((addressable)v * width + p) * BPP;
 
 			// For each channel
 			for (uchar b = 0; b < BPP; ++b)
@@ -536,7 +536,7 @@ void* xtga::codecs::Convert_BottomRight_To_TopLeft(void const* buffer, uint32 wi
 	return rval;
 }
 
-void* xtga::codecs::Convert_TopRight_To_TopLeft(void const* buffer, uint32 width, uint32 height, uchar depth, ERRORCODE* error)
+void* xtga::codecs::Convert_TopRight_To_TopLeft(void const* buffer, uint16 width, uint16 height, uchar depth, ERRORCODE* error)
 {
 	if (!(depth == 8 || depth == 16 || depth == 24 || depth == 32))
 	{
@@ -544,16 +544,16 @@ void* xtga::codecs::Convert_TopRight_To_TopLeft(void const* buffer, uint32 width
 		return nullptr;
 	}
 
-	uint32 BPP = depth / 8;
-	uchar* rval = new uchar[(uint64)width * height * BPP];
+	uchar BPP = depth / 8;
+	uchar* rval = new uchar[(addressable)width * height * BPP];
 
 	// For each scanline
-	for (uint32 v = 0; v < height; ++v)
+	for (uint16 v = 0; v < height; ++v)
 	{
 		// For each pixel
-		for (uint32 p = 0; p < width; ++p)
+		for (uint16 p = 0; p < width; ++p)
 		{
-			auto Pix = (uchar*)buffer + ((uint64)v * width + p) * BPP;
+			auto Pix = (uchar*)buffer + ((addressable)v * width + p) * BPP;
 
 			// For each channel
 			for (uchar b = 0; b < BPP; ++b)
@@ -1023,7 +1023,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		ColorMap = new BGRA5551[CMap.size()];
 		BGRA5551* cPtr = (BGRA5551*)ColorMap;
 
-		for (uint16 i = 0; i < CMap.size(); ++i)
+		for (uint16 i = 0; i < (uint16)CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
 		outBuff = new uchar[IMap.size()];
@@ -1433,7 +1433,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		ColorMap = new BGR888[CMap.size()];
 		BGR888* cPtr = (BGR888*)ColorMap;
 
-		for (uint16 i = 0; i < CMap.size(); ++i)
+		for (uint16 i = 0; i < (uint16)CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
 		outBuff = new uchar[IMap.size()];
@@ -1872,7 +1872,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		ColorMap = new BGRA8888[CMap.size()];
 		BGRA8888* cPtr = (BGRA8888*)ColorMap;
 
-		for (uint16 i = 0; i < CMap.size(); ++i)
+		for (uint16 i = 0; i < (uint16)CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
 		outBuff = new uchar[IMap.size()];
@@ -1951,11 +1951,11 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 		auto iPtr = (BGRA5551*)buff;
 		auto cPtr = (BGRA5551*)colormap;
 
-		auto DoDistanceCalc = [&](const uint64& start, const uint64& count)
+		auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 		{
 			// close enough ¯\_(:_:)_/¯
 			float eps = 0.00001f;
-			for (uint64 i = start; i < start + count; ++i)
+			for (addressable i = start; i < start + count; ++i)
 			{
 				float distance = FLT_MAX;
 				uchar bestMatch = 0;
@@ -1983,7 +1983,7 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 			std::thread* t = nullptr;
 			if (i == CoreCount - 1)
 			{
-				uint64 count = ilength - (i * slice);
+				addressable count = ilength - (i * slice);
 				t = new std::thread(DoDistanceCalc, i * slice, count);
 			}
 			else
@@ -2030,11 +2030,11 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 		auto iPtr = (BGR888*)buff;
 		auto cPtr = (BGR888*)colormap;
 
-		auto DoDistanceCalc = [&](const uint64& start, const uint64& count)
+		auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 		{
 			// close enough ¯\_(:_:)_/¯
 			float eps = 0.00001f;
-			for (uint64 i = start; i < start + count; ++i)
+			for (addressable i = start; i < start + count; ++i)
 			{
 				float distance = FLT_MAX;
 				uchar bestMatch = 0;
@@ -2062,7 +2062,7 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 			std::thread* t = nullptr;
 			if (i == CoreCount - 1)
 			{
-				uint64 count = ilength - (i * slice);
+				addressable count = ilength - (i * slice);
 				t = new std::thread(DoDistanceCalc, i * slice, count);
 			}
 			else
@@ -2109,11 +2109,11 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 		auto iPtr = (BGRA8888*)buff;
 		auto cPtr = (BGRA8888*)colormap;
 
-		auto DoDistanceCalc = [&](const uint64& start, const uint64& count)
+		auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 		{
 			// close enough ¯\_(:_:)_/¯
 			float eps = 0.00001f;
-			for (uint64 i = start; i < start + count; ++i)
+			for (addressable i = start; i < start + count; ++i)
 			{
 				float distance = FLT_MAX;
 				uchar bestMatch = 0;
@@ -2141,7 +2141,7 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 			std::thread* t = nullptr;
 			if (i == CoreCount - 1)
 			{
-				uint64 count = ilength - (i * slice);
+				addressable count = ilength - (i * slice);
 				t = new std::thread(DoDistanceCalc, i * slice, count);
 			}
 			else
@@ -2164,29 +2164,22 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 	return IMap;
 }
 
-bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const void* colormap, structs::ExtensionArea* extensions, void*& output,
-	xtga::pixelformats::PIXELFORMATS* PixelType, xtga::flags::ALPHATYPE* AlphaType, xtga::ERRORCODE* error)
+bool xtga::codecs::DecodeImage(const void* buffer, void* obuffer, flags::IMAGEORIGIN origin, uint16 w, uint16 h, uchar depth, bool rle, const void* colormap, ERRORCODE* error)
 {
 	using namespace xtga::flags;
 	using namespace xtga::codecs;
 	using namespace xtga::pixelformats;
 
-	auto ImgFrmt = header->IMAGE_TYPE;
-	uint32 pCount = header->IMAGE_WIDTH * header->IMAGE_HEIGHT;
 	auto tErr = ERRORCODE::NONE;
 
-	uchar depth = header->IMAGE_DEPTH;
-
-	if (tErr != ERRORCODE::NONE)
-	{
-		XTGA_SETERROR(error, tErr);
-		return false;
-	}
+	uchar tdepth = depth;
+	if (colormap)
+		tdepth = 8;
 
 	// First decode RLE
-	if (ImgFrmt == IMAGETYPE::COLOR_MAPPED_RLE || ImgFrmt == IMAGETYPE::GRAYSCALE_RLE || ImgFrmt == IMAGETYPE::TRUE_COLOR_RLE)
+	if (rle)
 	{
-		output = DecodeRLE(input, depth, pCount, &tErr);
+		obuffer = DecodeRLE(buffer, tdepth, (addressable)w * h, &tErr);
 
 		if (tErr != ERRORCODE::NONE)
 		{
@@ -2196,69 +2189,66 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 	}
 
 	// Decode color map
-	if (ImgFrmt == IMAGETYPE::COLOR_MAPPED || ImgFrmt == IMAGETYPE::COLOR_MAPPED_RLE)
+	if (colormap)
 	{
-		if (output)
+		if (obuffer)
 		{
-			auto tmp = output;
-			output = DecodeColorMap(output, pCount, colormap, header->COLOR_MAP_BITS_PER_ENTRY, &tErr);
+			auto tmp = obuffer;
+			obuffer = DecodeColorMap(obuffer, (addressable)w * h, colormap, depth, &tErr);
 			delete[] tmp;
 		}
 		else
 		{
-			output = DecodeColorMap(input, pCount, colormap, header->COLOR_MAP_BITS_PER_ENTRY, &tErr);
+			obuffer = DecodeColorMap(buffer, (addressable)w * h, colormap, depth, &tErr);
 		}
 
 		if (tErr != ERRORCODE::NONE)
 		{
 			XTGA_SETERROR(error, tErr);
 
-			if (output) delete[] output;
+			if (obuffer) delete[] obuffer;
 			return false;
 		}
 	}
 
 	// Order Pixels
-	auto OrderType = header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN;
-	if (ImgFrmt == IMAGETYPE::COLOR_MAPPED || ImgFrmt == IMAGETYPE::COLOR_MAPPED_RLE)
-		depth = header->COLOR_MAP_BITS_PER_ENTRY;
-	if (OrderType == IMAGEORIGIN::BOTTOM_LEFT)
+	if (origin == IMAGEORIGIN::BOTTOM_LEFT)
 	{
-		if (output)
+		if (obuffer)
 		{
-			auto tmp = output;
-			output = Convert_BottomLeft_To_TopLeft(tmp, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
+			auto tmp = obuffer;
+			obuffer = Convert_BottomLeft_To_TopLeft(tmp, w, h, depth, &tErr);
 			delete[] tmp;
 		}
 		else
 		{
-			output = Convert_BottomLeft_To_TopLeft(input, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
+			obuffer = Convert_BottomLeft_To_TopLeft(buffer, w, h, depth, &tErr);
 		}
 	}
-	else if (OrderType == IMAGEORIGIN::BOTTOM_RIGHT)
+	else if (origin == IMAGEORIGIN::BOTTOM_RIGHT)
 	{
-		if (output)
+		if (obuffer)
 		{
-			auto tmp = output;
-			output = Convert_BottomRight_To_TopLeft(tmp, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
+			auto tmp = obuffer;
+			obuffer = Convert_BottomRight_To_TopLeft(obuffer, w, h, depth, &tErr);
 			delete[] tmp;
 		}
 		else
 		{
-			output = Convert_BottomRight_To_TopLeft(input, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
+			obuffer = Convert_BottomRight_To_TopLeft(buffer, w, h, depth, &tErr);
 		}
 	}
-	else if (OrderType == IMAGEORIGIN::TOP_RIGHT)
+	else if (origin == IMAGEORIGIN::TOP_RIGHT)
 	{
-		if (output)
+		if (obuffer)
 		{
-			auto tmp = output;
-			output = Convert_TopRight_To_TopLeft(tmp, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
+			auto tmp = obuffer;
+			obuffer = Convert_TopRight_To_TopLeft(obuffer, w, h, depth, &tErr);
 			delete[] tmp;
 		}
 		else
 		{
-			output = Convert_TopRight_To_TopLeft(input, header->IMAGE_WIDTH, header->IMAGE_HEIGHT, depth, &tErr);
+			obuffer = Convert_TopRight_To_TopLeft(buffer, w, h, depth, &tErr);
 		}
 	}
 
@@ -2266,67 +2256,16 @@ bool xtga::codecs::DecodeImage(structs::Header* header, const void* input, const
 	{
 		XTGA_SETERROR(error, tErr);
 
-		if (output) delete[] output;
+		if (obuffer) delete[] obuffer;
 		return false;
 	}
 
-	// Determine Alpha Type + Pixel Format
-	if (extensions)
+	if (!obuffer)
 	{
-		XTGA_SETERROR(AlphaType, extensions->ALPHATYPE);
-	}
-	
-	if (depth == 32)
-	{
-		if (!extensions)
+		obuffer = new uchar[(addressable)w * h * depth];
+		for (addressable i = 0; i < (addressable)w * h * depth; ++i)
 		{
-			if (header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 8)
-			{
-				XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
-			}
-			else
-			{
-				XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
-			}
-		}
-		XTGA_SETERROR(PixelType, PIXELFORMATS::BGRA8888);
-	}
-	else if (depth == 24)
-	{
-		if (!extensions) XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
-		XTGA_SETERROR(PixelType, PIXELFORMATS::BGR888);
-	}
-	else if (depth == 16)
-	{
-		if (header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 8)
-		{
-			if (!extensions) XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
-			XTGA_SETERROR(PixelType, PIXELFORMATS::IA88);
-		}
-		else
-		{
-			if (!extensions) XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
-			XTGA_SETERROR(PixelType, PIXELFORMATS::BGRA5551);
-		}
-	}
-	else if (depth == 8)
-	{
-		if (!extensions) XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
-		XTGA_SETERROR(PixelType, PIXELFORMATS::I8);
-	}
-	else
-	{
-		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
-		if (output) delete[] output;
-		return false;
-	}
-
-	if (!output)
-	{
-		output = new uchar[pCount * (uint64)header->IMAGE_DEPTH];
-		for (uint64 i = 0; i < pCount * (uint64)header->IMAGE_DEPTH; ++i)
-		{
-			((uchar*)output)[i] = ((uchar*)input)[i];
+			((uchar*)obuffer)[i] = ((uchar*)buffer)[i];
 		}
 	}
 
@@ -2364,9 +2303,9 @@ void* xtga::codecs::ScaleImageBicubic(const void* data, xtga::pixelformats::PIXE
 
 	if (scale == 1.0f)
 	{
-		auto rBuff = new uchar[(uint64)width * height * BPP];
+		auto rBuff = new uchar[(addressable)width * height * BPP];
 
-		for (uint64 i = 0; i < (uint64)width * height * BPP; ++i)
+		for (addressable i = 0; i < (addressable)width * height * BPP; ++i)
 			rBuff[i] = ( (uchar*)data )[i];
 
 		XTGA_SETERROR(error, ERRORCODE::REDUNDANT_OPERATION);
@@ -2587,7 +2526,7 @@ void* xtga::codecs::ScaleImageBicubic(const void* data, xtga::pixelformats::PIXE
 	uint16 nWidth = (uint16)(width * scale);
 	uint16 nHeight = (uint16)(height * scale);
 
-	auto rval = new uchar[(uint64)nWidth * nHeight * BPP];
+	auto rval = new uchar[(addressable)nWidth * nHeight * BPP];
 
 	// For Each Scanline
 	for (uint16 y = 0; y < nHeight; ++y)

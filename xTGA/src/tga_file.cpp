@@ -379,6 +379,8 @@ public:
 	structs::ColorCorrectionEntry* _ColorCorrectionTable;
 	uint32* _ScanLineTable;
 	void* _ThumbnailData;
+	uchar _ThumbnailWidth;
+	uchar _ThumbnailHeight;
 };
 
 xtga::TGAFile::__TGAFileImpl::__TGAFileImpl()
@@ -410,7 +412,7 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 
 	// Get filesize
 	fseek(File, 0, SEEK_END);
-	uint32 DataSize = ftell(File);
+	addressable DataSize = ftell(File);
 
 	// Read the entire file into memory
 	_RawData = new uchar[DataSize];
@@ -436,7 +438,7 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 		}
 
 		_ColorMapData = (void*)((uchar*)_RawData + sizeof(structs::Header) + _Header->ID_LENGTH);
-		_ImageData = (void*)( (uchar*)_ColorMapData + ((uint64)_Header->COLOR_MAP_BITS_PER_ENTRY / 8 * _Header->COLOR_MAP_LENGTH) );
+		_ImageData = (void*)( (uchar*)_ColorMapData + ((addressable)_Header->COLOR_MAP_BITS_PER_ENTRY / 8 * _Header->COLOR_MAP_LENGTH) );
 	}
 	else
 	{
@@ -466,7 +468,9 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 
 			if (_Extensions->THUMBNAIL_OFFSET)
 			{
-				_ThumbnailData = (void*)((uchar*)_RawData + _Extensions->THUMBNAIL_OFFSET);
+				_ThumbnailWidth = *((uchar*)_RawData + _Extensions->THUMBNAIL_OFFSET);
+				_ThumbnailHeight = *((uchar*)_RawData + _Extensions->THUMBNAIL_OFFSET + 1);
+				_ThumbnailData = (void*)((uchar*)_RawData + _Extensions->THUMBNAIL_OFFSET + 2);
 			}
 
 			if (_Extensions->SCAN_LINE_OFFSET)
@@ -613,7 +617,7 @@ bool xtga::TGAFile::SaveFile(const char* filename, ERRORCODE* error)
 				fwrite(entry, 1, sizeof(structs::DeveloperDirectoryEntry), file);
 			}
 
-		uint32 devDirOffset = ftell(file);
+			uint32 devDirOffset = ftell(file);
 		}
 
 		// Write Scanline Table
@@ -627,8 +631,8 @@ bool xtga::TGAFile::SaveFile(const char* filename, ERRORCODE* error)
 		uint32 thumbnailOffset = ftell(file);
 		if (this->_impl->_ThumbnailData)
 		{
-			// TODO: Get Thumbnail Size FCN
-			//fwrite(this->_impl->_ThumbnailData, )
+			uint16 size = (uint16)_impl->_ThumbnailWidth * _impl->_ThumbnailHeight * _impl->_Header->IMAGE_DEPTH;
+			fwrite(this->_impl->_ThumbnailData, 1, size, file);
 		}
 
 		// Write Color Correction Table
@@ -814,14 +818,14 @@ void* xtga::TGAFile::GetImageData()
 	return this->_impl->_ImageData;
 }
 
-uint64 xtga::TGAFile::GetImageDataSize(ERRORCODE* error)
+addressable xtga::TGAFile::GetImageDataSize(ERRORCODE* error)
 {
 	using namespace flags;
 	using namespace codecs;
 
 	auto Header = this->_impl->_Header;
 	auto Frmt = Header->IMAGE_TYPE;
-	uint64 pCount = (uint64)Header->IMAGE_WIDTH * Header->IMAGE_HEIGHT;
+	addressable pCount = (addressable)Header->IMAGE_WIDTH * Header->IMAGE_HEIGHT;
 	ERRORCODE terr = ERRORCODE::NONE;
 
 	// Consider RLE
@@ -836,14 +840,14 @@ uint64 xtga::TGAFile::GetImageDataSize(ERRORCODE* error)
 		}
 
 		uchar BPP = depth / 8;
-		uint32 count = 0;
-		uint32 it = 0;
+		addressable count = 0;
+		addressable it = 0;
 
 		while (count < pCount)
 		{
 			auto Packet = (structs::RLEPacket*)((uchar*)this->_impl->_ImageData + it);
 			++it;
-			uint32 size = BPP * (Packet->PIXEL_COUNT_MINUS_ONE + 1);
+			addressable size = BPP * (Packet->PIXEL_COUNT_MINUS_ONE + 1);
 
 			if (Packet->RUN_LENGTH)
 			{
@@ -1047,13 +1051,13 @@ const void* xtga::TGAFile::GetThumbnailData()
 	return this->_impl->_ThumbnailData;
 }
 
-bool xtga::TGAFile::GenerateThumbnail(uint16 LongEdgeLength, bool Clip, ERRORCODE* error)
+bool xtga::TGAFile::GenerateThumbnail(uchar LongEdgeLength, ERRORCODE* error)
 {
 	using namespace flags;
 	using namespace codecs;
 	using namespace pixelformats;
 
-	ERRORCODE terr;
+	ERRORCODE terr = ERRORCODE::NONE;
 	if (!_impl->_Footer)
 		this->UpgradeToTGATwo(&terr);
 
@@ -1162,11 +1166,202 @@ bool xtga::TGAFile::GenerateThumbnail(uint16 LongEdgeLength, bool Clip, ERRORCOD
 		}
 	}
 
-	// TODO: add some member vars to hold the postage stamp w / h
+	_impl->_ThumbnailWidth = (uchar)(scale * header->IMAGE_WIDTH);
+	_impl->_ThumbnailHeight = (uchar)(scale * header->IMAGE_HEIGHT);
 
 	_impl->_ThumbnailData = tbuff;
 	_impl->__DanglingArrays.push_back(tbuff);
 	return true;
+}
+
+xtga::ManagedArray<xtga::pixelformats::IPixel>* xtga::TGAFile::GetThumbnail(xtga::pixelformats::PIXELFORMATS* PixelType, xtga::flags::ALPHATYPE* AlphaType, xtga::ERRORCODE* error)
+{
+	using namespace pixelformats;
+	using namespace flags;
+	using namespace codecs;
+
+	if (!_impl->_ThumbnailData)
+	{
+		XTGA_SETERROR(error, ERRORCODE::INVALID_OPERATION);
+		return nullptr;
+	}
+
+	uchar depth = _impl->_Header->IMAGE_DEPTH;
+	if (_impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED || _impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE)
+	{
+		depth = _impl->_Header->COLOR_MAP_BITS_PER_ENTRY;
+	}
+
+	bool rle = false;
+	if (_impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE || _impl->_Header->IMAGE_TYPE == IMAGETYPE::TRUE_COLOR_RLE ||
+		_impl->_Header->IMAGE_TYPE == IMAGETYPE::GRAYSCALE_RLE)
+	{
+		rle = true;
+	}
+
+	ERRORCODE terr = ERRORCODE::NONE;
+
+	void* ReturnBuff = nullptr;
+	if (!DecodeImage(_impl->_ThumbnailData, ReturnBuff, _impl->_Header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN,
+		_impl->_ThumbnailWidth, _impl->_ThumbnailHeight, depth, rle, _impl->_ColorMapData, &terr))
+	{
+		XTGA_SETERROR(error, terr);
+		return nullptr;
+	}
+
+	addressable pCount = (addressable)_impl->_ThumbnailWidth * _impl->_ThumbnailHeight;
+	ManagedArray<IPixel>* rarr = nullptr;
+
+	if (depth == 32)
+	{
+		rarr = (ManagedArray<IPixel>*)ManagedArray<BGRA8888>::Alloc((BGRA8888*)ReturnBuff, pCount);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
+		XTGA_SETERROR(PixelType, PIXELFORMATS::BGRA8888);
+	}
+	else if (depth == 24)
+	{
+		rarr = (ManagedArray<IPixel>*)ManagedArray<BGR888>::Alloc((BGR888*)ReturnBuff, pCount);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
+		XTGA_SETERROR(PixelType, PIXELFORMATS::BGR888);
+	}
+	else if (depth == 16 && _impl->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 1)
+	{
+		rarr = (ManagedArray<IPixel>*)ManagedArray<BGRA5551>::Alloc((BGRA5551*)ReturnBuff, pCount);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
+		XTGA_SETERROR(PixelType, PIXELFORMATS::BGRA5551);
+	}
+	else if (depth == 16 && _impl->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 8)
+	{
+		rarr = (ManagedArray<IPixel>*)ManagedArray<IA88>::Alloc((IA88*)ReturnBuff, pCount);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
+		XTGA_SETERROR(PixelType, PIXELFORMATS::IA88);
+	}
+	else if (depth == 8)
+	{
+		rarr = (ManagedArray<IPixel>*)ManagedArray<I8>::Alloc((I8*)ReturnBuff, pCount);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
+		XTGA_SETERROR(PixelType, PIXELFORMATS::I8);
+	}
+	else
+	{
+		delete[] ReturnBuff;
+		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
+		return nullptr;
+	}
+
+	XTGA_SETERROR(error, ERRORCODE::NONE);
+
+	if (_impl->_Extensions)
+	{
+		XTGA_SETERROR(AlphaType, _impl->_Extensions->ALPHATYPE);
+	}
+
+	return rarr;
+}
+
+xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetThumbnailRGBA(xtga::flags::ALPHATYPE* AlphaType, ERRORCODE* error)
+{
+	using namespace pixelformats;
+	using namespace flags;
+	using namespace codecs;
+
+	uchar depth = _impl->_Header->IMAGE_DEPTH;
+	if (_impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED || _impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE)
+	{
+		depth = _impl->_Header->COLOR_MAP_BITS_PER_ENTRY;
+	}
+
+	bool rle = false;
+	if (_impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE || _impl->_Header->IMAGE_TYPE == IMAGETYPE::TRUE_COLOR_RLE ||
+		_impl->_Header->IMAGE_TYPE == IMAGETYPE::GRAYSCALE_RLE)
+	{
+		rle = true;
+	}
+
+	auto terr = ERRORCODE::NONE;
+
+	void* ReturnBuff = nullptr;
+	if (!DecodeImage(_impl->_ThumbnailData, ReturnBuff, _impl->_Header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN,
+		_impl->_ThumbnailWidth, _impl->_ThumbnailHeight, depth, rle, _impl->_ColorMapData, &terr))
+	{
+		XTGA_SETERROR(error, terr);
+		return nullptr;
+	}
+
+	addressable pCount = (addressable)_impl->_ThumbnailWidth * _impl->_ThumbnailHeight;
+	auto rarr = ManagedArray<RGBA8888>::Alloc(pCount);
+
+	// Convert from various pixel formats to RGBA
+	if (depth == 32)
+	{
+		auto buff = ManagedArray<BGRA8888>::Alloc((BGRA8888*)ReturnBuff, pCount);
+		for (addressable i = 0; i < pCount; ++i)
+		{
+			rarr->at(i) = BGRA_To_RGBA(buff->at(i));
+		}
+		ManagedArray<BGRA8888>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
+	}
+	else if (depth == 24)
+	{
+		auto buff = ManagedArray<BGR888>::Alloc((BGR888*)ReturnBuff, pCount);
+		for (addressable i = 0; i < pCount; ++i)
+		{
+			rarr->at(i) = BGR_To_RGBA(buff->at(i));
+		}
+		ManagedArray<BGR888>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
+	}
+	else if (depth == 16 && _impl->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 1)
+	{
+		auto buff = ManagedArray<BGRA5551>::Alloc((BGRA5551*)ReturnBuff, pCount);
+		for (addressable i = 0; i < pCount; ++i)
+		{
+			rarr->at(i) = BGRA16_To_RGBA(buff->at(i));
+		}
+		ManagedArray<BGRA5551>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
+	}
+	else if (depth == 8)
+	{
+		auto buff = ManagedArray<I8>::Alloc((I8*)ReturnBuff, pCount);
+		for (addressable i = 0; i < pCount; ++i)
+		{
+			rarr->at(i) = I_To_RGBA(buff->at(i));
+		}
+		ManagedArray<I8>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
+	}
+	else if (depth == 16 && _impl->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 8)
+	{
+		auto buff = ManagedArray<IA88>::Alloc((IA88*)ReturnBuff, pCount);
+		for (addressable i = 0; i < pCount; ++i)
+		{
+			rarr->at(i) = IA_To_RGBA(buff->at(i));
+		}
+		ManagedArray<IA88>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
+	}
+	else
+	{
+		ManagedArray<RGBA8888>::Free(rarr);
+		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
+		return nullptr;
+	}
+
+	if (_impl->_Extensions)
+	{
+		XTGA_SETERROR(AlphaType, _impl->_Extensions->ALPHATYPE);
+	}
+
+	XTGA_SETERROR(error, ERRORCODE::NONE);
+
+	return rarr;
 }
 
 xtga::structs::ColorCorrectionEntry* xtga::TGAFile::GetColorCorrectionTable()
@@ -1199,45 +1394,81 @@ xtga::ManagedArray<xtga::pixelformats::IPixel>* xtga::TGAFile::GetImage(xtga::pi
 	using namespace pixelformats;
 	using namespace flags;
 	using namespace codecs;
-	PIXELFORMATS tPf;
-	ERRORCODE tErr;
-	ALPHATYPE tAt;
+
+	uchar depth = _impl->_Header->IMAGE_DEPTH;
+	if (_impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED || _impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE)
+	{
+		depth = _impl->_Header->COLOR_MAP_BITS_PER_ENTRY;
+	}
+
+	bool rle = false;
+	if (_impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE || _impl->_Header->IMAGE_TYPE == IMAGETYPE::TRUE_COLOR_RLE ||
+		_impl->_Header->IMAGE_TYPE == IMAGETYPE::GRAYSCALE_RLE)
+	{
+		rle = true;
+	}
+
+	ERRORCODE terr = ERRORCODE::NONE;
 
 	void* ReturnBuff = nullptr;
-	if (!DecodeImage(this->_impl->_Header, this->_impl->_ImageData, this->_impl->_ColorMapData,
-		this->_impl->_Extensions, ReturnBuff, &tPf, &tAt, &tErr))
+	if (!DecodeImage(_impl->_ImageData, ReturnBuff, _impl->_Header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN,
+		_impl->_Header->IMAGE_WIDTH, _impl->_Header->IMAGE_HEIGHT, depth, rle, _impl->_ColorMapData, &terr))
 	{
-		XTGA_SETERROR(error, tErr);
+		XTGA_SETERROR(error, terr);
 		return nullptr;
 	}
 
-	addressable pCount = (addressable)this->_impl->_Header->IMAGE_WIDTH * this->_impl->_Header->IMAGE_HEIGHT;
+	addressable pCount = (addressable)_impl->_Header->IMAGE_WIDTH * _impl->_Header->IMAGE_HEIGHT;
 	ManagedArray<IPixel>* rarr = nullptr;
 
-	if (tPf == PIXELFORMATS::BGRA8888)
+	if (depth == 32)
 	{
 		rarr = (ManagedArray<IPixel>*)ManagedArray<BGRA8888>::Alloc((BGRA8888*)ReturnBuff, pCount);
+
+		XTGA_SETERROR(PixelType, PIXELFORMATS::BGRA8888);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
 	}
-	else if (tPf == PIXELFORMATS::BGR888)
+	else if (depth == 24)
 	{
 		rarr = (ManagedArray<IPixel>*)ManagedArray<BGR888>::Alloc((BGR888*)ReturnBuff, pCount);
+
+		XTGA_SETERROR(PixelType, PIXELFORMATS::BGR888);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
 	}
-	else if (tPf == PIXELFORMATS::BGRA5551)
+	else if (depth == 16 && _impl->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 1)
 	{
 		rarr = (ManagedArray<IPixel>*)ManagedArray<BGRA5551>::Alloc((BGRA5551*)ReturnBuff, pCount);
+
+		XTGA_SETERROR(PixelType, PIXELFORMATS::BGRA5551);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
 	}
-	else if (tPf == PIXELFORMATS::I8)
-	{
-		rarr = (ManagedArray<IPixel>*)ManagedArray<I8>::Alloc((I8*)ReturnBuff, pCount);
-	}
-	else if (tPf == PIXELFORMATS::IA88)
+	else if (depth == 16 && _impl->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 8)
 	{
 		rarr = (ManagedArray<IPixel>*)ManagedArray<IA88>::Alloc((IA88*)ReturnBuff, pCount);
+
+		XTGA_SETERROR(PixelType, PIXELFORMATS::IA88);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
+	}
+	else if (depth == 8)
+	{
+		rarr = (ManagedArray<IPixel>*)ManagedArray<I8>::Alloc((I8*)ReturnBuff, pCount);
+
+		XTGA_SETERROR(PixelType, PIXELFORMATS::I8);
+		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
+	}
+	else
+	{
+		delete[] ReturnBuff;
+		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
+		return nullptr;
 	}
 
-	XTGA_SETERROR(PixelType, tPf);
-	XTGA_SETERROR(AlphaType, tAt);
 	XTGA_SETERROR(error, ERRORCODE::NONE);
+
+	if (_impl->_Extensions)
+	{
+		XTGA_SETERROR(AlphaType, _impl->_Extensions->ALPHATYPE);
+	}
 
 	return rarr;
 }
@@ -1247,23 +1478,35 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 	using namespace pixelformats;
 	using namespace flags;
 	using namespace codecs;
-	PIXELFORMATS tPf;
-	ERRORCODE tErr;
-	ALPHATYPE tAt;
+
+	uchar depth = _impl->_Header->IMAGE_DEPTH;
+	if (_impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED || _impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE)
+	{
+		depth = _impl->_Header->COLOR_MAP_BITS_PER_ENTRY;
+	}
+
+	bool rle = false;
+	if (_impl->_Header->IMAGE_TYPE == IMAGETYPE::COLOR_MAPPED_RLE || _impl->_Header->IMAGE_TYPE == IMAGETYPE::TRUE_COLOR_RLE ||
+		_impl->_Header->IMAGE_TYPE == IMAGETYPE::GRAYSCALE_RLE)
+	{
+		rle = true;
+	}
+
+	auto terr = ERRORCODE::NONE;
 
 	void* ReturnBuff = nullptr;
-	if (!DecodeImage(this->_impl->_Header, this->_impl->_ImageData, this->_impl->_ColorMapData,
-		this->_impl->_Extensions, ReturnBuff, &tPf, &tAt, &tErr))
+	if (!DecodeImage(_impl->_ImageData, ReturnBuff, _impl->_Header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN,
+		_impl->_Header->IMAGE_WIDTH, _impl->_Header->IMAGE_HEIGHT, depth, rle, _impl->_ColorMapData, &terr))
 	{
-		XTGA_SETERROR(error, tErr);
+		XTGA_SETERROR(error, terr);
 		return nullptr;
 	}
 
-	addressable pCount = (uint64)this->_impl->_Header->IMAGE_WIDTH * this->_impl->_Header->IMAGE_HEIGHT;
+	addressable pCount = (addressable)this->_impl->_Header->IMAGE_WIDTH * this->_impl->_Header->IMAGE_HEIGHT;
 	auto rarr = ManagedArray<RGBA8888>::Alloc(pCount);
 
 	// Convert from various pixel formats to RGBA
-	if (tPf == PIXELFORMATS::BGRA8888)
+	if (depth == 32)
 	{
 		auto buff = ManagedArray<BGRA8888>::Alloc((BGRA8888*)ReturnBuff, pCount);
 		for (addressable i = 0; i < pCount; ++i)
@@ -1271,8 +1514,10 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 			rarr->at(i) = BGRA_To_RGBA(buff->at(i));
 		}
 		ManagedArray<BGRA8888>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
 	}
-	else if (tPf == PIXELFORMATS::BGR888)
+	else if (depth == 24)
 	{
 		auto buff = ManagedArray<BGR888>::Alloc((BGR888*)ReturnBuff, pCount);
 		for (addressable i = 0; i < pCount; ++i)
@@ -1280,8 +1525,10 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 			rarr->at(i) = BGR_To_RGBA(buff->at(i));
 		}
 		ManagedArray<BGR888>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
 	}
-	else if (tPf == PIXELFORMATS::BGRA5551)
+	else if (depth == 16 && _impl->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 1)
 	{
 		auto buff = ManagedArray<BGRA5551>::Alloc((BGRA5551*)ReturnBuff, pCount);
 		for (addressable i = 0; i < pCount; ++i)
@@ -1289,8 +1536,10 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 			rarr->at(i) = BGRA16_To_RGBA(buff->at(i));
 		}
 		ManagedArray<BGRA5551>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_IGNORE);
 	}
-	else if (tPf == PIXELFORMATS::I8)
+	else if (depth == 8)
 	{
 		auto buff = ManagedArray<I8>::Alloc((I8*)ReturnBuff, pCount);
 		for (addressable i = 0; i < pCount; ++i)
@@ -1298,8 +1547,10 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 			rarr->at(i) = I_To_RGBA(buff->at(i));
 		}
 		ManagedArray<I8>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::NOALPHA);
 	}
-	else if (tPf == PIXELFORMATS::IA88)
+	else if (depth == 16 && _impl->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT == 8)
 	{
 		auto buff = ManagedArray<IA88>::Alloc((IA88*)ReturnBuff, pCount);
 		for (addressable i = 0; i < pCount; ++i)
@@ -1307,10 +1558,22 @@ xtga::ManagedArray<xtga::pixelformats::RGBA8888>* xtga::TGAFile::GetImageRGBA(xt
 			rarr->at(i) = IA_To_RGBA(buff->at(i));
 		}
 		ManagedArray<IA88>::Free(buff);
+
+		XTGA_SETERROR(AlphaType, ALPHATYPE::UNDEFINED_ALPHA_KEEP);
+	}
+	else
+	{
+		ManagedArray<RGBA8888>::Free(rarr);
+		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
+		return nullptr;
 	}
 
 	XTGA_SETERROR(error, ERRORCODE::NONE);
-	XTGA_SETERROR(AlphaType, tAt);
+
+	if (_impl->_Extensions)
+	{
+		XTGA_SETERROR(AlphaType, _impl->_Extensions->ALPHATYPE);
+	}
 
 	return rarr;
 }

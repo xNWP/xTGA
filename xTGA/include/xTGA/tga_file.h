@@ -81,7 +81,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code (can be nullptr).
 		/// @return TGAFile*				The created TGAFile (or nullptr if an error occured).
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI static TGAFile* Alloc(void* buffer, uint32 width, uint32 height, const Parameters& config, ERRORCODE* error = nullptr);
+		XTGAAPI static TGAFile* Alloc(void* buffer, uint16 width, uint16 height, const Parameters& config, ERRORCODE* error = nullptr);
 		
 		//----------------------------------------------------------------------------------------------------
 		/// Frees the supplied TGAFile object and sets its pointer to nullptr.
@@ -137,9 +137,9 @@ namespace xtga
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the size of the raw image buffer.
 		/// @param[out] error			Holds the error/status code (can be nullptr).
-		/// @return uint64				The size of the image buffer in bytes (or 0 if an error occured).
+		/// @return addressable			The size of the image buffer in bytes (or 0 if an error occured).
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI uint64 GetImageDataSize(ERRORCODE* error = nullptr);
+		XTGAAPI addressable GetImageDataSize(ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Compresses the image data with Run-length Encoding (RLE).
@@ -259,13 +259,10 @@ namespace xtga
 		/// Generates a thumbnail using bicubic interpolation.
 		/// NOTE: Will convert the image to TGA 2.0 if it is not already.
 		/// @param[in] LongEdgeLength		The length in pixels of the longest edge of the image (recommended <=64).
-		/// @param[in] Clip					Whether or not to clip the image for images with a non square aspect ratio.
-		///									If set to false the remaining space will be filled with white for non-alpha
-		///									images, and transparency for alpha images.
 		/// @param[out] error				The status/error code of the image, will indicate clipping (can be nullptr).
 		/// @return bool					True if the thumbnail was generated.
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI bool GenerateThumbnail(uint16 LongEdgeLength, bool Clip = false, ERRORCODE* error = nullptr);
+		XTGAAPI bool GenerateThumbnail(uchar LongEdgeLength, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the decoded thumbnail image in its original pixel format with the top left pixel being the first pixel.

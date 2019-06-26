@@ -64,7 +64,7 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the size of the array.
-		/// @return uint64				The size of the array.
+		/// @return addressable			The size of the array.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI addressable size() const;
 
