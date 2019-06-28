@@ -946,9 +946,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				if (gdiff > 92 || gdiff < -92) return FLT_MAX;
 				if (bdiff > 128 || bdiff < -128) return FLT_MAX;
 
-				return std::powf((rdiff * 0.30f), 2)
-					+ std::powf((gdiff * 0.60f), 2)
-					+ std::powf((bdiff * 0.10f), 2);
+				return std::pow((rdiff * 0.30f), 2)
+					+ std::pow((gdiff * 0.60f), 2)
+					+ std::pow((bdiff * 0.10f), 2);
 			};
 
 			IMap.resize(length);
@@ -1356,9 +1356,9 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				if (gdiff > 92 || gdiff < -92) return FLT_MAX;
 				if (bdiff > 128 || bdiff < -128) return FLT_MAX;
 
-				return std::powf((rdiff * 0.30f), 2)
-					+ std::powf((gdiff * 0.60f), 2)
-					+ std::powf((bdiff * 0.10f), 2);
+				return std::pow((rdiff * 0.30f), 2)
+					+ std::pow((gdiff * 0.60f), 2)
+					+ std::pow((bdiff * 0.10f), 2);
 			};
 
 			IMap.resize(length);
@@ -1790,10 +1790,10 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 				if (bdiff > 128 || bdiff < -128) return FLT_MAX;
 				if (adiff > 64 || adiff < -64) return FLT_MAX;
 
-				return std::powf((rdiff * 0.15f), 2)
-					+ std::powf((gdiff * 0.30f), 2)
-					+ std::powf((bdiff * 0.05f), 2)
-					+ std::powf((adiff * 0.50f), 2);
+				return std::pow((rdiff * 0.15f), 2)
+					+ std::pow((gdiff * 0.30f), 2)
+					+ std::pow((bdiff * 0.05f), 2)
+					+ std::pow((adiff * 0.50f), 2);
 			};
 
 			IMap.resize(length);
@@ -1943,9 +1943,9 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 			if (gdiff > 92 || gdiff < -92) return FLT_MAX;
 			if (bdiff > 128 || bdiff < -128) return FLT_MAX;
 
-			return std::powf((rdiff * 0.30f), 2)
-				+ std::powf((gdiff * 0.60f), 2)
-				+ std::powf((bdiff * 0.10f), 2);
+			return std::pow((rdiff * 0.30f), 2)
+				+ std::pow((gdiff * 0.60f), 2)
+				+ std::pow((bdiff * 0.10f), 2);
 		};
 
 		auto iPtr = (BGRA5551*)buff;
@@ -2022,9 +2022,9 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 			if (gdiff > 92 || gdiff < -92) return FLT_MAX;
 			if (bdiff > 128 || bdiff < -128) return FLT_MAX;
 
-			return std::powf((rdiff * 0.30f), 2)
-				+ std::powf((gdiff * 0.60f), 2)
-				+ std::powf((bdiff * 0.10f), 2);
+			return std::pow((rdiff * 0.30f), 2)
+				+ std::pow((gdiff * 0.60f), 2)
+				+ std::pow((bdiff * 0.10f), 2);
 		};
 
 		auto iPtr = (BGR888*)buff;
@@ -2101,9 +2101,9 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 			if (gdiff > 92 || gdiff < -92) return FLT_MAX;
 			if (bdiff > 128 || bdiff < -128) return FLT_MAX;
 
-			return std::powf((rdiff * 0.30f), 2)
-				+ std::powf((gdiff * 0.60f), 2)
-				+ std::powf((bdiff * 0.10f), 2);
+			return std::pow((rdiff * 0.30f), 2)
+				+ std::pow((gdiff * 0.60f), 2)
+				+ std::pow((bdiff * 0.10f), 2);
 		};
 
 		auto iPtr = (BGRA8888*)buff;
@@ -2331,8 +2331,8 @@ void* xtga::codecs::ScaleImageBicubic(const void* data, xtga::pixelformats::PIXE
 
 	auto CubicInterpolate = [](const float in[4], float x) -> float
 	{
-		return (float)((-0.5 * in[0] + 1.5 * in[1] - 1.5 * in[2] + 0.5 * in[3]) * std::powf(x, 3)
-			+ (in[0] - 2.5 * in[1] + 2.0 * in[2] - 0.5 * in[3]) * std::powf(x, 2)
+		return (float)((-0.5 * in[0] + 1.5 * in[1] - 1.5 * in[2] + 0.5 * in[3]) * std::pow(x, 3)
+			+ (in[0] - 2.5 * in[1] + 2.0 * in[2] - 0.5 * in[3]) * std::pow(x, 2)
 			+ (-0.5 * in[0] + 0.5 * in[2]) * x
 			+ in[1]);
 	};

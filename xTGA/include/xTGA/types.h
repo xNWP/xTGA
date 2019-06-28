@@ -13,6 +13,7 @@
 #ifdef __cplusplus
 #	include <cstdint>
 #	include <cfloat>
+#	include <cmath>
 	typedef std::uint8_t uchar;
 	typedef std::uint16_t uint16;
 	typedef std::uint32_t uint32;

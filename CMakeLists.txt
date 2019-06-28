@@ -1,6 +1,6 @@
 # CMakeLists.txt
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 
 project(xTGA	VERSION 100
 				DESCRIPTION "A C/C++ library for opening/saving/manipulating TrueVision Targa (TGA) Images."
@@ -18,3 +18,12 @@ add_subdirectory(tests)
 enable_testing()
 add_test(TestDynamicLinkage test_dll)
 add_test(TestStaticLinkage test_static)
+
+# Standards
+target_compile_features(xTGA PRIVATE
+cxx_range_for
+cxx_nullptr
+cxx_lambdas
+cxx_auto_type
+cxx_rvalue_references
+)

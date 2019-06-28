@@ -41,18 +41,6 @@ add_library(xTGA SHARED ${SOURCES} ${HEADERS} ${CFGHEADERS})
 add_library(xTGAs STATIC ${SOURCES} ${HEADERS} ${CFGHEADERS})
 target_include_directories(xTGA PUBLIC include)
 target_include_directories(xTGAs PUBLIC include)
+target_link_libraries(xTGA pthread)
+target_link_libraries(xTGAs pthread)
 
-# Standards
-target_compile_features(xTGA PRIVATE
-cxx_range_for
-cxx_nullptr
-cxx_lambdas
-cxx_auto_type
-)
-
-# Warnings
-if (MSVC)
-	add_compile_options(/W4)
-else()
-	add_compile_options(-Wall -Wextra -Wpedantic)
-endif()

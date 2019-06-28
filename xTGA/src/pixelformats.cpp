@@ -1,4 +1,3 @@
-#include "..\include\xTGA\pixelformats.h"
 //============ Copyright © 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
