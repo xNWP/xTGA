@@ -23,6 +23,15 @@ constexpr uchar XTGASIG[] = "xTGA by xNWP";
 constexpr uchar XTGALET = ' ';
 constexpr uint16 XTGAVER = XTGA_VERSION;
 
+namespace xtga
+{
+	XTGAAPI uint16 WhatVersion();
+	uint16 WhatVersion()
+	{
+		return XTGAVER;
+	}
+}
+
 struct DeveloperDirectoryEntryImpl : xtga::structs::DeveloperDirectoryEntry
 {
 	void* DATA;

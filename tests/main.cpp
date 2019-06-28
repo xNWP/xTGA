@@ -12,7 +12,9 @@
 
 int main()
 {
-	// WIP
-
-	return 0;
+	auto test = xtga::WhatVersion();
+	if (xtga::WhatVersion() == XTGA_VERSION)
+		return 0;
+	else
+		return -1;
 }

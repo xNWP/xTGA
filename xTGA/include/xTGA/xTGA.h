@@ -22,4 +22,12 @@
 #	pragma message("Using xTGA in DLL mode. If you are trying to use xTGA as a Static Library, define 'XTGA_STATIC' before including xTGA.h")
 #endif // !XTGA_STATIC
 
+namespace xtga
+{
+	//----------------------------------------------------------------------------------------------------
+	/// Returns the version of library, useful to test linkage as well!
+	//----------------------------------------------------------------------------------------------------
+	extern uint16 WhatVersion();
+}
+
 #endif
