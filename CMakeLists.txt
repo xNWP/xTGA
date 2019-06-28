@@ -13,11 +13,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_subdirectory(xTGA)
+
 add_subdirectory(tests)
 
-enable_testing()
+# tests
 add_test(TestDynamicLinkage test_dll)
 add_test(TestStaticLinkage test_static)
+add_test(TestTypeSize test_types)
+
+enable_testing()
 
 # Standards
 target_compile_features(xTGA PRIVATE

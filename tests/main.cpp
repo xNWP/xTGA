@@ -4,16 +4,20 @@
 /// For a copy, see <https://opensource.org/licenses/MIT>.
 //==============================================================================
 /// file 	: main.cpp
-/// purpose : This project exists solely to showcase the proper way to link the
-///			  library. You can go ahead and use the file to test the library as you please :)
+/// purpose : Tests that the library links properly.
 //==============================================================================
 
 #include "xTGA/xTGA.h"
+
+#include <iostream>
 
 int main()
 {
 	if (xtga::WhatVersion() == XTGA_VERSION)
 		return 0;
 	else
-		return -1;
+	{
+		std::cout << "Failed to link library.\n";
+		return 1;
+	}
 }
