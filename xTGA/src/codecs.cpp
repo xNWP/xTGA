@@ -7,7 +7,7 @@
 /// purpose : Contains the implementation for the encoders/decoders for the TGA format.
 //==============================================================================
 
-#include "xTGA/internal/codecs.h"
+#include "codecs.h"
 
 #include "xTGA/error.h"
 #include "xTGA/structures.h"

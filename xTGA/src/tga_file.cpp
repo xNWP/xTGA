@@ -9,7 +9,7 @@
 
 #include "xTGA/tga_file.h"
 
-#include "xTGA/internal/codecs.h"
+#include "codecs.h"
 #include "xTGA/error.h"
 #include "xTGA/flags.h"
 
@@ -21,7 +21,7 @@
 constexpr uchar TGA2SIG[] = "TRUEVISION-XFILE.";
 constexpr uchar XTGASIG[] = "xTGA by xNWP";
 constexpr uchar XTGALET = ' ';
-constexpr uint16 XTGAVER = 100;
+constexpr uint16 XTGAVER = XTGA_VERSION;
 
 struct DeveloperDirectoryEntryImpl : xtga::structs::DeveloperDirectoryEntry
 {

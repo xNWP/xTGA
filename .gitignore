@@ -1,5 +1,14 @@
 .vs
-_obj
-bin
+[Bb]uild*
+[Bb]in*
 *.user
 *.filters
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+CTestTestfile.cmake
+*.vcxproj
+*.sln
+cmake_install.cmake

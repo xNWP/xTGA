@@ -5,6 +5,7 @@
 //==============================================================================
 /// file 	: api.h
 /// purpose : Provides the export macros for the library.
+///			  Require preprocessing by CMake.
 //==============================================================================
 
 #ifndef XTGA_API_H__
@@ -21,5 +22,7 @@
 #		define XTGAAPI __declspec(dllimport)
 #	endif
 #endif
+
+#cmakedefine XTGA_VERSION @xTGA_VERSION@
 
 #endif // !XTGA_API_H__
