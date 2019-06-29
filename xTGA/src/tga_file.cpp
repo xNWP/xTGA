@@ -1,10 +1,10 @@
-//============ Copyright © 2019 Brett Anthony. All rights reserved. ============
+//============ Copyright Â© 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
 //==============================================================================
 /// file 	: tga_file.cpp
-/// purpose : 
+/// purpose :
 //==============================================================================
 
 #include "xTGA/tga_file.h"
@@ -13,6 +13,7 @@
 #include "xTGA/error.h"
 #include "xTGA/flags.h"
 
+#include <cstdlib>
 #include <ctime>
 #include <stdio.h>
 #include <string.h>
@@ -424,7 +425,7 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 	addressable DataSize = ftell(File);
 
 	// Read the entire file into memory
-	_RawData = new uchar[DataSize];
+	_RawData = malloc(DataSize);
 	fseek(File, 0, SEEK_SET);
 	fread(_RawData, 1, DataSize, File);
 
@@ -500,7 +501,7 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 				auto* entry = new DeveloperDirectoryEntryImpl;
 
 				memcpy(entry, &DeveloperDirectory[i], sizeof(structs::DeveloperDirectoryEntry));
-				entry->DATA = new uchar[entry->ENTRY_SIZE];
+				entry->DATA = malloc(entry->ENTRY_SIZE);
 				memcpy(entry->DATA, (uchar*)_RawData + entry->ENTRY_OFFSET, entry->ENTRY_SIZE);
 
 				__DeveloperEntries.push_back(entry);
@@ -513,20 +514,20 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 
 xtga::TGAFile::__TGAFileImpl::~__TGAFileImpl()
 {
-	if (this->_RawData) delete[] this->_RawData;
+	if (this->_RawData) free(this->_RawData);
 	for (auto& i : this->__DanglingArrays)
 	{
-		if (i) delete[] i;
+		if (i) free(i);
 	}
 	for (auto& i : this->__DanglingPtrs)
 	{
-		if (i) delete i;
+		if (i) free(i);
 	}
 	for (auto& i : this->__DeveloperEntries)
 	{
 		if (i)
 		{
-			delete[] i->DATA;
+			free(i->DATA);
 			delete i;
 		}
 	}
@@ -710,7 +711,7 @@ uchar const * xtga::TGAFile::GetImageID()
 
 void xtga::TGAFile::SetImageID(const void* data, uchar size)
 {
-	this->_impl->_ImageId = new uchar[size];
+	this->_impl->_ImageId = (uchar*)malloc(size);
 
 	for (uchar i = 0; i < size && i < 256; ++i)
 	{
@@ -770,37 +771,37 @@ bool xtga::TGAFile::GenerateColorMap(bool force, xtga::ERRORCODE* error)
 
 	if (terr != ERRORCODE::NONE)
 	{
-		delete[] iBuff;
+		free(iBuff);
 		return false;
 	}
 
 	if (!codecs::GenerateColorMap(iBuff, EncBuff, this->_impl->_ColorMapData, pCount, depth, CSize, force, &terr))
 	{
 		XTGA_SETERROR(error, terr);
-		if (RLE) delete[] iBuff;
+		if (RLE) free(iBuff);
 		return false;
 	}
 
-	if (RLE) delete[] iBuff;
+	if (RLE) free(iBuff);
 
 	if (RLE)
 	{
 		void* tbuff = nullptr;
 		if (terr != ERRORCODE::NONE)
 		{
-			delete[] EncBuff;
+			free(EncBuff);
 			XTGA_SETERROR(error, terr);
 			return false;
 		}
 
 		if (!EncodeRLE(EncBuff, tbuff, Header->IMAGE_WIDTH, Header->IMAGE_HEIGHT, 8, &terr))
 		{
-			delete[] EncBuff;
+			free(EncBuff);
 			XTGA_SETERROR(error, terr);
 			return false;
 		}
 
-		delete[] EncBuff;
+		free(EncBuff);
 		EncBuff = tbuff;
 	}
 
@@ -839,7 +840,7 @@ addressable xtga::TGAFile::GetImageDataSize(ERRORCODE* error)
 
 	// Consider RLE
 	if (Frmt == IMAGETYPE::COLOR_MAPPED_RLE || Frmt == IMAGETYPE::GRAYSCALE_RLE || Frmt == IMAGETYPE::TRUE_COLOR_RLE)
-	{		
+	{
 		uchar depth = Header->IMAGE_DEPTH;
 
 		if (terr != ERRORCODE::NONE)
@@ -914,7 +915,7 @@ bool xtga::TGAFile::CompressWithRLE(xtga::ERRORCODE* error)
 		Header->IMAGE_TYPE = IMAGETYPE::GRAYSCALE_RLE;
 	else
 		Header->IMAGE_TYPE = IMAGETYPE::TRUE_COLOR_RLE;
-	
+
 	XTGA_SETERROR(error, ERRORCODE::NONE);
 
 	return true;
@@ -968,7 +969,7 @@ const void* xtga::TGAFile::GetDeveloperEntry(uint16 index, uint16* tag, uint32* 
 	XTGA_SETERROR(tag, entry->TAG);
 	XTGA_SETERROR(size, entry->ENTRY_SIZE);
 	XTGA_SETERROR(error, ERRORCODE::NONE);
-	
+
 	return entry->DATA;
 }
 
@@ -997,8 +998,8 @@ bool xtga::TGAFile::EditDeveloperEntry(uint16 index, const void* data, uint32 si
 	auto entry = _impl->__DeveloperEntries[index];
 	if (tag) entry->TAG = *tag;
 	entry->ENTRY_SIZE = size;
-	delete[] entry->DATA;
-	entry->DATA = new uchar[size];
+	free(entry->DATA);
+	entry->DATA = malloc(size);
 	memcpy(entry->DATA, data, size);
 
 	XTGA_SETERROR(error, ERRORCODE::NONE);
@@ -1023,7 +1024,7 @@ bool xtga::TGAFile::AddDeveloperEntry(uint16 tag, const void* data, uint32 size,
 	e->ENTRY_OFFSET = 0;
 	e->ENTRY_SIZE = size;
 	e->TAG = tag;
-	e->DATA = new uchar[size];
+	e->DATA = malloc(size);
 	memcpy(e->DATA, data, size);
 
 	_impl->__DeveloperEntries.push_back(e);
@@ -1106,7 +1107,7 @@ bool xtga::TGAFile::GenerateThumbnail(uchar LongEdgeLength, ERRORCODE* error)
 		if (tbuff)
 		{
 			tbuff = DecodeColorMap(tbuff, header->IMAGE_HEIGHT * header->IMAGE_WIDTH, _impl->_ColorMapData, header->COLOR_MAP_BITS_PER_ENTRY, &terr);
-			delete[] tmp;
+			free(tmp);
 		}
 		else
 		{
@@ -1152,7 +1153,7 @@ bool xtga::TGAFile::GenerateThumbnail(uchar LongEdgeLength, ERRORCODE* error)
 	tbuff = ScaleImageBicubic(tbuff, pf,
 		header->IMAGE_WIDTH, header->IMAGE_HEIGHT, scale, &terr);
 
-	if (tmp) delete[] tmp;
+	if (tmp) free(tmp);
 
 	if (terr != ERRORCODE::NONE)
 	{
@@ -1166,7 +1167,7 @@ bool xtga::TGAFile::GenerateThumbnail(uchar LongEdgeLength, ERRORCODE* error)
 		tmp = tbuff;
 		tbuff = ApplyColorMap(tbuff, (addressable)header->IMAGE_HEIGHT * header->IMAGE_WIDTH, _impl->_ColorMapData, header->COLOR_MAP_LENGTH, header->COLOR_MAP_BITS_PER_ENTRY, &terr);
 
-		delete[] tmp;
+		free(tmp);
 
 		if (terr != ERRORCODE::NONE)
 		{
@@ -1253,7 +1254,7 @@ xtga::ManagedArray<xtga::pixelformats::IPixel>* xtga::TGAFile::GetThumbnail(xtga
 	}
 	else
 	{
-		delete[] ReturnBuff;
+		free(ReturnBuff);
 		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
 		return nullptr;
 	}
@@ -1385,7 +1386,7 @@ void xtga::TGAFile::GenerateColorCorrectionTable()
 	if (this->_impl->_ColorCorrectionTable)
 		return;
 
-	this->_impl->_ColorCorrectionTable = new structs::ColorCorrectionEntry[256];
+	this->_impl->_ColorCorrectionTable = (structs::ColorCorrectionEntry*)malloc(sizeof(structs::ColorCorrectionEntry) * 256);
 
 	for (uint16 i = 0; i < 256; ++i)
 	{
@@ -1467,7 +1468,7 @@ xtga::ManagedArray<xtga::pixelformats::IPixel>* xtga::TGAFile::GetImage(xtga::pi
 	}
 	else
 	{
-		delete[] ReturnBuff;
+		free(ReturnBuff);
 		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
 		return nullptr;
 	}
@@ -1600,7 +1601,7 @@ void xtga::TGAFile::UpgradeToTGATwo(xtga::ERRORCODE* error)
 		this->_impl->_Footer = new structs::Footer;
 		memset(this->_impl->_Footer, 0, sizeof(structs::Footer));
 		memcpy(this->_impl->_Footer->SIGNATURE, TGA2SIG, sizeof(TGA2SIG));
-		
+
 		// Fill extensions
 		this->_impl->_Extensions = new structs::ExtensionArea;
 		memset(this->_impl->_Extensions, 0, sizeof(structs::ExtensionArea));

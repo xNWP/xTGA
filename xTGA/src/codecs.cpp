@@ -1,4 +1,4 @@
-//============ Copyright © 2019 Brett Anthony. All rights reserved. ============
+//============ Copyright Â© 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
@@ -34,14 +34,14 @@ void* xtga::codecs::DecodeRLE(void const * buffer, uchar depth, addressable leng
 	addressable it = 0;
 	uchar BPP = depth / 8;
 
-	uchar* rval = new uchar[length * (addressable)BPP];
+	uchar* rval = (uchar*)malloc(sizeof(uchar) * length * (addressable)BPP);
 
 	while (count < length)
 	{
 		auto Packet = (structs::RLEPacket*)( (uchar*)buffer + it );
 		++it;
 		uint16 size = BPP * (Packet->PIXEL_COUNT_MINUS_ONE + 1);
-		
+
 		if (Packet->RUN_LENGTH)
 		{
 			auto pix = ((uchar*)buffer + it);
@@ -301,7 +301,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 		constructPkt:;
 			PacketPixels p;
 			p.pixels = pivot;
-			
+
 			auto size = i - starti;
 			if (size > 128)
 			{
@@ -374,7 +374,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 		constructPkt:;
 			PacketPixels p;
 			p.pixels = pivot;
-			
+
 			auto size = i - starti;
 			if (size > 128)
 			{
@@ -415,7 +415,7 @@ bool xtga::codecs::EncodeRLE(void const* buffer, void*& obuffer, uint16 width, u
 			outputSize += (addressable)1 + ((addressable)i.pkt.PIXEL_COUNT_MINUS_ONE + 1) * BPP;
 	}
 
-	uchar* OutBuffer = new uchar[outputSize];
+	uchar* OutBuffer = (uchar*)malloc(sizeof(uchar) * outputSize);
 	addressable it = 0;
 
 	for (auto& i : output)
@@ -459,7 +459,7 @@ void* xtga::codecs::DecodeColorMap(void const* ImageBuffer, addressable length, 
 	}
 
 	uchar BPP = depth / 8;
-	uchar* rval = new uchar[(addressable)BPP * length];
+	uchar* rval = (uchar*)malloc((addressable)BPP * length);
 
 	for (addressable i = 0, it = 0; i < length * (addressable)BPP; ++it, i += BPP)
 	{
@@ -483,7 +483,7 @@ void* xtga::codecs::Convert_BottomLeft_To_TopLeft(void const* buffer, uint16 wid
 	}
 
 	uchar BPP = depth / 8;
-	uchar* rval = new uchar[(addressable)width * height * BPP];
+	uchar* rval = (uchar*)malloc((addressable)width * height * BPP);
 
 	// For each scanline
 	for (uint16 v = 0; v < height; ++v)
@@ -514,7 +514,7 @@ void* xtga::codecs::Convert_BottomRight_To_TopLeft(void const* buffer, uint16 wi
 	}
 
 	uchar BPP = depth / 8;
-	uchar* rval = new uchar[(addressable)width * height * BPP];
+	uchar* rval = (uchar*)malloc((addressable)width * height * BPP);
 
 	// For each scanline
 	for (uint16 v = 0; v < height; ++v)
@@ -545,7 +545,7 @@ void* xtga::codecs::Convert_TopRight_To_TopLeft(void const* buffer, uint16 width
 	}
 
 	uchar BPP = depth / 8;
-	uchar* rval = new uchar[(addressable)width * height * BPP];
+	uchar* rval = (uchar*)malloc((addressable)width * height * BPP);
 
 	// For each scanline
 	for (uint16 v = 0; v < height; ++v)
@@ -629,7 +629,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		XTGA_SETERROR(error, ERRORCODE::INVALID_DEPTH);
 		return false;
 	}
-	
+
 	using namespace pixelformats;
 
 	auto Generate16BitColorMap = [&]() -> bool
@@ -898,8 +898,8 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			}
 
 			// Insert Black/White If Needed
-			BGRA5551 black; black.R = black.G = black.B = 0x00;
-			BGRA5551 white; white.R = white.G = white.B = 0xFF;
+			BGRA5551 black; black.R = black.G = black.B = 0x1F;
+			BGRA5551 white; white.R = white.G = white.B = 0x1F;
 			bool hW = false, hB = false;
 			uchar lW = 0, lB = 0;
 			for (uint16 i = 0; i < CMap.size(); ++i)
@@ -955,7 +955,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 			auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 			{
-				// close enough ¯\_(:_:)_/¯
+				// close enough ï¿½\_(:_:)_/ï¿½
 				float eps = 0.00001f;
 				for (addressable i = start; i < start + count; ++i)
 				{
@@ -1020,13 +1020,13 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 	notForced:;
 
-		ColorMap = new BGRA5551[CMap.size()];
+		ColorMap = (BGRA5551*)malloc(sizeof(BGRA5551) * (addressable)CMap.size());
 		BGRA5551* cPtr = (BGRA5551*)ColorMap;
 
 		for (uint16 i = 0; i < (uint16)CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
-		outBuff = new uchar[IMap.size()];
+		outBuff = (uchar*)malloc((addressable)IMap.size());
 		for (addressable i = 0; i < (addressable)IMap.size(); ++i)
 			((uchar*)outBuff)[i] = IMap[i];
 
@@ -1246,7 +1246,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 					auto RR = CheckRange(buckets[i], 0xFF0000);
 					auto GR = CheckRange(buckets[i], 0x00FF00);
 					auto BR = CheckRange(buckets[i], 0x0000FF);
-					
+
 					if (RR >= GR && RR >= BR)
 					{
 						std::sort(buckets[i].begin(), buckets[i].end(), compr);
@@ -1365,7 +1365,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 			auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 			{
-				// close enough ¯\_(:_:)_/¯
+				// close enough ï¿½\_(:_:)_/ï¿½
 				float eps = 0.00001f;
 				for (addressable i = start; i < start + count; ++i)
 				{
@@ -1430,13 +1430,13 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 	notForced:;
 
-		ColorMap = new BGR888[CMap.size()];
+		ColorMap = (BGR888*)malloc(sizeof(BGR888) * (addressable)CMap.size());
 		BGR888* cPtr = (BGR888*)ColorMap;
 
 		for (uint16 i = 0; i < (uint16)CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
-		outBuff = new uchar[IMap.size()];
+		outBuff = (uchar*)malloc((addressable)IMap.size());
 		for (addressable i = 0; i < IMap.size(); ++i)
 			((uchar*)outBuff)[i] = IMap[i];
 
@@ -1548,7 +1548,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 					auto val = iPtr[i];
 
 					if (!PureAlpha) if (val.A == 0x00) PureAlpha = true;
-					else if (!PureWhite) 
+					else if (!PureWhite)
 						if (val.R == 0xFF && val.G == 0xFF && val.B == 0xFF && val.A == 0xFF)
 							PureWhite = true;
 					else if (!PureBlack)
@@ -1645,7 +1645,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 			};
 
 			std::vector<BGRA8888> VUniqueValues(sets[0].begin(), sets[0].end());
-			
+
 			std::vector<std::vector<BGRA8888>> buckets;
 			buckets.push_back(VUniqueValues);
 
@@ -1800,7 +1800,7 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 
 			auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 			{
-				// close enough ¯\_(:_:)_/¯
+				// close enough ï¿½\_(:_:)_/ï¿½
 				float eps = 0.00001f;
 				for (addressable i = start; i < start + count; ++i)
 				{
@@ -1869,18 +1869,18 @@ bool xtga::codecs::GenerateColorMap(const void* inBuff, void*& outBuff, void*& C
 		}
 
 	notForced:;
-		ColorMap = new BGRA8888[CMap.size()];
+		ColorMap = (BGRA8888*)malloc(sizeof(BGRA8888) * (addressable)CMap.size());
 		BGRA8888* cPtr = (BGRA8888*)ColorMap;
 
 		for (uint16 i = 0; i < (uint16)CMap.size(); ++i)
 			cPtr[i] = CMap[i];
 
-		outBuff = new uchar[IMap.size()];
+		outBuff = (uchar*)malloc((addressable)IMap.size());
 		for (addressable i = 0; i < IMap.size(); ++i)
 			((uchar*)outBuff)[i] = (uchar)IMap[i];
 
 		Size = (uint16)CMap.size();
-		
+
 		XTGA_SETERROR(error, ERRORCODE::NONE);
 
 		return true;
@@ -1921,7 +1921,7 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 	addressable slice = ilength / CoreCount;
 	std::vector<std::thread*> threads;
 
-	auto IMap = new uchar[ilength];
+	auto IMap = (uchar*)malloc(ilength);
 
 	if (depth == 16)
 	{
@@ -1953,7 +1953,7 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 
 		auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 		{
-			// close enough ¯\_(:_:)_/¯
+			// close enough ï¿½\_(:_:)_/ï¿½
 			float eps = 0.00001f;
 			for (addressable i = start; i < start + count; ++i)
 			{
@@ -2032,7 +2032,7 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 
 		auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 		{
-			// close enough ¯\_(:_:)_/¯
+			// close enough ï¿½\_(:_:)_/ï¿½
 			float eps = 0.00001f;
 			for (addressable i = start; i < start + count; ++i)
 			{
@@ -2111,7 +2111,7 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 
 		auto DoDistanceCalc = [&](const addressable& start, const addressable& count)
 		{
-			// close enough ¯\_(:_:)_/¯
+			// close enough ï¿½\_(:_:)_/ï¿½
 			float eps = 0.00001f;
 			for (addressable i = start; i < start + count; ++i)
 			{
@@ -2195,7 +2195,7 @@ bool xtga::codecs::DecodeImage(const void* buffer, void* obuffer, flags::IMAGEOR
 		{
 			auto tmp = obuffer;
 			obuffer = DecodeColorMap(obuffer, (addressable)w * h, colormap, depth, &tErr);
-			delete[] tmp;
+			free(tmp);
 		}
 		else
 		{
@@ -2206,7 +2206,7 @@ bool xtga::codecs::DecodeImage(const void* buffer, void* obuffer, flags::IMAGEOR
 		{
 			XTGA_SETERROR(error, tErr);
 
-			if (obuffer) delete[] obuffer;
+			if (obuffer) free(obuffer);
 			return false;
 		}
 	}
@@ -2218,7 +2218,7 @@ bool xtga::codecs::DecodeImage(const void* buffer, void* obuffer, flags::IMAGEOR
 		{
 			auto tmp = obuffer;
 			obuffer = Convert_BottomLeft_To_TopLeft(tmp, w, h, depth, &tErr);
-			delete[] tmp;
+			free(tmp);
 		}
 		else
 		{
@@ -2231,7 +2231,7 @@ bool xtga::codecs::DecodeImage(const void* buffer, void* obuffer, flags::IMAGEOR
 		{
 			auto tmp = obuffer;
 			obuffer = Convert_BottomRight_To_TopLeft(obuffer, w, h, depth, &tErr);
-			delete[] tmp;
+			free(tmp);
 		}
 		else
 		{
@@ -2244,7 +2244,7 @@ bool xtga::codecs::DecodeImage(const void* buffer, void* obuffer, flags::IMAGEOR
 		{
 			auto tmp = obuffer;
 			obuffer = Convert_TopRight_To_TopLeft(obuffer, w, h, depth, &tErr);
-			delete[] tmp;
+			free(tmp);
 		}
 		else
 		{
@@ -2256,13 +2256,13 @@ bool xtga::codecs::DecodeImage(const void* buffer, void* obuffer, flags::IMAGEOR
 	{
 		XTGA_SETERROR(error, tErr);
 
-		if (obuffer) delete[] obuffer;
+		if (obuffer) free(obuffer);
 		return false;
 	}
 
 	if (!obuffer)
 	{
-		obuffer = new uchar[(addressable)w * h * depth];
+		obuffer = (uchar*)malloc((addressable)w * h * depth);
 		for (addressable i = 0; i < (addressable)w * h * depth; ++i)
 		{
 			((uchar*)obuffer)[i] = ((uchar*)buffer)[i];
@@ -2303,7 +2303,7 @@ void* xtga::codecs::ScaleImageBicubic(const void* data, xtga::pixelformats::PIXE
 
 	if (scale == 1.0f)
 	{
-		auto rBuff = new uchar[(addressable)width * height * BPP];
+		auto rBuff = (uchar*)malloc((addressable)width * height * BPP);
 
 		for (addressable i = 0; i < (addressable)width * height * BPP; ++i)
 			rBuff[i] = ( (uchar*)data )[i];
@@ -2526,7 +2526,7 @@ void* xtga::codecs::ScaleImageBicubic(const void* data, xtga::pixelformats::PIXE
 	uint16 nWidth = (uint16)(width * scale);
 	uint16 nHeight = (uint16)(height * scale);
 
-	auto rval = new uchar[(addressable)nWidth * nHeight * BPP];
+	auto rval = (uchar*)malloc((addressable)nWidth * nHeight * BPP);
 
 	// For Each Scanline
 	for (uint16 y = 0; y < nHeight; ++y)

@@ -1,4 +1,4 @@
-//============ Copyright © 2019 Brett Anthony. All rights reserved. ============
+//============ Copyright Â© 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
@@ -8,6 +8,8 @@
 //==============================================================================
 
 #include "xTGA/marray.h"
+
+#include <cstdlib>
 
 template <class T>
 class xtga::ManagedArray<T>::__ManagedArrayImpl
@@ -25,7 +27,7 @@ public:
 template <class T>
 xtga::ManagedArray<T>::__ManagedArrayImpl::__ManagedArrayImpl(addressable size)
 {
-	this->_rawData = new T[size];
+	this->_rawData = (T*)malloc(sizeof(T) * size);
 	this->_size = size;
 	this->_eSize = sizeof(T);
 }
@@ -41,7 +43,7 @@ xtga::ManagedArray<T>::__ManagedArrayImpl::__ManagedArrayImpl(T* data, addressab
 template <class T>
 xtga::ManagedArray<T>::__ManagedArrayImpl::~__ManagedArrayImpl()
 {
-	delete[] this->_rawData;
+	free(this->_rawData);
 }
 
 template <class T>

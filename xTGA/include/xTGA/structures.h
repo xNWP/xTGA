@@ -1,4 +1,4 @@
-//============ Copyright © 2019 Brett Anthony. All rights reserved. ============
+//============ Copyright Â© 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
@@ -27,7 +27,7 @@ namespace xtga
 				struct
 				{
 					uchar						ALPHA_CHANNEL_BITCOUNT : 4;
-					xtga::flags::IMAGEORIGIN	IMAGE_ORIGIN : 2;
+					xtga::flags::IMAGEORIGIN	IMAGE_ORIGIN : 2; // warning on GCC, no way to disable :\
 					uchar						UNUSED : 2;
 				};
 			};
