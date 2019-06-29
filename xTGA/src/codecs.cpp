@@ -2164,7 +2164,7 @@ void* xtga::codecs::ApplyColorMap(const void* buff, addressable ilength, const v
 	return IMap;
 }
 
-bool xtga::codecs::DecodeImage(const void* buffer, void* obuffer, flags::IMAGEORIGIN origin, uint16 w, uint16 h, uchar depth, bool rle, const void* colormap, ERRORCODE* error)
+bool xtga::codecs::DecodeImage(const void* buffer, void*& obuffer, flags::IMAGEORIGIN origin, uint16 w, uint16 h, uchar depth, bool rle, const void* colormap, ERRORCODE* error)
 {
 	using namespace xtga::flags;
 	using namespace xtga::codecs;

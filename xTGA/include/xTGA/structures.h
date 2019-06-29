@@ -27,7 +27,7 @@ namespace xtga
 				struct
 				{
 					uchar						ALPHA_CHANNEL_BITCOUNT : 4;
-					xtga::flags::IMAGEORIGIN	IMAGE_ORIGIN : 2; // warning on GCC, no way to disable :\
+					xtga::flags::IMAGEORIGIN	IMAGE_ORIGIN : 2; // warning on GCC, no way to disable :/
 					uchar						UNUSED : 2;
 				};
 			};

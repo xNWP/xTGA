@@ -167,7 +167,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code (can be nullptr).
 		/// @return bool					Returns true if the image was successfully decoded.
 		//----------------------------------------------------------------------------------------------------
-		bool DecodeImage(const void* buffer, void* obuffer, flags::IMAGEORIGIN origin, uint16 w, uint16 h, uchar depth, bool rle, const void* colormap = nullptr, ERRORCODE* error = nullptr);
+		bool DecodeImage(const void* buffer, void*& obuffer, flags::IMAGEORIGIN origin, uint16 w, uint16 h, uchar depth, bool rle, const void* colormap = nullptr, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Scales an image using bicubic interpolation.

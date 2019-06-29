@@ -405,13 +405,12 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl()
 	_ColorCorrectionTable = nullptr;
 	_ScanLineTable = nullptr;
 	_ThumbnailData = nullptr;
+	_ThumbnailWidth = 0;
+	_ThumbnailHeight = 0;
 }
 
-xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* error)
+xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* error) : __TGAFileImpl ()
 {
-	// First call default constructor
-	__TGAFileImpl();
-
 	auto File = fopen((const char*)filename, "rb");
 
 	if (File == nullptr)
