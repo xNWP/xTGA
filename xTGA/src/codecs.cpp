@@ -19,9 +19,6 @@
 #include <thread>
 #include <vector>
 
-constexpr uchar LUT5[] = { 0, 8, 16, 25, 33, 41, 49, 58, 66, 74, 82, 90, 99, 107, 115, 123, 132,
-								 140, 148, 156, 165, 173, 181, 189, 197, 206, 214, 222, 230, 239, 247, 255 };
-
 void* xtga::codecs::DecodeRLE(void const * buffer, uchar depth, addressable length, ERRORCODE* error)
 {
 	if (!(depth == 8 || depth == 16 || depth == 24 || depth == 32))

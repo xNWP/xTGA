@@ -45,9 +45,7 @@ xtga::Parameters xtga::Parameters::BGR24()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGR888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -60,9 +58,7 @@ xtga::Parameters xtga::Parameters::BGR24_RLE()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGR888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
@@ -75,9 +71,7 @@ xtga::Parameters xtga::Parameters::BGR24_COLORMAPPED()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGR888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = true;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -90,9 +84,7 @@ xtga::Parameters xtga::Parameters::BGR24_RLE_COLORMAPPED()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA5551;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = true;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
@@ -105,9 +97,7 @@ xtga::Parameters xtga::Parameters::BGR16()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA5551;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -120,9 +110,7 @@ xtga::Parameters xtga::Parameters::BGR16_RLE()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA5551;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
@@ -135,9 +123,7 @@ xtga::Parameters xtga::Parameters::BGR16_COLORMAPPED()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA5551;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = true;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -150,9 +136,7 @@ xtga::Parameters xtga::Parameters::BGR16_RLE_COLORMAPPED()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA5551;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = true;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
@@ -165,9 +149,7 @@ xtga::Parameters xtga::Parameters::BGRA32_STRAIGHT_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::STRAIGHT;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -180,9 +162,7 @@ xtga::Parameters xtga::Parameters::BGRA32_PREMULTIPLIED_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::PREMULTIPLIED;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -195,9 +175,7 @@ xtga::Parameters xtga::Parameters::BGRA32_RLE_STRAIGHT_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::STRAIGHT;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
@@ -210,9 +188,7 @@ xtga::Parameters xtga::Parameters::BGRA32_RLE_PREMULTIPLIED_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::PREMULTIPLIED;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -225,9 +201,7 @@ xtga::Parameters xtga::Parameters::BGRA32_COLORMAPPED_STRAIGHT_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::STRAIGHT;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = true;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -240,9 +214,7 @@ xtga::Parameters xtga::Parameters::BGRA32_COLORMAPPED_PREMULTIPLIED_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::PREMULTIPLIED;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = true;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -255,9 +227,7 @@ xtga::Parameters xtga::Parameters::BGRA32_RLE_COLORMAPPED_STRAIGHT_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::STRAIGHT;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = true;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
@@ -270,9 +240,7 @@ xtga::Parameters xtga::Parameters::BGRA32_RLE_COLORMAPPED_PREMULTIPLIED_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::PREMULTIPLIED;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = true;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
@@ -285,9 +253,7 @@ xtga::Parameters xtga::Parameters::I8()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::I8;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -300,9 +266,7 @@ xtga::Parameters xtga::Parameters::I8_RLE()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::I8;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::NOALPHA;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
@@ -315,9 +279,7 @@ xtga::Parameters xtga::Parameters::IA16_STRAIGHT_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::IA88;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::STRAIGHT;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -330,9 +292,7 @@ xtga::Parameters xtga::Parameters::IA16_PREMULTIPLIED_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::IA88;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::PREMULTIPLIED;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = false;
 	return rval;
@@ -345,9 +305,7 @@ xtga::Parameters xtga::Parameters::IA16_RLE_STRAIGHT_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::IA88;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::STRAIGHT;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
@@ -360,12 +318,15 @@ xtga::Parameters xtga::Parameters::IA16_RLE_PREMULTIPLIED_ALPHA()
 	rval.OutputFormat = pixelformats::PIXELFORMATS::IA88;
 	rval.TGA2File = true;
 	rval.AlphaType = flags::ALPHATYPE::PREMULTIPLIED;
-	rval.UseScanLineTable = false;
 	rval.UseColorMap = false;
-	rval.UseExtensionTable = true;
 	rval.UseThumbnailImage = false;
 	rval.RunLengthEncode = true;
 	return rval;
+}
+
+xtga::pixelformats::PIXELFORMATS xtga::Parameters::GetOutputFormat() const
+{
+	return this->OutputFormat;
 }
 
 class xtga::TGAFile::__TGAFileImpl
@@ -373,6 +334,7 @@ class xtga::TGAFile::__TGAFileImpl
 public:
 	__TGAFileImpl();
 	__TGAFileImpl(char const * filename, ERRORCODE* error);
+	__TGAFileImpl(const void* buffer, uint16 width, uint16 height, const Parameters& config, ERRORCODE* error);
 	~__TGAFileImpl();
 
 	std::vector<void*> __DanglingArrays;
@@ -511,6 +473,899 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 	XTGA_SETERROR(error, ERRORCODE::NONE);
 }
 
+xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(const void* buffer, uint16 width, uint16 height, const Parameters& config, ERRORCODE* error)
+{
+	using namespace pixelformats;
+
+	void* ImageData = nullptr;
+	uchar InputBPP = 0;
+	uchar OutputBPP = 0;
+	void (*PixelTransform)(const void* input, void* output);
+
+	switch (config.InputFormat)
+	{
+	case PIXELFORMATS::ABGR8888:
+		InputBPP = 4;
+		break;
+
+	case PIXELFORMATS::AI88:
+		InputBPP = 2;
+		break;
+		
+	case PIXELFORMATS::ARGB1555:
+		InputBPP = 2;
+		break;
+
+	case PIXELFORMATS::ARGB8888:
+		InputBPP = 4;
+		break;
+
+	case PIXELFORMATS::BGR565:
+		InputBPP = 2;
+		break;
+
+	case PIXELFORMATS::BGR888:
+		InputBPP = 3;
+		break;
+
+	case PIXELFORMATS::BGRA5551:
+		InputBPP = 2;
+		break;
+
+	case PIXELFORMATS::BGRA8888:
+		InputBPP = 4;
+		break;
+
+	case PIXELFORMATS::I8:
+		InputBPP = 1;
+		break;
+
+	case PIXELFORMATS::IA88:
+		InputBPP = 2;
+		break;
+
+	case PIXELFORMATS::RGB565:
+		InputBPP = 2;
+		break;
+
+	case PIXELFORMATS::RGB888:
+		InputBPP = 3;
+		break;
+
+	case PIXELFORMATS::RGBA8888:
+		InputBPP = 4;
+		break;
+
+	default:
+		XTGA_SETERROR(error, ERRORCODE::UNKNOWN);
+		return;
+	}
+
+	this->_Header = new structs::Header;
+	memset(this->_Header, 0, sizeof(structs::Header));
+	this->_Header->IMAGE_WIDTH = width;
+	this->_Header->IMAGE_HEIGHT = height;
+
+	// Convert Various To BGR24
+	if (config.GetOutputFormat() == PIXELFORMATS::BGR888)
+	{
+		ImageData = malloc((addressable)sizeof(BGR888) * width * height);
+		OutputBPP = 3;
+		this->_Header->IMAGE_TYPE = flags::IMAGETYPE::TRUE_COLOR;
+
+		if (config.InputFormat == PIXELFORMATS::ABGR8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ABGR8888*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::AI88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (AI88*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = iPtr->I;
+				oPtr->G = iPtr->I;
+				oPtr->R = iPtr->I;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB1555)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB1555*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = LUT5[iPtr->B];
+				oPtr->G = LUT5[iPtr->G];
+				oPtr->R = LUT5[iPtr->R];
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB8888*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR565*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = LUT5[iPtr->B];
+				oPtr->G = LUT6[iPtr->G];
+				oPtr->R = LUT5[iPtr->R];
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR888*)input;
+				auto oPtr = (BGR888*)output;
+				*oPtr = *iPtr;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA5551)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA5551*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = LUT5[iPtr->B];
+				oPtr->G = LUT5[iPtr->G];
+				oPtr->R = LUT5[iPtr->R];
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA8888*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::I8)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (I8*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = iPtr->I;
+				oPtr->G = iPtr->I;
+				oPtr->R = iPtr->I;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::IA88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (IA88*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = iPtr->I;
+				oPtr->G = iPtr->I;
+				oPtr->R = iPtr->I;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB565*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = LUT5[iPtr->B];
+				oPtr->G = LUT6[iPtr->G];
+				oPtr->R = LUT5[iPtr->R];
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB888*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGBA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGBA8888*)input;
+				auto oPtr = (BGR888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+			};
+		}
+		else
+		{
+			XTGA_SETERROR(error, ERRORCODE::UNKNOWN);
+			return;
+		}
+	}
+	else if (config.GetOutputFormat() == PIXELFORMATS::BGRA5551) // Convert Various To BGR16
+	{
+		ImageData = malloc((addressable)sizeof(BGRA5551) * width * height);
+		OutputBPP = 2;
+		this->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT = 1;
+		this->_Header->IMAGE_TYPE = flags::IMAGETYPE::TRUE_COLOR;
+
+		if (config.InputFormat == PIXELFORMATS::ABGR8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ABGR8888*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = (iPtr->B & 0xF8) >> 3;
+				oPtr->G = (iPtr->G & 0xF8) >> 3;
+				oPtr->R = (iPtr->R & 0xF8) >> 3;
+				oPtr->A = iPtr->A == 255 ? 1 : 0;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::AI88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (AI88*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = (iPtr->I & 0xF8) >> 3;
+				oPtr->G = (iPtr->I & 0xF8) >> 3;
+				oPtr->R = (iPtr->I & 0xF8) >> 3;
+				oPtr->A = iPtr->A == 255 ? 1 : 0;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB1555)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB1555*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+				oPtr->A = iPtr->A;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB8888*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = (iPtr->B & 0xF8) >> 3;
+				oPtr->G = (iPtr->G & 0xF8) >> 3;
+				oPtr->R = (iPtr->R & 0xF8) >> 3;
+				oPtr->A = iPtr->A == 255 ? 1 : 0;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR565*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = (iPtr->G & 0x3E) >> 1;
+				oPtr->R = iPtr->R;
+				oPtr->A = 1;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR888*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = (iPtr->B & 0xF8) >> 3;
+				oPtr->G = (iPtr->G & 0xF8) >> 3;
+				oPtr->R = (iPtr->R & 0xF8) >> 3;
+				oPtr->A = 1;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA5551)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA5551*)input;
+				auto oPtr = (BGRA5551*)output;
+				*oPtr = *iPtr;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA8888*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = (iPtr->B & 0xF8) >> 3;
+				oPtr->G = (iPtr->G & 0xF8) >> 3;
+				oPtr->R = (iPtr->R & 0xF8) >> 3;
+				oPtr->A = iPtr->A == 255 ? 1 : 0;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::I8)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (I8*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = (iPtr->I & 0xF8) >> 3;
+				oPtr->G = (iPtr->I & 0xF8) >> 3;
+				oPtr->R = (iPtr->I & 0xF8) >> 3;
+				oPtr->A = 1;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::IA88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (IA88*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = (iPtr->I & 0xF8) >> 3;
+				oPtr->G = (iPtr->I & 0xF8) >> 3;
+				oPtr->R = (iPtr->I & 0xF8) >> 3;
+				oPtr->A = iPtr->A == 255 ? 1 : 0;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB565*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = (iPtr->G & 0x3E) >> 1;
+				oPtr->R = iPtr->R;
+				oPtr->A = 1;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB888*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = (iPtr->B & 0xF8) >> 3;
+				oPtr->G = (iPtr->G & 0xF8) >> 3;
+				oPtr->R = (iPtr->R & 0xF8) >> 3;
+				oPtr->A = 1;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGBA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGBA8888*)input;
+				auto oPtr = (BGRA5551*)output;
+				oPtr->B = (iPtr->B & 0xF8) >> 3;
+				oPtr->G = (iPtr->G & 0xF8) >> 3;
+				oPtr->R = (iPtr->R & 0xF8) >> 3;
+				oPtr->A = iPtr->A == 255 ? 1 : 0;
+			};
+		}
+		else
+		{
+			XTGA_SETERROR(error, ERRORCODE::UNKNOWN);
+			return;
+		}
+	}
+	else if (config.GetOutputFormat() == PIXELFORMATS::BGRA8888) // Convert Various To BGRA32
+	{
+		ImageData = malloc((addressable)sizeof(BGRA8888) * width * height);
+		OutputBPP = 4;
+		this->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT = 8;
+		this->_Header->IMAGE_TYPE = flags::IMAGETYPE::TRUE_COLOR;
+
+		if (config.InputFormat == PIXELFORMATS::ABGR8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ABGR8888*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+				oPtr->A = iPtr->A;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::AI88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (AI88*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = iPtr->I;
+				oPtr->G = iPtr->I;
+				oPtr->R = iPtr->I;
+				oPtr->A = iPtr->A;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB1555)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB1555*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = LUT5[iPtr->B];
+				oPtr->G = LUT5[iPtr->G];
+				oPtr->R = LUT5[iPtr->R];
+				oPtr->A = iPtr->A == 1 ? 255 : 0;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB8888*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+				oPtr->A = iPtr->A;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR565*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = LUT5[iPtr->B];
+				oPtr->G = LUT6[iPtr->G];
+				oPtr->R = LUT5[iPtr->R];
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR888*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA5551)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA5551*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = LUT5[iPtr->B];
+				oPtr->G = LUT5[iPtr->G];
+				oPtr->R = LUT5[iPtr->R];
+				oPtr->A = iPtr->A == 1 ? 255 : 0;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA8888*)input;
+				auto oPtr = (BGRA8888*)output;
+				*oPtr = *iPtr;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::I8)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (I8*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = iPtr->I;
+				oPtr->G = iPtr->I;
+				oPtr->R = iPtr->I;
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::IA88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (IA88*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = iPtr->I;
+				oPtr->G = iPtr->I;
+				oPtr->R = iPtr->I;
+				oPtr->A = iPtr->A;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB565*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = LUT5[iPtr->B];
+				oPtr->G = LUT6[iPtr->G];
+				oPtr->R = LUT5[iPtr->R];
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB888*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGBA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGBA8888*)input;
+				auto oPtr = (BGRA8888*)output;
+				oPtr->B = iPtr->B;
+				oPtr->G = iPtr->G;
+				oPtr->R = iPtr->R;
+				oPtr->A = iPtr->A;
+			};
+		}
+		else
+		{
+			XTGA_SETERROR(error, ERRORCODE::UNKNOWN);
+			return;
+		}
+	}
+	else if (config.GetOutputFormat() == PIXELFORMATS::I8) 	// Convert Various To I8
+	{
+		ImageData = malloc((addressable)sizeof(I8) * width * height);
+		OutputBPP = 1;
+		this->_Header->IMAGE_TYPE = flags::IMAGETYPE::GRAYSCALE;
+
+		if (config.InputFormat == PIXELFORMATS::ABGR8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ABGR8888*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::AI88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (AI88*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = iPtr->I;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB1555)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB1555*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = LUT5[(uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25)];
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB8888*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR565*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = (uchar)((float)LUT5[iPtr->R] * 0.25 + (float)LUT6[iPtr->G] * 0.50 + (float)LUT5[iPtr->B] * 0.25);
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR888*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA5551)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA5551*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = LUT5[(uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25)];
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA8888*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::I8)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (I8*)input;
+				auto oPtr = (I8*)output;
+				*oPtr = *iPtr;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::IA88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (IA88*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = iPtr->I;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB565*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = (uchar)((float)LUT5[iPtr->R] * 0.25 + (float)LUT6[iPtr->G] * 0.50 + (float)LUT5[iPtr->B] * 0.25);
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB888*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGBA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGBA8888*)input;
+				auto oPtr = (I8*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+			};
+		}
+		else
+		{
+			XTGA_SETERROR(error, ERRORCODE::UNKNOWN);
+			return;
+		}
+	}
+	else if (config.GetOutputFormat() == PIXELFORMATS::IA88) // Convert Various To IA16
+	{
+		ImageData = malloc((addressable)sizeof(IA88) * width * height);
+		OutputBPP = 2;
+		this->_Header->IMAGE_DESCRIPTOR.ALPHA_CHANNEL_BITCOUNT = 8;
+		this->_Header->IMAGE_TYPE = flags::IMAGETYPE::GRAYSCALE;
+
+		if (config.InputFormat == PIXELFORMATS::ABGR8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ABGR8888*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+				oPtr->A = iPtr->A;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::AI88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (AI88*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = iPtr->I;
+				oPtr->A = iPtr->A;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB1555)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB1555*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = LUT5[(uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25)];
+				oPtr->A = iPtr->A == 1 ? 255 : 0;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::ARGB8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (ARGB8888*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+				oPtr->A = iPtr->A;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR565*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = (uchar)((float)LUT5[iPtr->R] * 0.25 + (float)LUT6[iPtr->G] * 0.50 + (float)LUT5[iPtr->B] * 0.25);
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGR888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGR888*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA5551)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA5551*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = LUT5[(uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25)];
+				oPtr->A = iPtr->A == 1 ? 255 : 0;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::BGRA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (BGRA8888*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+				oPtr->A = iPtr->A;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::I8)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (I8*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = iPtr->I;
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::IA88)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (IA88*)input;
+				auto oPtr = (IA88*)output;
+				*oPtr = *iPtr;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB565)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB565*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = (uchar)((float)LUT5[iPtr->R] * 0.25 + (float)LUT6[iPtr->G] * 0.50 + (float)LUT5[iPtr->B] * 0.25);
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGB888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGB888*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+				oPtr->A = 255;
+			};
+		}
+		else if (config.InputFormat == PIXELFORMATS::RGBA8888)
+		{
+			PixelTransform = [](const void* input, void* output)
+			{
+				auto iPtr = (RGBA8888*)input;
+				auto oPtr = (IA88*)output;
+				oPtr->I = (uchar)((float)iPtr->R * 0.25 + (float)iPtr->G * 0.50 + (float)iPtr->B * 0.25);
+				oPtr->A = iPtr->A;
+			};
+		}
+		else
+		{
+			XTGA_SETERROR(error, ERRORCODE::UNKNOWN);
+			return;
+		}
+	}
+	else
+	{
+		XTGA_SETERROR(error, ERRORCODE::UNKNOWN);
+		return;
+	}
+
+	this->_Header->IMAGE_DEPTH = OutputBPP * 8;
+
+	// Setup Image
+	for (uint16 h = 0; h < height; ++h)
+	{
+		for (uint16 w = 0; w < width; ++w)
+		{
+			PixelTransform( ( (uchar*)buffer + (h * width + w) * InputBPP ), ( (uchar*)ImageData + ((height - 1 - h) * width + w) * OutputBPP ));
+		}
+	}
+
+	// Apply Color Map
+	if (config.UseColorMap && OutputBPP >= 16)
+	{
+		void* ColorMap = nullptr;
+		uint16 csize = 0;
+		auto tmp = ImageData;
+		if(codecs::GenerateColorMap(ImageData, ImageData, ColorMap, width * height, OutputBPP, csize, false, error))
+		{
+			this->_Header->IMAGE_DEPTH = 8;
+			this->_Header->COLOR_MAP_BITS_PER_ENTRY = InputBPP * 8;
+			this->_Header->COLOR_MAP_LENGTH = csize;
+			this->_Header->COLOR_MAP_TYPE = 1;
+			this->_Header->IMAGE_TYPE = flags::IMAGETYPE::COLOR_MAPPED;
+			free(tmp);
+			this->_ColorMapData = ColorMap;
+			this->__DanglingArrays.push_back(ColorMap);
+		}
+	}
+
+// Apply RLE
+if (config.RunLengthEncode)
+{
+	auto tmp = ImageData;
+	if (!codecs::EncodeRLE(ImageData, ImageData, width, height, this->_Header->IMAGE_DEPTH, error))
+	{
+		free(tmp);
+		this->~__TGAFileImpl();
+		return;
+	}
+
+	if (this->_Header->IMAGE_TYPE == flags::IMAGETYPE::COLOR_MAPPED)
+		this->_Header->IMAGE_TYPE = flags::IMAGETYPE::COLOR_MAPPED_RLE;
+	else if (this->_Header->IMAGE_TYPE == flags::IMAGETYPE::GRAYSCALE)
+		this->_Header->IMAGE_TYPE = flags::IMAGETYPE::GRAYSCALE_RLE;
+	else if (this->_Header->IMAGE_TYPE == flags::IMAGETYPE::TRUE_COLOR)
+		this->_Header->IMAGE_TYPE = flags::IMAGETYPE::TRUE_COLOR_RLE;
+
+	free(tmp);
+}
+
+this->_ImageData = ImageData;
+this->__DanglingArrays.push_back(ImageData);
+
+XTGA_SETERROR(error, ERRORCODE::NONE);
+}
+
 xtga::TGAFile::__TGAFileImpl::~__TGAFileImpl()
 {
 	if (this->_RawData) free(this->_RawData);
@@ -550,6 +1405,48 @@ xtga::TGAFile* xtga::TGAFile::Alloc(char const* filename, ERRORCODE* error)
 	TGAFile* r = new TGAFile();
 	r->_impl = impl;
 
+	return r;
+}
+
+xtga::TGAFile* xtga::TGAFile::Alloc(const void* buffer, uint16 width, uint16 height, const Parameters& config, ERRORCODE* error)
+{
+	ERRORCODE err;
+	auto impl = new __TGAFileImpl(buffer, width, height, config, &err);
+
+	if (err != ERRORCODE::NONE)
+	{
+		delete impl;
+		XTGA_SETERROR(error, err);
+
+		return nullptr;
+	}
+
+	TGAFile* r = new TGAFile();
+	r->_impl = impl;
+
+	if (config.TGA2File)
+	{
+		r->UpgradeToTGATwo(&err);
+
+		if (err != ERRORCODE::NONE)
+		{
+			TGAFile::Free(r);
+			return nullptr;
+		}
+		
+		if (config.UseThumbnailImage)
+		{
+			if(!r->GenerateThumbnail(64, &err))
+			{
+				TGAFile::Free(r);
+				return nullptr;
+			}
+		}
+
+		r->_impl->_Extensions->ALPHATYPE = config.AlphaType;
+	}
+
+	XTGA_SETERROR(error, ERRORCODE::NONE);
 	return r;
 }
 

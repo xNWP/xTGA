@@ -48,10 +48,10 @@ namespace xtga
 		flags::ALPHATYPE AlphaType				= flags::ALPHATYPE::UNDEFINED_ALPHA_KEEP;	/* The type of alpha the output image contains. */
 		bool UseColorMap						= false;									/* Whether or not to generate a color map. It will not be generated if it would take more bits than storing the image without it would. */
 		bool TGA2File							= true;										/* The file should be TGA 2.0 */
-		bool UseScanLineTable					= false;									/* Whether or not to generate a scan line table. REQUIRES TGA 2.0 */
-		bool UseExtensionTable					= true;										/* Whether or not to use an extension table. REQUIRES TGA 2.0 */
 		bool UseThumbnailImage					= false;									/* Whether or not to generate a thumbnail image. REQUIRES TGA 2.0 */
-		bool RunLengthEncode					= true;										/* Whether or not to use ren-length encoding to save space. */
+		bool RunLengthEncode					= true;										/* Whether or not to use run-length encoding to save space. */
+
+		pixelformats::PIXELFORMATS GetOutputFormat() const;									/* Returns the target output format. */
 
 	private:
 		pixelformats::PIXELFORMATS OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
@@ -81,7 +81,7 @@ namespace xtga
 		/// @param[out] error				Holds the error/status code (can be nullptr).
 		/// @return TGAFile*				The created TGAFile (or nullptr if an error occured).
 		//----------------------------------------------------------------------------------------------------
-		XTGAAPI static TGAFile* Alloc(void* buffer, uint16 width, uint16 height, const Parameters& config, ERRORCODE* error = nullptr);
+		XTGAAPI static TGAFile* Alloc(const void* buffer, uint16 width, uint16 height, const Parameters& config, ERRORCODE* error = nullptr);
 		
 		//----------------------------------------------------------------------------------------------------
 		/// Frees the supplied TGAFile object and sets its pointer to nullptr.
