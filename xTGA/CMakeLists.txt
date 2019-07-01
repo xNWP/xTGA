@@ -20,9 +20,11 @@ add_compile_definitions(XTGA_EXPORTS)
 set(SOURCES
 src/codecs.h
 src/codecs.cpp
+src/error_macro.h
 src/marray.cpp
 src/pixelformats.cpp
 src/tga_file.cpp
+src/xTGA_C.cpp
 )
 
 set(HEADERS
@@ -34,6 +36,7 @@ include/xTGA/structures.h
 include/xTGA/tga_file.h
 include/xTGA/types.h
 include/xTGA/xTGA.h
+include/xTGA/xTGA_C.h
 )
 
 # Binary

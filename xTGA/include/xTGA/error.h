@@ -12,9 +12,6 @@
 
 #include "xTGA/types.h"
 
-#define XTGA_SETERROR( CONTAINER, CODE ) \
-if (CONTAINER != nullptr) *CONTAINER = CODE
-
 namespace xtga
 {
 	//----------------------------------------------------------------------------------------------------

@@ -21,28 +21,28 @@ namespace xtga
 {
 	struct Parameters
 	{
-		static Parameters BGR24();										/* BGR with 8-bits per primary. */
-		static Parameters BGR24_RLE();									/* BGR with 8-bits per primary and Run-length encoding. */
-		static Parameters BGR24_COLORMAPPED();							/* BGR with 8-bits per primary and indexed color. */
-		static Parameters BGR24_RLE_COLORMAPPED();						/* BGR with 8-bits per primary, Run-length encoding, and indexed color. */
-		static Parameters BGR16();										/* BGR with 5-bits per primary (1-bit set to ignore). */
-		static Parameters BGR16_RLE();									/* BGR with 5-bits per primary (1-bit set to ignore) and Run-length encoding. */
-		static Parameters BGR16_COLORMAPPED();							/* BGR with 5-bits per primary (1-bit set to ignore) and indexed color. */
-		static Parameters BGR16_RLE_COLORMAPPED();						/* BGR with 5-bits per primary (1-bit set to ignore), Run-length encoding, and indexed color. */
-		static Parameters BGRA32_STRAIGHT_ALPHA();						/* BGRA with 8-bits per primary, and 8-bit alpha (straight). */
-		static Parameters BGRA32_PREMULTIPLIED_ALPHA();					/* BGRA with 8-bits per primary, and 8-bits alpha (premultiplied).*/
-		static Parameters BGRA32_RLE_STRAIGHT_ALPHA();					/* BGRA with 8-bits per primary, 8-bit alpha (straight), and Run-length encoding. */
-		static Parameters BGRA32_RLE_PREMULTIPLIED_ALPHA();				/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and Run-length encoding. */
-		static Parameters BGRA32_COLORMAPPED_STRAIGHT_ALPHA();			/* BGRA with 8-bits per primary, 8-bit alpha (straight), and indexed color. */
-		static Parameters BGRA32_COLORMAPPED_PREMULTIPLIED_ALPHA();		/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and indexed color. */
-		static Parameters BGRA32_RLE_COLORMAPPED_STRAIGHT_ALPHA();		/* BGRA with 8-bits per primary, 8-bit alpha (straight), Run-length encoding, and indexed color. */
-		static Parameters BGRA32_RLE_COLORMAPPED_PREMULTIPLIED_ALPHA();	/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), Run-length encoding, and indexed color. */
-		static Parameters I8();											/* Grayscale with 8-bit primary. */
-		static Parameters I8_RLE();										/* Grayscale with 8-bit primary and Run-length encoding. */
-		static Parameters IA16_STRAIGHT_ALPHA();						/* Grayscale with 8-bit primary, 8-bit alpha (straight). */
-		static Parameters IA16_PREMULTIPLIED_ALPHA();					/* Grayscale with 8-bit primary, 8-bit alpha (premultiplied). */
-		static Parameters IA16_RLE_STRAIGHT_ALPHA();					/* Grayscale with 8-bit primary, 8-bit alpha (straight), and Run-length encoding. */
-		static Parameters IA16_RLE_PREMULTIPLIED_ALPHA();				/* Grayscale with 8-bit primary, 8-bit alpha (premultiplied), and Run-length encoding. */
+		XTGAAPI static Parameters BGR24();										/* BGR with 8-bits per primary. */
+		XTGAAPI static Parameters BGR24_RLE();									/* BGR with 8-bits per primary and Run-length encoding. */
+		XTGAAPI static Parameters BGR24_COLORMAPPED();							/* BGR with 8-bits per primary and indexed color. */
+		XTGAAPI static Parameters BGR24_RLE_COLORMAPPED();						/* BGR with 8-bits per primary, Run-length encoding, and indexed color. */
+		XTGAAPI static Parameters BGR16();										/* BGR with 5-bits per primary (1-bit set to ignore). */
+		XTGAAPI static Parameters BGR16_RLE();									/* BGR with 5-bits per primary (1-bit set to ignore) and Run-length encoding. */
+		XTGAAPI static Parameters BGR16_COLORMAPPED();							/* BGR with 5-bits per primary (1-bit set to ignore) and indexed color. */
+		XTGAAPI static Parameters BGR16_RLE_COLORMAPPED();						/* BGR with 5-bits per primary (1-bit set to ignore), Run-length encoding, and indexed color. */
+		XTGAAPI static Parameters BGRA32_STRAIGHT_ALPHA();						/* BGRA with 8-bits per primary, and 8-bit alpha (straight). */
+		XTGAAPI static Parameters BGRA32_PREMULTIPLIED_ALPHA();					/* BGRA with 8-bits per primary, and 8-bits alpha (premultiplied).*/
+		XTGAAPI static Parameters BGRA32_RLE_STRAIGHT_ALPHA();					/* BGRA with 8-bits per primary, 8-bit alpha (straight), and Run-length encoding. */
+		XTGAAPI static Parameters BGRA32_RLE_PREMULTIPLIED_ALPHA();				/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and Run-length encoding. */
+		XTGAAPI static Parameters BGRA32_COLORMAPPED_STRAIGHT_ALPHA();			/* BGRA with 8-bits per primary, 8-bit alpha (straight), and indexed color. */
+		XTGAAPI static Parameters BGRA32_COLORMAPPED_PREMULTIPLIED_ALPHA();		/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and indexed color. */
+		XTGAAPI static Parameters BGRA32_RLE_COLORMAPPED_STRAIGHT_ALPHA();		/* BGRA with 8-bits per primary, 8-bit alpha (straight), Run-length encoding, and indexed color. */
+		XTGAAPI static Parameters BGRA32_RLE_COLORMAPPED_PREMULTIPLIED_ALPHA();	/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), Run-length encoding, and indexed color. */
+		XTGAAPI static Parameters I8();											/* Grayscale with 8-bit primary. */
+		XTGAAPI static Parameters I8_RLE();										/* Grayscale with 8-bit primary and Run-length encoding. */
+		XTGAAPI static Parameters IA16_STRAIGHT_ALPHA();						/* Grayscale with 8-bit primary, 8-bit alpha (straight). */
+		XTGAAPI static Parameters IA16_PREMULTIPLIED_ALPHA();					/* Grayscale with 8-bit primary, 8-bit alpha (premultiplied). */
+		XTGAAPI static Parameters IA16_RLE_STRAIGHT_ALPHA();					/* Grayscale with 8-bit primary, 8-bit alpha (straight), and Run-length encoding. */
+		XTGAAPI static Parameters IA16_RLE_PREMULTIPLIED_ALPHA();				/* Grayscale with 8-bit primary, 8-bit alpha (premultiplied), and Run-length encoding. */
 
 		pixelformats::PIXELFORMATS InputFormat	= pixelformats::PIXELFORMATS::DEFAULT;		/* The input pixel format. */
 		flags::ALPHATYPE AlphaType				= flags::ALPHATYPE::UNDEFINED_ALPHA_KEEP;	/* The type of alpha the output image contains. */
@@ -51,7 +51,7 @@ namespace xtga
 		bool UseThumbnailImage					= false;									/* Whether or not to generate a thumbnail image. REQUIRES TGA 2.0 */
 		bool RunLengthEncode					= true;										/* Whether or not to use run-length encoding to save space. */
 
-		pixelformats::PIXELFORMATS GetOutputFormat() const;									/* Returns the target output format. */
+		XTGAAPI pixelformats::PIXELFORMATS GetOutputFormat() const;							/* Returns the target output format. */
 
 	private:
 		pixelformats::PIXELFORMATS OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
@@ -283,7 +283,7 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the color correction table.
-		/// @return uint16*					The fetched color correction table (or nullptr) [editable].
+		/// @return ColorCorrectionEntry*	The fetched color correction table (or nullptr) [editable].
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI	structs::ColorCorrectionEntry* GetColorCorrectionTable();
 

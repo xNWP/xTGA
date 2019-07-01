@@ -71,6 +71,8 @@ int test_8bit_integrity()
 	free(ibuffer);
 	ManagedArray<I8>::Free(ImageData);
 	ManagedArray<I8>::Free(ImageData2);
+	TGAFile::Free(tga);
+	TGAFile::Free(tga2);
 
 	return 0;
 }
@@ -133,6 +135,8 @@ int test_16bit_integrity()
 	free(ibuffer);
 	ManagedArray<BGRA5551>::Free(ImageData);
 	ManagedArray<BGRA5551>::Free(ImageData2);
+	TGAFile::Free(tga);
+	TGAFile::Free(tga2);
 
 	return 0;
 }
@@ -193,6 +197,8 @@ int test_24bit_integrity()
 	free(ibuffer);
 	ManagedArray<BGR888>::Free(ImageData);
 	ManagedArray<BGR888>::Free(ImageData2);
+	TGAFile::Free(tga);
+	TGAFile::Free(tga2);
 
 	return 0;
 }
@@ -255,6 +261,8 @@ int test_32bit_integrity()
 	free(ibuffer);
 	ManagedArray<BGRA8888>::Free(ImageData);
 	ManagedArray<BGRA8888>::Free(ImageData2);
+	TGAFile::Free(tga);
+	TGAFile::Free(tga2);
 
 	return 0;
 }

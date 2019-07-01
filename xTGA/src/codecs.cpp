@@ -9,6 +9,7 @@
 
 #include "codecs.h"
 
+#include "error_macro.h"
 #include "xTGA/error.h"
 #include "xTGA/structures.h"
 

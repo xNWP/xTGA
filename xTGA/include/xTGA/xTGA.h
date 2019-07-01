@@ -27,7 +27,7 @@ namespace xtga
 	//----------------------------------------------------------------------------------------------------
 	/// Returns the version of library, useful to test linkage as well!
 	//----------------------------------------------------------------------------------------------------
-	extern uint16 WhatVersion();
+	XTGAAPI extern uint16 WhatVersion();
 }
 
 #endif

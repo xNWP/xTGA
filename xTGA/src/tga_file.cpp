@@ -10,6 +10,7 @@
 #include "xTGA/tga_file.h"
 
 #include "codecs.h"
+#include "error_macro.h"
 #include "xTGA/error.h"
 #include "xTGA/flags.h"
 

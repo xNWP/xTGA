@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.14)
 
 project(xTGA	VERSION 100
 				DESCRIPTION "A C/C++ library for opening/saving/manipulating TrueVision Targa (TGA) Images."
-				LANGUAGES CXX)
+				LANGUAGES C CXX)
 				
 set(XTGA_VERSION ${PROJECT_VERSION})
 
@@ -20,6 +20,8 @@ add_test(TestDynamicLinkage test_dll)
 add_test(TestStaticLinkage test_static)
 add_test(TestTypeSize test_types)
 add_test(TestLoading test_loading)
+add_test(TestCLinkage test_c_linkage)
+add_test(TestCLoading test_c_loading)
 
 enable_testing()
 

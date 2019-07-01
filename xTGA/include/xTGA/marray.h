@@ -63,6 +63,15 @@ namespace xtga
 		XTGAAPI T& operator[](addressable index);
 
 		//----------------------------------------------------------------------------------------------------
+		/// Returns the raw pointer [editable] at the given index.
+		/// @tparam T					The type of data the array contains (does not effect behaviour in this case).
+		/// @param[in] index			The index of the element.
+		/// @param[out] error			The error/status code. Can be nullptr.
+		/// @return void*				The data at the index.
+		//----------------------------------------------------------------------------------------------------
+		XTGAAPI void* rawat(addressable index, ERRORCODE* error = nullptr);
+
+		//----------------------------------------------------------------------------------------------------
 		/// Returns the size of the array.
 		/// @return addressable			The size of the array.
 		//----------------------------------------------------------------------------------------------------

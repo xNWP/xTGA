@@ -9,6 +9,8 @@
 
 #include "xTGA/marray.h"
 
+#include "error_macro.h"
+
 #include <cstdlib>
 
 template <class T>
@@ -87,6 +89,18 @@ template <typename T>
 T& xtga::ManagedArray<T>::operator[](addressable index)
 {
 	return this->at(index);
+}
+
+template <typename T>
+void* xtga::ManagedArray<T>::rawat(addressable index, ERRORCODE* error)
+{
+	if (index >= this->_impl->_size)
+	{
+		XTGA_SETERROR(error, ERRORCODE::INDEX_OUT_OF_RANGE);
+		return (void*)this->_impl->_rawData;
+	}
+
+	return (void*)((uchar*)this->_impl->_rawData + (index * this->_impl->_eSize));
 }
 
 template <typename T>
