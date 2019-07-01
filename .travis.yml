@@ -9,16 +9,50 @@ addons:
             - gcc-9
             - g++-9
 
-install:
-    - wget https://github.com/Kitware/CMake/releases/download/v3.15.0-rc3/cmake-3.15.0-rc3-Linux-x86_64.tar.gz
-    - tar -xf cmake-3.15.0-rc3-Linux-x86_64.tar.gz
-    - OURCMAKE="${TRAVIS_BUILD_DIR}/cmake-3.15.0-rc3-Linux-x86_64/bin/cmake"
-    - OURCTEST="${TRAVIS_BUILD_DIR}/cmake-3.15.0-rc3-Linux-x86_64/bin/ctest"
-    
-script:
-    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-9 /usr/bin/gcc
-    - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-9 /usr/bin/g++
-    - mkdir build && cd build
-    - ${OURCMAKE} ..
-    - make all
-    - ${OURCTEST} --verbose
+jobs:
+  include:
+      # Linux 32-bit
+    - &build-and-test
+      stage: build and test
+      os: linux
+      install:
+        - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-9 /usr/bin/gcc
+        - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-9 /usr/bin/g++
+        - wget https://github.com/Kitware/CMake/releases/download/v3.15.0-rc3/cmake-3.15.0-rc3-Linux-x86_64.tar.gz
+        - tar -xf cmake-3.15.0-rc3-Linux-x86_64.tar.gz
+        - OCMAKE="${TRAVIS_BUILD_DIR}/cmake-3.15.0-rc3-Linux-x86_64/bin/cmake"
+        - OCTEST="${TRAVIS_BUILD_DIR}/cmake-3.15.0-rc3-Linux-x86_64/bin/ctest"
+      before_script:
+        - sudo apt-get install -y gcc-9-multilib
+        - sudo apt-get install -y g++-9-multilib
+        - sudo apt-get install -y linux-libc-dev:i386
+      env:
+        - TOOLCHAIN=-DCMAKE_TOOLCHAIN_FILE=x86-toolchain.cmake
+      script:
+        - mkdir build && cd build
+        - ${OCMAKE} ${TOOLCHAIN} ..
+        - make all
+        - ${OCTEST} --verbose
+
+      # Linux 64-bit
+    - <<: *build-and-test
+      before_script: skip
+      env:
+        - TOOLCHAIN=""
+
+      # Windows 64-bit
+    - &build-and-test-windows
+      stage: build and test
+      os: windows
+      install: choco upgrade cmake
+      env: ARCH=" Win64"
+      script:
+        - mkdir build && cd build
+        - cmake -G "Visual Studio 15 2017${ARCH}" ..
+        - cmake --build .
+        - ctest --verbose
+
+      # Windows 32-bit
+    - <<: *build-and-test-windows
+      env:
+        - ARCH=""

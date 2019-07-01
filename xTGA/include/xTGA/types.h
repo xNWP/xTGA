@@ -41,6 +41,8 @@
 #	else
 #		ifdef __ppc64__
 			typedef uint64 addressable;
+#		else
+			typedef uint32 addressable;
 #		endif
 #	endif
 #endif
