@@ -47,6 +47,7 @@ jobs:
         on:
           repo: xNWP/xTGA
           branch: master
+          tags: true
 
       # Linux 64-bit
     - <<: *build-and-test
@@ -78,6 +79,7 @@ jobs:
         on:
           repo: xNWP/xTGA
           branch: master
+          tags: true      
 
       # Windows 32-bit
     - <<: *build-and-test-windows
