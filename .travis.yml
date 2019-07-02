@@ -13,7 +13,7 @@ jobs:
   include:
       # Linux 32-bit
     - &build-and-test
-      stage: build and test
+      stage: build, test, deploy
       os: linux
       install:
         - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-9 /usr/bin/gcc
@@ -34,6 +34,20 @@ jobs:
         - make all
         - ${OCTEST} --verbose
 
+      before_deploy:
+        - ${OCMAKE} --build . --target PACKAGE
+      deploy:
+        provider: releases
+        api_key:
+          secure: qpk1cBNeR3SwKqueQ6hfGx8j2f9gv6sWkvhOoXh68kCILYGAHUo5g8HE5Wa3h+L7zZ/AF/qVFY0CbUoHG+1qRpRpfOuAUImkcXozuinVQkfSB0WlDQSlBMlHZeaZxDAh/gumPdBU9KJ3lGy6XxDazQXjjU9opJ2wmHfOMQc7xgiFf6m2qD7Ituiapj4B+reLuB/8SMlU2odoWNrEZVr9ZEudl0Ny4tqG69kqsk/Zem3Q9P4dCG/lu5P+PsPVUfkTleNNdEWuGWKlp5sMGLOmc37PRuLjuPb6FhEPiPaRoQLPKGY1hCsy7OrynP+0CfYkzuMMqCxzOzKhgGTapDR3Eyp19V4Ky/n05sm9EFigcqhcuBlO+eh7ab4eWO0Rw7aC5LD295N3Rkqcbb+Jc9M2lKpVZ+YuQB3a3TvlBpjH8dIbh8ODHimYNK4wJ3mWySEOU3c+NZs4g5q29XVqnlhnbh2T/YVG6gi+779nYx7aMO8n56e2fb9f6Ajj4fIAvPLrZjpHPfQUxOOQnfA7/B+VGF9bYSID99/Hd+J5xb2Xd2rkyravOkmwMG+4w8eqwvNKZII7u9VX9pnU89/28Rzol7iLPiXHBV4ESbSoAB6AK5CtZtNh8mTGaofCt4NMyuadIZ9Z4U80bJEReHKdhKaDoFQMu+nRxaXS/nuyuHSMWPI=
+        file_glob: true
+        file: xtga-*
+        draft: true
+        skip_cleanup: true
+        on:
+          repo: xNWP/xTGA
+          branch: master
+
       # Linux 64-bit
     - <<: *build-and-test
       before_script: skip
@@ -42,7 +56,7 @@ jobs:
 
       # Windows 64-bit
     - &build-and-test-windows
-      stage: build and test
+      stage: build, test, deploy
       os: windows
       install: choco upgrade cmake
       env: ARCH=" Win64"
@@ -51,6 +65,19 @@ jobs:
         - cmake -G "Visual Studio 15 2017${ARCH}" ..
         - cmake --build .
         - ctest --verbose
+      before_deploy:
+        - cmake --build . --target PACKAGE
+      deploy:
+        provider: releases
+        api_key:
+          secure: qpk1cBNeR3SwKqueQ6hfGx8j2f9gv6sWkvhOoXh68kCILYGAHUo5g8HE5Wa3h+L7zZ/AF/qVFY0CbUoHG+1qRpRpfOuAUImkcXozuinVQkfSB0WlDQSlBMlHZeaZxDAh/gumPdBU9KJ3lGy6XxDazQXjjU9opJ2wmHfOMQc7xgiFf6m2qD7Ituiapj4B+reLuB/8SMlU2odoWNrEZVr9ZEudl0Ny4tqG69kqsk/Zem3Q9P4dCG/lu5P+PsPVUfkTleNNdEWuGWKlp5sMGLOmc37PRuLjuPb6FhEPiPaRoQLPKGY1hCsy7OrynP+0CfYkzuMMqCxzOzKhgGTapDR3Eyp19V4Ky/n05sm9EFigcqhcuBlO+eh7ab4eWO0Rw7aC5LD295N3Rkqcbb+Jc9M2lKpVZ+YuQB3a3TvlBpjH8dIbh8ODHimYNK4wJ3mWySEOU3c+NZs4g5q29XVqnlhnbh2T/YVG6gi+779nYx7aMO8n56e2fb9f6Ajj4fIAvPLrZjpHPfQUxOOQnfA7/B+VGF9bYSID99/Hd+J5xb2Xd2rkyravOkmwMG+4w8eqwvNKZII7u9VX9pnU89/28Rzol7iLPiXHBV4ESbSoAB6AK5CtZtNh8mTGaofCt4NMyuadIZ9Z4U80bJEReHKdhKaDoFQMu+nRxaXS/nuyuHSMWPI=
+        file_glob: true
+        file: xtga-*
+        draft: true
+        skip_cleanup: true
+        on:
+          repo: xNWP/xTGA
+          branch: master
 
       # Windows 32-bit
     - <<: *build-and-test-windows

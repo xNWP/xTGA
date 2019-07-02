@@ -68,7 +68,7 @@ if(MSVC)
 	endif()
 
 	add_custom_target(PACKAGE
-	COMMENT Packaging library for distribution...
+	COMMENT "Packaging library for distribution..."
 	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGA --config Release
 	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGAs --config Release
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
@@ -89,8 +89,14 @@ elseif(UNIX)
 	LICENSE
 	${HEADERS})
 
+	if(CMAKE_CXX_FLAGS MATCHES "-m32")
+		set(archiveName xtga-${XTGA_VERSION_ASCII}-linux-x86)
+	else()
+		set(archiveName xtga-${XTGA_VERSION_ASCII}-linux-x64)
+	endif()
+
 	add_custom_target(PACKAGE
-	COMMENT Packaging library for distribution...
+	COMMENT "Packaging library for distribution..."
 	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGA
 	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGAs
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
@@ -100,7 +106,7 @@ elseif(UNIX)
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libxTGA.so ${PROJECT_BINARY_DIR}/temp
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libxTGAs.a ${PROJECT_BINARY_DIR}/temp
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/LICENSE ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR}/temp tar czf ${PROJECT_BINARY_DIR}/${archiveName}.tar.gz --format=gnutar -- ${packageList}
+	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR}/temp tar czf ${PROJECT_BINARY_DIR}/${archiveName}.tar.gz -- ${packageList}
 	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
 )
 endif()
