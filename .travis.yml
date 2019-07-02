@@ -46,7 +46,7 @@ jobs:
         skip_cleanup: true
         on:
           repo: xNWP/xTGA
-          branch: master
+          tags: true
 
       # Linux 64-bit
     - <<: *build-and-test
@@ -77,7 +77,7 @@ jobs:
         skip_cleanup: true
         on:
           repo: xNWP/xTGA
-          branch: master
+          tags: true
 
       # Windows 32-bit
     - <<: *build-and-test-windows
