@@ -34,3 +34,11 @@ cxx_lambdas
 cxx_auto_type
 cxx_rvalue_references
 )
+
+target_compile_features(xTGAs PRIVATE
+cxx_range_for
+cxx_nullptr
+cxx_lambdas
+cxx_auto_type
+cxx_rvalue_references
+)

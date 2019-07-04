@@ -17,7 +17,6 @@ endforeach()
 
 set(interface ${PROJECT_SOURCE_DIR}/xTGA/include)
 set(common ${PROJECT_SOURCE_DIR}/tests)
-set(sources ${PROJECT_SOURCE_DIR}/xTGA/src)
 
 add_executable(test_dll main.cpp)
 target_link_libraries(test_dll xTGA)
@@ -26,7 +25,6 @@ target_include_directories(test_dll PUBLIC ${interface})
 add_executable(test_static main.cpp)
 target_link_libraries(test_static xTGAs)
 target_include_directories(test_static PUBLIC ${interface})
-target_compile_definitions(test_static PUBLIC XTGA_STATIC)
 
 add_executable(test_types types.cpp)
 target_link_libraries(test_types xTGA)
@@ -38,7 +36,7 @@ target_include_directories(test_loading PUBLIC ${interface} ${common})
 
 add_executable(test_c_linkage c_linkage.c)
 target_link_libraries(test_c_linkage xTGA)
-target_include_directories(test_c_linkage PUBLIC ${interface} ${sources})
+target_include_directories(test_c_linkage PUBLIC ${interface})
 
 add_executable(test_c_loading c_loading.c assert_equal.h library_error.h cmake_file.h)
 target_link_libraries(test_c_loading xTGA)

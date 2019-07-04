@@ -11,18 +11,22 @@
 #ifndef XTGA_API_H__
 #define XTGA_API_H__
 
-#if XTGA_STATIC
+#ifdef XTGA_STATIC
 #	define XTGAAPI
 #	define _CRT_SECURE_NO_WARNINGS
-#elif defined(_MSC_VER)
-#	if defined(XTGA_EXPORTS)
-#		define XTGAAPI __declspec(dllexport)
-#		define _CRT_SECURE_NO_WARNINGS
-#	else
-#		define XTGAAPI __declspec(dllimport)
+#else
+#	ifdef _MSC_VER
+#		ifdef XTGA_EXPORTS
+#			define XTGAAPI __declspec(dllexport)
+#			define _CRT_SECURE_NO_WARNINGS
+#		else
+#			define XTGAAPI __declspec(dllimport)
+#		endif
 #	endif
-#elif defined(__GNUC__)
-#	if defined(XTGA_EXPORTS)
+#endif
+
+#ifdef __GNUC__
+#	ifdef XTGA_EXPORTS
 #		define XTGAAPI __attribute__((visibility("default")))
 #	else
 #		define XTGAAPI

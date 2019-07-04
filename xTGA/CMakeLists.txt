@@ -16,8 +16,6 @@ foreach(x IN LISTS CFGHEADERS)
 	configure_file(${x} ${PROJECT_SOURCE_DIR}/xTGA/include/xTGA/${y})
 endforeach()
 
-add_compile_definitions(XTGA_EXPORTS)
-
 set(SOURCES
 src/codecs.h
 src/codecs.cpp
@@ -45,6 +43,8 @@ add_library(xTGA SHARED ${SOURCES} ${HEADERS} ${CFGHEADERS})
 add_library(xTGAs STATIC ${SOURCES} ${HEADERS} ${CFGHEADERS})
 target_include_directories(xTGA PUBLIC include)
 target_include_directories(xTGAs PUBLIC include)
+target_compile_definitions(xTGA PRIVATE XTGA_EXPORTS)
+target_compile_definitions(xTGAs PUBLIC XTGA_STATIC)
 
 if(UNIX)
 	find_package(Threads)
