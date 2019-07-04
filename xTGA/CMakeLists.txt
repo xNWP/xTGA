@@ -46,67 +46,10 @@ target_include_directories(xTGAs PUBLIC include)
 target_compile_definitions(xTGA PRIVATE XTGA_EXPORTS)
 target_compile_definitions(xTGAs PUBLIC XTGA_STATIC)
 
+set_property(TARGET xTGA xTGAs PROPERTY DEBUG_POSTFIX _d)
+
 if(UNIX)
 	find_package(Threads)
 	target_link_libraries(xTGA ${CMAKE_THREAD_LIBS_INIT})
 	target_link_libraries(xTGAs ${CMAKE_THREAD_LIBS_INIT})
-endif()
-
-# Packager
-if(MSVC)
-	list(APPEND packageList
-	xTGA.dll
-	xTGA.lib
-	xTGAs.lib
-	LICENSE
-	${HEADERS})
-
-	if(CMAKE_CL_64)
-		set(archiveName xtga-${XTGA_VERSION_ASCII}-Win64)
-	else()
-		set(archiveName xtga-${XTGA_VERSION_ASCII}-Win32)
-	endif()
-
-	add_custom_target(PACKAGE
-	COMMENT "Packaging library for distribution..."
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGA --config Release
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGAs --config Release
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/xTGA/include/xTGA ${PROJECT_BINARY_DIR}/temp/include/xTGA
-	COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_BINARY_DIR}/temp/include/xTGA/.gitignore
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/Release/xTGA.dll ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/Release/xTGA.lib ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/Release/xTGAs.lib ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/LICENSE ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR}/temp tar cf ${PROJECT_BINARY_DIR}/${archiveName}.zip --format=zip -- ${packageList}
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
-)
-elseif(UNIX)
-	list(APPEND packageList
-	libxTGA.so
-	libxTGAs.a
-	LICENSE
-	${HEADERS})
-
-	if(CMAKE_CXX_FLAGS MATCHES "-m32")
-		set(archiveName xtga-${XTGA_VERSION_ASCII}-linux-x86)
-	else()
-		set(archiveName xtga-${XTGA_VERSION_ASCII}-linux-x64)
-	endif()
-
-	add_custom_target(PACKAGE
-	COMMENT "Packaging library for distribution..."
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGA
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGAs
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/xTGA/include/xTGA ${PROJECT_BINARY_DIR}/temp/include/xTGA
-	COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_BINARY_DIR}/temp/include/xTGA/.gitignore
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libxTGA.so ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libxTGAs.a ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/LICENSE ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR}/temp tar czf ${PROJECT_BINARY_DIR}/${archiveName}.tar.gz -- ${packageList}
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
-)
 endif()

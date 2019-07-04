@@ -27,7 +27,6 @@ target_link_libraries(test_static xTGAs)
 target_include_directories(test_static PUBLIC ${interface})
 
 add_executable(test_types types.cpp)
-target_link_libraries(test_types xTGA)
 target_include_directories(test_types PUBLIC ${interface})
 
 add_executable(test_loading loading.cpp assert_equal.h library_error.h cmake_file.h)
