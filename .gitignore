@@ -1,6 +1,7 @@
 .vs
 [Bb]uild*
 [Bb]in*
+[Pp]ackages*
 *.user
 *.filters
 CMakeLists.txt.user

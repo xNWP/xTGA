@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.14)
 project(xTGA	VERSION 100
 				DESCRIPTION "A C/C++ library for opening/saving/manipulating TrueVision Targa (TGA) Images."
 				LANGUAGES C CXX)
-				
+
 set(XTGA_VERSION ${PROJECT_VERSION})
 set(XTGA_VERSION_ASCII "1.0")
 
@@ -45,64 +45,55 @@ cxx_rvalue_references
 
 # Packager
 if(MSVC)
-	list(APPEND packageList
-	xTGA.dll
-	xTGA_d.dll
-	xTGA.lib
-	xTGA_d.lib
-	xTGAs.lib
-	xTGAs_d.lib
-	LICENSE
-	${HEADERS})
-
-	if(CMAKE_CL_64)
-		set(archiveName xtga-${XTGA_VERSION_ASCII}-Win64)
-	else()
-		set(archiveName xtga-${XTGA_VERSION_ASCII}-Win32)
-	endif()
-
 	add_custom_target(PACKAGE
 	COMMENT "Packaging library for distribution..."
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGA --config Release
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGAs --config Release
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/xTGA/include/xTGA ${PROJECT_BINARY_DIR}/temp/include/xTGA
-	COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_BINARY_DIR}/temp/include/xTGA/.gitignore
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/Release/xTGA.dll ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/Release/xTGA.lib ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/Release/xTGAs.lib ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/LICENSE ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR}/temp tar cf ${PROJECT_BINARY_DIR}/${archiveName}.zip --format=zip -- ${packageList}
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
+	COMMAND cd ${PROJECT_SOURCE_DIR}
+	COMMAND ${CMAKE_COMMAND} -E remove_directory build
+	COMMAND mkdir build
+	COMMAND mkdir packages
+	COMMAND cd build
+	COMMAND ${CMAKE_COMMAND} -G "Visual Studio 15 2017 Win64" ..
+	COMMAND ${CMAKE_COMMAND} --build . --target xTGA --config Release
+	COMMAND ${CMAKE_COMMAND} --build . --target xTGAs --config Release
+	COMMAND ${CMAKE_COMMAND} --build . --target xTGA --config Debug
+	COMMAND ${CMAKE_COMMAND} --build . --target xTGAs --config Debug
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/xTGA/include/xTGA ${PROJECT_SOURCE_DIR}/build/include/xTGA
+	COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_SOURCE_DIR}/build/include/xTGA/.gitignore
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Release/xTGA.dll ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Release/xTGA.lib ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Release/xTGAs.lib ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Debug/xTGA_d.dll ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Debug/xTGA_d.lib ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Debug/xTGAs_d.lib ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/LICENSE ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E tar cf ${PROJECT_SOURCE_DIR}/packages/xtga-${XTGA_VERSION_ASCII}-Win64.zip --format=zip -- xTGA.dll xTGA.lib xTGA_d.dll xTGA_d.lib xTGAs.lib xTGAs_d.lib include LICENSE
+	COMMAND cd ..
+	COMMAND ${CMAKE_COMMAND} -E remove_directory build
+
+	COMMAND mkdir build
+	COMMAND cd build
+	COMMAND ${CMAKE_COMMAND} -G "Visual Studio 15 2017" ..
+	COMMAND ${CMAKE_COMMAND} --build . --target xTGA --config Release
+	COMMAND ${CMAKE_COMMAND} --build . --target xTGAs --config Release
+	COMMAND ${CMAKE_COMMAND} --build . --target xTGA --config Debug
+	COMMAND ${CMAKE_COMMAND} --build . --target xTGAs --config Debug
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/xTGA/include/xTGA ${PROJECT_SOURCE_DIR}/build/include/xTGA
+	COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_SOURCE_DIR}/build/include/xTGA/.gitignore
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Release/xTGA.dll ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Release/xTGA.lib ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Release/xTGAs.lib ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Debug/xTGA_d.dll ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Debug/xTGA_d.lib ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/build/Debug/xTGAs_d.lib ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/LICENSE ${PROJECT_SOURCE_DIR}/build
+	COMMAND ${CMAKE_COMMAND} -E tar cf ${PROJECT_SOURCE_DIR}/packages/xtga-${XTGA_VERSION_ASCII}-Win32.zip --format=zip -- xTGA.dll xTGA.lib xTGA_d.dll xTGA_d.lib xTGAs.lib xTGAs_d.lib include LICENSE
+	COMMAND cd ..
+	COMMAND ${CMAKE_COMMAND} -E remove_directory build
 )
 elseif(UNIX)
-	list(APPEND packageList
-	libxTGA.so
-	libxTGA_d.so
-	libxTGAs.a
-	libxTGAs_d.a
-	LICENSE
-	${HEADERS})
-
-	if(CMAKE_CXX_FLAGS MATCHES "-m32")
-		set(archiveName xtga-${XTGA_VERSION_ASCII}-linux-x86)
-	else()
-		set(archiveName xtga-${XTGA_VERSION_ASCII}-linux-x64)
-	endif()
-
 	add_custom_target(PACKAGE
 	COMMENT "Packaging library for distribution..."
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGA
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR} cmake --build . --target xTGAs
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/xTGA/include/xTGA ${PROJECT_BINARY_DIR}/temp/include/xTGA
-	COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_BINARY_DIR}/temp/include/xTGA/.gitignore
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libxTGA.so ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libxTGAs.a ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/LICENSE ${PROJECT_BINARY_DIR}/temp
-	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_BINARY_DIR}/temp tar czf ${PROJECT_BINARY_DIR}/${archiveName}.tar.gz -- ${packageList}
-	COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/temp
+	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_SOURCE_DIR} chmod +x .travis/package_files_linux.sh
+	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_SOURCE_DIR} .travis/package_files_linux.sh ${XTGA_VERSION_ASCII}
 )
 endif()
