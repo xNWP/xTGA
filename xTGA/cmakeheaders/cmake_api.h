@@ -11,11 +11,11 @@
 #ifndef XTGA_API_H__
 #define XTGA_API_H__
 
-#ifdef XTGA_STATIC
-#	define XTGAAPI
-#	define _CRT_SECURE_NO_WARNINGS
-#else
-#	ifdef _MSC_VER
+#ifdef _MSC_VER
+# ifdef XTGA_STATIC
+#	  define XTGAAPI
+#	  define _CRT_SECURE_NO_WARNINGS
+# else
 #		ifdef XTGA_EXPORTS
 #			define XTGAAPI __declspec(dllexport)
 #			define _CRT_SECURE_NO_WARNINGS
