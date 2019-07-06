@@ -1,4 +1,4 @@
-//============ Copyright © 2019 Brett Anthony. All rights reserved. ============
+//============ Copyright ï¿½ 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
@@ -148,14 +148,13 @@ namespace xtga
 		/// @return bool					True if the color map could be generated.
 		//----------------------------------------------------------------------------------------------------
 		bool GenerateColorMap(const void* inBuff, void*& outBuff, void*& colorBuff, addressable length, uchar depth, uint16& Size, bool force = false, ERRORCODE* error = nullptr);
-	
+
 		//----------------------------------------------------------------------------------------------------
 		/// Applies a colormap to an existing image buffer.
 		/// @param[in] buff					The input image buffer.
 		/// @param[in] ilength				The length of the input buffer (in pixels).
 		/// @param[in] colormap				The input color map.
 		/// @param[in] clength				The length of the colormap buffer (in pixels).
-		/// @param[in] length				The number of pixels the input buffer contains.
 		/// @param[in] depth				The bits per pixel of the input image (must be 16/24/32).
 		/// @param[out] error				Holds the error/status code (can be nullptr).
 		/// @return void*					The converted image buffer.

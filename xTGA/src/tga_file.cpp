@@ -474,7 +474,7 @@ xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(char const * filename, ERRORCODE* er
 	XTGA_SETERROR(error, ERRORCODE::NONE);
 }
 
-xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(const void* buffer, uint16 width, uint16 height, const Parameters& config, ERRORCODE* error)
+xtga::TGAFile::__TGAFileImpl::__TGAFileImpl(const void* buffer, uint16 width, uint16 height, const Parameters& config, ERRORCODE* error) : __TGAFileImpl ()
 {
 	using namespace pixelformats;
 
