@@ -1,10 +1,10 @@
-//============ Copyright © 2019 Brett Anthony. All rights reserved. ============
+//============ Copyright Â© 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
 //==============================================================================
-/// file 	: pixelformats.h
-/// purpose : Provides various structures for pixel formats.
+/// @file pixelformats.h
+/// @brief Provides various structures for pixel formats.
 //==============================================================================
 
 #ifndef XTGA_PIXELFORMATS_H__
@@ -17,22 +17,26 @@ namespace xtga
 {
 	namespace pixelformats
 	{
+		/**
+		* @enum PIXELFORMATS
+		* @brief a strongly typed enum describing the format of a pixel.
+		*/
 		enum class PIXELFORMATS : uchar
 		{
-			DEFAULT		= 0x09,
-			RGB888		= 0x00,		/* An RGB pixel with 8-bits per primary. */
-			BGR888		= 0x01,		/* A BGR pixel with 8-bits per primary. */
-			RGB565		= 0x02,		/* An RGB pixel with 5-bits red, 6 bits green, and 5-bits blue. */
-			BGR565		= 0x03,		/* A BGR pixel with 5-bits blue, 6-bits green, and 5-bits green. */
-			ARGB1555	= 0x04,		/* An RGB pixel with 5-bits per primary and 1-bit alpha/attribute. */
-			BGRA5551	= 0x05,		/* A BGR pixel with 5-bits per primary and 1-bit alpha/attribute. */
-			I8			= 0x06,		/* A luminance (I) pixel with 8-bits. */
-			IA88		= 0x07,		/* An IA pixel with 8-bit primary and 8-bit alpha. */
-			AI88		= 0x08,		/* An AI pixel with 8-bit primary and 8-bit alpha. */
-			RGBA8888	= 0x09,		/* An RGBA pixel with 8-bits per primary and 8-bit alpha. */
-			ABGR8888	= 0x0A,		/* An ABGR pixel with 8-bits per primary and 8-bit alpha. */
-			ARGB8888	= 0x0B,		/* An ARGB pixel with 8-bits per primary and 8-bit alpha. */
-			BGRA8888	= 0x0C,		/* A BGRA pixel with 8-bits per primary and 8-bit alpha. */
+			DEFAULT		= 0x09,		/*!< The default pixel format RGBA8888 */
+			RGB888		= 0x00,		/*!< An RGB pixel with 8-bits per primary. */
+			BGR888		= 0x01,		/*!< A BGR pixel with 8-bits per primary. */
+			RGB565		= 0x02,		/*!< An RGB pixel with 5-bits red, 6 bits green, and 5-bits blue. */
+			BGR565		= 0x03,		/*!< A BGR pixel with 5-bits blue, 6-bits green, and 5-bits green. */
+			ARGB1555	= 0x04,		/*!< An RGB pixel with 5-bits per primary and 1-bit alpha/attribute. */
+			BGRA5551	= 0x05,		/*!< A BGR pixel with 5-bits per primary and 1-bit alpha/attribute. */
+			I8				= 0x06,		/*!< A luminance (I) pixel with 8-bits. */
+			IA88			= 0x07,		/*!< An IA pixel with 8-bit primary and 8-bit alpha. */
+			AI88			= 0x08,		/*!< An AI pixel with 8-bit primary and 8-bit alpha. */
+			RGBA8888	= 0x09,		/*!< An RGBA pixel with 8-bits per primary and 8-bit alpha. */
+			ABGR8888	= 0x0A,		/*!< An ABGR pixel with 8-bits per primary and 8-bit alpha. */
+			ARGB8888	= 0x0B,		/*!< An ARGB pixel with 8-bits per primary and 8-bit alpha. */
+			BGRA8888	= 0x0C,		/*!< A BGRA pixel with 8-bits per primary and 8-bit alpha. */
 		};
 
 		//----------------------------------------------------------------------------------------------------

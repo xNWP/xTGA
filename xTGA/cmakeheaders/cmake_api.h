@@ -3,9 +3,9 @@
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
 //==============================================================================
-/// file 	: api.h
-/// purpose : Provides the export macros for the library.
-///			  Require preprocessing by CMake.
+/// @file api.h
+/// @brief Provides the export macros for the library.
+///			       Require preprocessing by CMake.
 //==============================================================================
 
 #ifndef XTGA_API_H__

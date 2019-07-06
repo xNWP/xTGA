@@ -1,10 +1,13 @@
-//============ Copyright © 2019 Brett Anthony. All rights reserved. ============
+//============ Copyright Â© 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
 //==============================================================================
-/// file 	: xTGA_C.h
-/// purpose : Provides the C interface for the library.
+/// @file xTGA_C.h
+/// @brief Provides the C interface for the library. All functions enums etc.
+/// are prefixed with 'xtga_'. All methods have a one-to-one relationship to a
+/// C++ method, i.e. xtga_TGAFile_Alloc_FromFile() is equivalent to
+/// xtga::TGAFile::Alloc() in the C++ header.
 //==============================================================================
 
 #ifndef XTGA_XTGA_C_H__
@@ -27,63 +30,79 @@ typedef struct xtga_TGAFile xtga_TGAFile;
 typedef struct xtga_Parameters xtga_Parameters;
 typedef struct xtga_ManagedArray xtga_ManagedArray;
 
+/**
+* @enum xtga_PIXELFORMATS_e
+* @brief C-Interface: describes the format of a pixel.
+*/
 typedef enum
 {
-	xtga_PIXELFORMATS_DEFAULT	= 0x09,
-	xtga_PIXELFORMATS_RGB888	= 0x00,		/* An RGB pixel with 8-bits per primary. */
-	xtga_PIXELFORMATS_BGR888	= 0x01,		/* A BGR pixel with 8-bits per primary. */
-	xtga_PIXELFORMATS_RGB565	= 0x02,		/* An RGB pixel with 5-bits red, 6 bits green, and 5-bits blue. */
-	xtga_PIXELFORMATS_BGR565	= 0x03,		/* A BGR pixel with 5-bits blue, 6-bits green, and 5-bits green. */
-	xtga_PIXELFORMATS_ARGB1555	= 0x04,		/* An RGB pixel with 5-bits per primary and 1-bit alpha/attribute. */
-	xtga_PIXELFORMATS_BGRA5551	= 0x05,		/* A BGR pixel with 5-bits per primary and 1-bit alpha/attribute. */
-	xtga_PIXELFORMATS_I8		= 0x06,		/* A luminance (I) pixel with 8-bits. */
-	xtga_PIXELFORMATS_IA88		= 0x07,		/* An IA pixel with 8-bit primary and 8-bit alpha. */
-	xtga_PIXELFORMATS_AI88		= 0x08,		/* An AI pixel with 8-bit primary and 8-bit alpha. */
-	xtga_PIXELFORMATS_RGBA8888	= 0x09,		/* An RGBA pixel with 8-bits per primary and 8-bit alpha. */
-	xtga_PIXELFORMATS_ABGR8888	= 0x0A,		/* An ABGR pixel with 8-bits per primary and 8-bit alpha. */
-	xtga_PIXELFORMATS_ARGB8888	= 0x0B,		/* An ARGB pixel with 8-bits per primary and 8-bit alpha. */
-	xtga_PIXELFORMATS_BGRA8888	= 0x0C,		/* A BGRA pixel with 8-bits per primary and 8-bit alpha. */
+	xtga_PIXELFORMATS_DEFAULT		= 0x09,		/*!< The default pixel format, currently RGBA8888. */
+	xtga_PIXELFORMATS_RGB888		= 0x00,		/*!< An RGB pixel with 8-bits per primary. */
+	xtga_PIXELFORMATS_BGR888		= 0x01,		/*!< A BGR pixel with 8-bits per primary. */
+	xtga_PIXELFORMATS_RGB565		= 0x02,		/*!< An RGB pixel with 5-bits red, 6 bits green, and 5-bits blue. */
+	xtga_PIXELFORMATS_BGR565		= 0x03,		/*!< A BGR pixel with 5-bits blue, 6-bits green, and 5-bits green. */
+	xtga_PIXELFORMATS_ARGB1555	= 0x04,		/*!< An RGB pixel with 5-bits per primary and 1-bit alpha/attribute. */
+	xtga_PIXELFORMATS_BGRA5551	= 0x05,		/*!< A BGR pixel with 5-bits per primary and 1-bit alpha/attribute. */
+	xtga_PIXELFORMATS_I8				= 0x06,		/*!< A luminance (I) pixel with 8-bits. */
+	xtga_PIXELFORMATS_IA88			= 0x07,		/*!< An IA pixel with 8-bit primary and 8-bit alpha. */
+	xtga_PIXELFORMATS_AI88			= 0x08,		/*!< An AI pixel with 8-bit primary and 8-bit alpha. */
+	xtga_PIXELFORMATS_RGBA8888	= 0x09,		/*!< An RGBA pixel with 8-bits per primary and 8-bit alpha. */
+	xtga_PIXELFORMATS_ABGR8888	= 0x0A,		/*!< An ABGR pixel with 8-bits per primary and 8-bit alpha. */
+	xtga_PIXELFORMATS_ARGB8888	= 0x0B,		/*!< An ARGB pixel with 8-bits per primary and 8-bit alpha. */
+	xtga_PIXELFORMATS_BGRA8888	= 0x0C,		/*!< A BGRA pixel with 8-bits per primary and 8-bit alpha. */
 } xtga_PIXELFORMATS_e;
 
+/**
+* @enum xtga_ALPHATYPE_e
+* @brief C-Interface: describes the alpha type of an image.
+*/
 typedef enum
 {
-	xtga_ALPHATYPE_NOALPHA					= 0x00,			/* There is no alpha in the image. */
-	xtga_ALPHATYPE_UNDEFINED_ALPHA_IGNORE	= 0x01,			/* The data in the alpha channel is undefined and can be ignored. */
-	xtga_ALPHATYPE_UNDEFINED_ALPHA_KEEP		= 0x02,			/* The data in the alpha channel is undefined but should be kept. */
-	xtga_ALPHATYPE_STRAIGHT					= 0x03,			/* The data in the alpha channel is a valid straight alpha. */
-	xtga_ALPHATYPE_PREMULTIPLIED			= 0x04			/* The data in the alpha channel is a valid premultiplied alpha. */
+	xtga_ALPHATYPE_NOALPHA								= 0x00,			/*!< There is no alpha in the image. */
+	xtga_ALPHATYPE_UNDEFINED_ALPHA_IGNORE	= 0x01,			/*!< The data in the alpha channel is undefined and can be ignored. */
+	xtga_ALPHATYPE_UNDEFINED_ALPHA_KEEP		= 0x02,			/*!< The data in the alpha channel is undefined but should be kept. */
+	xtga_ALPHATYPE_STRAIGHT								= 0x03,			/*!< The data in the alpha channel is a valid straight alpha. */
+	xtga_ALPHATYPE_PREMULTIPLIED					= 0x04			/*!< The data in the alpha channel is a valid premultiplied alpha. */
 } xtga_ALPHATYPE_e;
 
+/**
+* @enum xtga_ERRORCODE_e
+* @brief C-Interface: describes the error/status of an operation.
+*/
 typedef enum
 {
-	// General Errors
-	xtga_ERRORCODE_UNKNOWN				= 0xFFFFFFFF,	/* An unknown error occured. */
-	xtga_ERRORCODE_NONE					= 0x00000000,	/* Operation completed without error. */
-	xtga_ERRORCODE_FILE_ERROR			= 0x00000001,	/* An error occured while opening/saving a file descriptor. */
-	xtga_ERRORCODE_INDEX_OUT_OF_RANGE	= 0x00000002,	/* The requested index was out of range. */
-	xtga_ERRORCODE_REDUNDANT_OPERATION	= 0x00000003,	/* The requested operation would be redundant. */
-	xtga_ERRORCODE_OVERFLOW_DETECTED	= 0x00000004,	/* The requested operation causes an overflow. */
-	xtga_ERRORCODE_INVALID_OPERATION	= 0x00000005,	/* The requested operation is invalid for the object. */
-
-	// Image Errors
-	xtga_ERRORCODE_INVALID_DEPTH		= 0x00000010,	/* The supplied image bit depth was invalid. */
-	xtga_ERRORCODE_COLORMAP_TOO_LARGE	= 0x00000011,	/* The resulting color map wouldn't save space and thus was not returned. */
-
-	// Container Errors
-	xtga_ERRORCODE_CONTAINER_FULL		= 0x00000100	/* The container is at max capacity and cannot have any new items added. */
+	xtga_ERRORCODE_UNKNOWN							= 0xFFFFFFFF,	/*!< An unknown error occured. */
+	xtga_ERRORCODE_NONE									= 0x00000000,	/*!< Operation completed without error. */
+	xtga_ERRORCODE_FILE_ERROR						= 0x00000001,	/*!< An error occured while opening/saving a file descriptor. */
+	xtga_ERRORCODE_INDEX_OUT_OF_RANGE		= 0x00000002,	/*!< The requested index was out of range. */
+	xtga_ERRORCODE_REDUNDANT_OPERATION	= 0x00000003,	/*!< The requested operation would be redundant. */
+	xtga_ERRORCODE_OVERFLOW_DETECTED		= 0x00000004,	/*!< The requested operation causes an overflow. */
+	xtga_ERRORCODE_INVALID_OPERATION		= 0x00000005,	/*!< The requested operation is invalid for the object. */
+	xtga_ERRORCODE_INVALID_DEPTH				= 0x00000010,	/*!< The supplied image bit depth was invalid. */
+	xtga_ERRORCODE_COLORMAP_TOO_LARGE		= 0x00000011,	/*!< The resulting color map wouldn't save space and thus was not returned. */
+	xtga_ERRORCODE_CONTAINER_FULL				= 0x00000100	/*!< The container is at max capacity and cannot have any new items added. */
 } xtga_ERRORCODE_e;
 
+/**
+* @enum xtga_IMAGETYPE_e
+* @brief C-Interface: describes the image format of a TGA file.
+*/
 typedef enum
 {
-	xtga_IMAGETYPE_NONE					= 0x00,			/* No image data present. */
-	xtga_IMAGETYPE_COLOR_MAPPED			= 0x01,			/* Uncompressed Color Mapped. */
-	xtga_IMAGETYPE_TRUE_COLOR			= 0x02,			/* Uncompressed True Color. */
-	xtga_IMAGETYPE_GRAYSCALE			= 0x03,			/* Uncompressed Grayscale. */
-	xtga_IMAGETYPE_COLOR_MAPPED_RLE		= 0x09,			/* Run-length encoded Color Mapped. */
-	xtga_IMAGETYPE_TRUE_COLOR_RLE		= 0x0A,			/* Run-length encoded True Color. */
-	xtga_IMAGETYPE_GRAYSCALE_RLE		= 0x0B			/* Run-length encoded Grayscale. */
+	xtga_IMAGETYPE_NONE							= 0x00,			/*!< No image data present. */
+	xtga_IMAGETYPE_COLOR_MAPPED			= 0x01,			/*!< Uncompressed Color Mapped. */
+	xtga_IMAGETYPE_TRUE_COLOR				= 0x02,			/*!< Uncompressed True Color. */
+	xtga_IMAGETYPE_GRAYSCALE				= 0x03,			/*!< Uncompressed Grayscale. */
+	xtga_IMAGETYPE_COLOR_MAPPED_RLE	= 0x09,			/*!< Run-length encoded Color Mapped. */
+	xtga_IMAGETYPE_TRUE_COLOR_RLE		= 0x0A,			/*!< Run-length encoded True Color. */
+	xtga_IMAGETYPE_GRAYSCALE_RLE		= 0x0B			/*!< Run-length encoded Grayscale. */
 } xtga_IMAGETYPE_e;
 
+/**
+* @struct xtga_ColorCorrectionEntry_t
+* @brief C-Interface: describes the format of a TGA File color correction entry.
+* I am currently unaware if this is the correct format for this, if you do know please contact me!
+*/
 typedef struct
 {
 	// TODO: Verify that this is the correct format
@@ -93,38 +112,46 @@ typedef struct
 	uint16 A;
 } xtga_ColorCorrectionEntry_t;
 
+/**
+* @struct xtga_ExtensionArea_t
+* @brief C-Interface: provides metadata extensions the the TGA format.
+*/
 typedef struct
 {
-	uint16						EXTENSION_SIZE;					/* The size of the extension area. Should be 495 for TGA 2.0. */
-	uchar						AUTHOR_NAME[41];				/* The file author's name. Null-terminated. */
-	uchar						AUTHOR_COMMENTS_0[81];			/* 1st author comment line. Null-terminated. */
-	uchar						AUTHOR_COMMENTS_1[81];			/* 2nd author comment line. Null-terminated. */
-	uchar						AUTHOR_COMMENTS_2[81];			/* 3rd author comment line. Null-terminated. */
-	uchar						AUTHOR_COMMENTS_3[81];			/* 4th author comment line. Null-terminated. */
-	uint16						SAVE_DATE_MONTH;				/* The month the file was last saved/modified. */
-	uint16						SAVE_DATE_DAY;					/* The day the file was last saved/modified. */
-	uint16						SAVE_DATE_YEAR;					/* The year the file was last saved/modified. */
-	uint16						SAVE_DATE_HOUR;					/* The hour the file was last saved/modified. */
-	uint16						SAVE_DATE_MINUTE;				/* The minute the file was last saved/modified. */
-	uint16						SAVE_DATE_SECOND;				/* The second the file was last saved/modified. */
-	uchar						JOB_NAME[41];					/* Name/ID tag for the image. Null-terminated. */
-	uint16						JOB_HOURS;						/* The amount of billed hours for the image. */
-	uint16						JOB_MINUTES;					/* The amount of billed minutes for the image. */
-	uint16						JOB_SECONDS;					/* The number of billed seconds for the image. */
-	uchar						SOFTWARE_ID[41];				/* The software that was used to create the image. Null-terminated. */
-	uint16						SOFTWARE_VERSION;				/* The version of the software used to create the image. The version is multiplied by 100. i.e. for version 2.50, store 250. */
-	uchar						SOFTWARE_LETTER;				/* The letter that is added to the end of the software version, i.e. 'b' for beta. */
-	uint32						KEY_COLOR;						/* The chroma key color for the image in format BGRA. */
-	uint16						PIXEL_RATIO_X;					/* The numerator of the pixel aspect ratio. */
-	uint16						PIXEL_RATIO_Y;					/* The denominator of the pixel aspect ratio. Can be 0 to denote no pixel aspect ratio info. */
-	uint16						GAMMA_NUMERATOR;				/* The numerator of the gamma correction. */
-	uint16						GAMMA_DENOMINATOR;				/* The denominator of the gamma correction. Can be 0 to denote no gamma correction info. */
-	uint32						COLOR_CORRECTION_TABLE;			/* The offset from the beginning of the file for the color correction table. */
-	uint32						THUMBNAIL_OFFSET;				/* The offset from the beginning of the file for the thumbnail image. */
-	uint32						SCAN_LINE_OFFSET;				/* The offset from the beginning of the file for the scan line table. */
-	xtga_ALPHATYPE_e			ALPHATYPE;						/* Details the type of alpha the image contains. */
+	uint16						EXTENSION_SIZE;					/*!< The size of the extension area. Should be 495 for TGA 2.0. */
+	uchar							AUTHOR_NAME[41];				/*!< The file author's name. Null-terminated. */
+	uchar							AUTHOR_COMMENTS_0[81];	/*!< 1st author comment line. Null-terminated. */
+	uchar							AUTHOR_COMMENTS_1[81];	/*!< 2nd author comment line. Null-terminated. */
+	uchar							AUTHOR_COMMENTS_3[81];	/*!< 4th author comment line. Null-terminated. */
+	uchar							AUTHOR_COMMENTS_2[81];	/*!< 3rd author comment line. Null-terminated. */
+	uint16						SAVE_DATE_MONTH;				/*!< The month the file was last saved/modified. */
+	uint16						SAVE_DATE_DAY;					/*!< The day the file was last saved/modified. */
+	uint16						SAVE_DATE_YEAR;					/*!< The year the file was last saved/modified. */
+	uint16						SAVE_DATE_HOUR;					/*!< The hour the file was last saved/modified. */
+	uint16						SAVE_DATE_MINUTE;				/*!< The minute the file was last saved/modified. */
+	uint16						SAVE_DATE_SECOND;				/*!< The second the file was last saved/modified. */
+	uchar							JOB_NAME[41];						/*!< Name/ID tag for the image. Null-terminated. */
+	uint16						JOB_HOURS;							/*!< The amount of billed hours for the image. */
+	uint16						JOB_MINUTES;						/*!< The amount of billed minutes for the image. */
+	uint16						JOB_SECONDS;						/*!< The number of billed seconds for the image. */
+	uchar							SOFTWARE_ID[41];				/*!< The software that was used to create the image. Null-terminated. */
+	uint16						SOFTWARE_VERSION;				/*!< The version of the software used to create the image. The version is multiplied by 100. i.e. for version 2.50, store 250. */
+	uchar							SOFTWARE_LETTER;				/*!< The letter that is added to the end of the software version, i.e. 'b' for beta. */
+	uint32						KEY_COLOR;							/*!< The chroma key color for the image in format BGRA. */
+	uint16						PIXEL_RATIO_X;					/*!< The numerator of the pixel aspect ratio. */
+	uint16						PIXEL_RATIO_Y;					/*!< The denominator of the pixel aspect ratio. Can be 0 to denote no pixel aspect ratio info. */
+	uint16						GAMMA_NUMERATOR;				/*!< The numerator of the gamma correction. */
+	uint16						GAMMA_DENOMINATOR;			/*!< The denominator of the gamma correction. Can be 0 to denote no gamma correction info. */
+	uint32						COLOR_CORRECTION_TABLE;	/*!< The offset from the beginning of the file for the color correction table. */
+	uint32						THUMBNAIL_OFFSET;				/*!< The offset from the beginning of the file for the thumbnail image. */
+	uint32						SCAN_LINE_OFFSET;				/*!< The offset from the beginning of the file for the scan line table. */
+	xtga_ALPHATYPE_e	ALPHATYPE;							/*!< Details the type of alpha the image contains. */
 } xtga_ExtensionArea_t;
 
+/**
+* @struct xtga_ImageDescriptor_t
+* @brief C-Interface: describes various aspects of the pixel format.
+*/
 typedef struct
 {
 	union
@@ -132,31 +159,36 @@ typedef struct
 		uchar RawBits;
 		struct
 		{
-			uchar						ALPHA_CHANNEL_BITCOUNT : 4;
-			uchar						IMAGE_ORIGIN : 2;
+			uchar						ALPHA_CHANNEL_BITCOUNT : 4;	/*!< The number of bits dedicated to alpha/attribute per pixel. */
+			uchar						IMAGE_ORIGIN : 2;						/*!< The origin of the first pixel of the image, generates a warning on GCC, no way to disable :s */
 			uchar						UNUSED : 2;
 		};
 	};
 } xtga_ImageDescriptor_t;
 
+/**
+* @struct xtga_Header_t
+* @brief C-Interface: Contains the most valuable information of the TGA File.
+*/
 typedef struct
 {
-	uchar						ID_LENGTH;						/* Length of the Image ID Field (in bytes). */
-	uchar						COLOR_MAP_TYPE;					/* 0 if there is no color map, 1 otherwise. */
-	uchar						IMAGE_TYPE;						/* Image type. */
-	uint16						COLOR_MAP_FIRST_ENTRY_INDEX;	/* Index of the first color map entry. */
-	uint16						COLOR_MAP_LENGTH;				/* Total number of color map entries. */
-	uchar						COLOR_MAP_BITS_PER_ENTRY;		/* Number of bits per color map entry. */
-	uint16						ORIGIN_X;						/* Absolute horizontal coordinate for the lower left corner of the image. */
-	uint16						ORIGIN_Y;						/* Absolute vertical coordinate for the lower left corner of the image. */
-	uint16						IMAGE_WIDTH;					/* Width of the image in pixels. */
-	uint16						IMAGE_HEIGHT;					/* Height of the image in pixels. */
-	uchar						IMAGE_DEPTH;					/* Bits per pixel of the image. */
-	xtga_ImageDescriptor_t		IMAGE_DESCRIPTOR;				/* Contains the number of attribute bits per pixel/alpha bits per pixel, and image origin. */
+	uchar										ID_LENGTH;										/*!< Length of the Image ID Field (in bytes). */
+	uchar										COLOR_MAP_TYPE;								/*!< 0 if there is no color map, 1 otherwise. */
+	uchar										IMAGE_TYPE;										/*!< Image type. */
+	uint16									COLOR_MAP_FIRST_ENTRY_INDEX;	/*!< Index of the first color map entry. */
+	uint16									COLOR_MAP_LENGTH;							/*!< Total number of color map entries. */
+	uchar										COLOR_MAP_BITS_PER_ENTRY;			/*!< Number of bits per color map entry. */
+	uint16									ORIGIN_X;											/*!< Absolute horizontal coordinate for the lower left corner of the image. */
+	uint16									ORIGIN_Y;											/*!< Absolute vertical coordinate for the lower left corner of the image. */
+	uint16									IMAGE_WIDTH;									/*!< Width of the image in pixels. */
+	uint16									IMAGE_HEIGHT;									/*!< Height of the image in pixels. */
+	uchar										IMAGE_DEPTH;									/*!< Bits per pixel of the image. */
+	xtga_ImageDescriptor_t	IMAGE_DESCRIPTOR;							/*!< Contains the number of attribute bits per pixel/alpha bits per pixel, and image origin. */
 } xtga_Header_t;
 
 //----------------------------------------------------------------------------------------------------
 /// Returns the version of library, useful to test linkage as well!
+/// @return uint16							The version of the library multiplied by 100. i.e. 100 = v1.0
 //----------------------------------------------------------------------------------------------------
 XTGAAPI extern uint16 xtga_WhatVersion();
 
@@ -166,28 +198,28 @@ XTGAAPI extern uint16 xtga_WhatVersion();
 //----------------------------------------------------------------------------------------------------
 XTGAAPI void xtga_FreeMem(void** mem);
 
-XTGAAPI xtga_Parameters* xtga_Parameters_BGR24();										/* BGR with 8-bits per primary. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGR24_RLE();									/* BGR with 8-bits per primary and Run-length encoding. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGR24_COLORMAPPED();							/* BGR with 8-bits per primary and indexed color. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGR24_RLE_COLORMAPPED();						/* BGR with 8-bits per primary, Run-length encoding, and indexed color. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGR16();										/* BGR with 5-bits per primary (1-bit set to ignore). */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGR16_RLE();									/* BGR with 5-bits per primary (1-bit set to ignore) and Run-length encoding. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGR16_COLORMAPPED();							/* BGR with 5-bits per primary (1-bit set to ignore) and indexed color. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGR16_RLE_COLORMAPPED();						/* BGR with 5-bits per primary (1-bit set to ignore), Run-length encoding, and indexed color. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_STRAIGHT_ALPHA();						/* BGRA with 8-bits per primary, and 8-bit alpha (straight). */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_PREMULTIPLIED_ALPHA();					/* BGRA with 8-bits per primary, and 8-bits alpha (premultiplied).*/
-XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_RLE_STRAIGHT_ALPHA();					/* BGRA with 8-bits per primary, 8-bit alpha (straight), and Run-length encoding. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_RLE_PREMULTIPLIED_ALPHA();				/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and Run-length encoding. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_COLORMAPPED_STRAIGHT_ALPHA();			/* BGRA with 8-bits per primary, 8-bit alpha (straight), and indexed color. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_COLORMAPPED_PREMULTIPLIED_ALPHA();		/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and indexed color. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_RLE_COLORMAPPED_STRAIGHT_ALPHA();		/* BGRA with 8-bits per primary, 8-bit alpha (straight), Run-length encoding, and indexed color. */
-XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_RLE_COLORMAPPED_PREMULTIPLIED_ALPHA();	/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), Run-length encoding, and indexed color. */
-XTGAAPI xtga_Parameters* xtga_Parameters_I8();											/* Grayscale with 8-bit primary. */
-XTGAAPI xtga_Parameters* xtga_Parameters_I8_RLE();										/* Grayscale with 8-bit primary and Run-length encoding. */
-XTGAAPI xtga_Parameters* xtga_Parameters_IA16_STRAIGHT_ALPHA();							/* Grayscale with 8-bit primary, 8-bit alpha (straight). */
-XTGAAPI xtga_Parameters* xtga_Parameters_IA16_PREMULTIPLIED_ALPHA();					/* Grayscale with 8-bit primary, 8-bit alpha (premultiplied). */
-XTGAAPI xtga_Parameters* xtga_Parameters_IA16_RLE_STRAIGHT_ALPHA();						/* Grayscale with 8-bit primary, 8-bit alpha (straight), and Run-length encoding. */
-XTGAAPI xtga_Parameters* xtga_Parameters_IA16_RLE_PREMULTIPLIED_ALPHA();				/* Grayscale with 8-bit primary, 8-bit alpha (premultiplied), and Run-length encoding. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGR24();																				/*!< BGR with 8-bits per primary. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGR24_RLE();																		/*!< BGR with 8-bits per primary and Run-length encoding. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGR24_COLORMAPPED();														/*!< BGR with 8-bits per primary and indexed color. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGR24_RLE_COLORMAPPED();												/*!< BGR with 8-bits per primary, Run-length encoding, and indexed color. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGR16();																				/*!< BGR with 5-bits per primary (1-bit set to ignore). */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGR16_RLE();																		/*!< BGR with 5-bits per primary (1-bit set to ignore) and Run-length encoding. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGR16_COLORMAPPED();														/*!< BGR with 5-bits per primary (1-bit set to ignore) and indexed color. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGR16_RLE_COLORMAPPED();												/*!< BGR with 5-bits per primary (1-bit set to ignore), Run-length encoding, and indexed color. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_STRAIGHT_ALPHA();												/*!< BGRA with 8-bits per primary, and 8-bit alpha (straight). */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_PREMULTIPLIED_ALPHA();									/*!< BGRA with 8-bits per primary, and 8-bits alpha (premultiplied).*/
+XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_RLE_STRAIGHT_ALPHA();										/*!< BGRA with 8-bits per primary, 8-bit alpha (straight), and Run-length encoding. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_RLE_PREMULTIPLIED_ALPHA();							/*!< BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and Run-length encoding. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_COLORMAPPED_STRAIGHT_ALPHA();						/*!< BGRA with 8-bits per primary, 8-bit alpha (straight), and indexed color. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_COLORMAPPED_PREMULTIPLIED_ALPHA();			/*!< BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and indexed color. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_RLE_COLORMAPPED_STRAIGHT_ALPHA();				/*!< BGRA with 8-bits per primary, 8-bit alpha (straight), Run-length encoding, and indexed color. */
+XTGAAPI xtga_Parameters* xtga_Parameters_BGRA32_RLE_COLORMAPPED_PREMULTIPLIED_ALPHA();	/*!< BGRA with 8-bits per primary, 8-bit alpha (premultiplied), Run-length encoding, and indexed color. */
+XTGAAPI xtga_Parameters* xtga_Parameters_I8();																					/*!< Grayscale with 8-bit primary. */
+XTGAAPI xtga_Parameters* xtga_Parameters_I8_RLE();																			/*!< Grayscale with 8-bit primary and Run-length encoding. */
+XTGAAPI xtga_Parameters* xtga_Parameters_IA16_STRAIGHT_ALPHA();													/*!< Grayscale with 8-bit primary, 8-bit alpha (straight). */
+XTGAAPI xtga_Parameters* xtga_Parameters_IA16_PREMULTIPLIED_ALPHA();										/*!< Grayscale with 8-bit primary, 8-bit alpha (premultiplied). */
+XTGAAPI xtga_Parameters* xtga_Parameters_IA16_RLE_STRAIGHT_ALPHA();											/*!< Grayscale with 8-bit primary, 8-bit alpha (straight), and Run-length encoding. */
+XTGAAPI xtga_Parameters* xtga_Parameters_IA16_RLE_PREMULTIPLIED_ALPHA();								/*!< Grayscale with 8-bit primary, 8-bit alpha (premultiplied), and Run-length encoding. */
 
 //----------------------------------------------------------------------------------------------------
 /// Sets the input format.
@@ -227,7 +259,7 @@ XTGAAPI void xtga_Parameters_set_thumbnail(xtga_Parameters* Parameters, bool use
 //----------------------------------------------------------------------------------------------------
 /// Sets whether or not to use run-length encoding.
 /// @param[in,out] Parameters			The object to set the property for.
-/// @param[in] usethumbnail				True if the image should use run-length encoding.
+/// @param[in] userle							True if the image should use run-length encoding.
 //----------------------------------------------------------------------------------------------------
 XTGAAPI void xtga_Parameters_set_rle(xtga_Parameters* Parameters, bool userle);
 

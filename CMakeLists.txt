@@ -97,3 +97,12 @@ elseif(UNIX)
 	COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_SOURCE_DIR} .travis/package_files_linux.sh ${XTGA_VERSION_ASCII}
 )
 endif()
+
+# Doxygen
+configure_file(${PROJECT_SOURCE_DIR}/docs/cmake_Doxyfile ${PROJECT_SOURCE_DIR}/docs/Doxyfile)
+
+add_custom_target(GenerateDocumentation
+COMMENT "Generating documentation under docs..."
+COMMAND cd ${PROJECT_SOURCE_DIR}/docs
+COMMAND doxygen Doxyfile
+)

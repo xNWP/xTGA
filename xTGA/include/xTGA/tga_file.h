@@ -1,10 +1,10 @@
-//============ Copyright © 2019 Brett Anthony. All rights reserved. ============
+//============ Copyright Â© 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
 //==============================================================================
-/// file 	: tga_file.h
-/// purpose : Defines the TGAFile class that can decode/encode TGA files.
+/// @file tga_file.h
+/// @brief Defines the TGAFile class that can decode/encode TGA files.
 //==============================================================================
 
 #ifndef XTGA_TGA_FILE_H__
@@ -19,39 +19,43 @@
 
 namespace xtga
 {
+	/**
+	* @brief essentially a settings object, the static functions create a basic Parameters object with the described
+	* output pixel format, from there you can simply modify the InputFormat + any additional options.
+	*/
 	struct Parameters
 	{
-		XTGAAPI static Parameters BGR24();										/* BGR with 8-bits per primary. */
-		XTGAAPI static Parameters BGR24_RLE();									/* BGR with 8-bits per primary and Run-length encoding. */
-		XTGAAPI static Parameters BGR24_COLORMAPPED();							/* BGR with 8-bits per primary and indexed color. */
-		XTGAAPI static Parameters BGR24_RLE_COLORMAPPED();						/* BGR with 8-bits per primary, Run-length encoding, and indexed color. */
-		XTGAAPI static Parameters BGR16();										/* BGR with 5-bits per primary (1-bit set to ignore). */
-		XTGAAPI static Parameters BGR16_RLE();									/* BGR with 5-bits per primary (1-bit set to ignore) and Run-length encoding. */
-		XTGAAPI static Parameters BGR16_COLORMAPPED();							/* BGR with 5-bits per primary (1-bit set to ignore) and indexed color. */
-		XTGAAPI static Parameters BGR16_RLE_COLORMAPPED();						/* BGR with 5-bits per primary (1-bit set to ignore), Run-length encoding, and indexed color. */
-		XTGAAPI static Parameters BGRA32_STRAIGHT_ALPHA();						/* BGRA with 8-bits per primary, and 8-bit alpha (straight). */
-		XTGAAPI static Parameters BGRA32_PREMULTIPLIED_ALPHA();					/* BGRA with 8-bits per primary, and 8-bits alpha (premultiplied).*/
-		XTGAAPI static Parameters BGRA32_RLE_STRAIGHT_ALPHA();					/* BGRA with 8-bits per primary, 8-bit alpha (straight), and Run-length encoding. */
-		XTGAAPI static Parameters BGRA32_RLE_PREMULTIPLIED_ALPHA();				/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and Run-length encoding. */
-		XTGAAPI static Parameters BGRA32_COLORMAPPED_STRAIGHT_ALPHA();			/* BGRA with 8-bits per primary, 8-bit alpha (straight), and indexed color. */
-		XTGAAPI static Parameters BGRA32_COLORMAPPED_PREMULTIPLIED_ALPHA();		/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and indexed color. */
-		XTGAAPI static Parameters BGRA32_RLE_COLORMAPPED_STRAIGHT_ALPHA();		/* BGRA with 8-bits per primary, 8-bit alpha (straight), Run-length encoding, and indexed color. */
-		XTGAAPI static Parameters BGRA32_RLE_COLORMAPPED_PREMULTIPLIED_ALPHA();	/* BGRA with 8-bits per primary, 8-bit alpha (premultiplied), Run-length encoding, and indexed color. */
-		XTGAAPI static Parameters I8();											/* Grayscale with 8-bit primary. */
-		XTGAAPI static Parameters I8_RLE();										/* Grayscale with 8-bit primary and Run-length encoding. */
-		XTGAAPI static Parameters IA16_STRAIGHT_ALPHA();						/* Grayscale with 8-bit primary, 8-bit alpha (straight). */
-		XTGAAPI static Parameters IA16_PREMULTIPLIED_ALPHA();					/* Grayscale with 8-bit primary, 8-bit alpha (premultiplied). */
-		XTGAAPI static Parameters IA16_RLE_STRAIGHT_ALPHA();					/* Grayscale with 8-bit primary, 8-bit alpha (straight), and Run-length encoding. */
-		XTGAAPI static Parameters IA16_RLE_PREMULTIPLIED_ALPHA();				/* Grayscale with 8-bit primary, 8-bit alpha (premultiplied), and Run-length encoding. */
+		XTGAAPI static Parameters BGR24();																			/*!< BGR with 8-bits per primary. */
+		XTGAAPI static Parameters BGR24_RLE();																	/*!< BGR with 8-bits per primary and Run-length encoding. */
+		XTGAAPI static Parameters BGR24_COLORMAPPED();													/*!< BGR with 8-bits per primary and indexed color. */
+		XTGAAPI static Parameters BGR24_RLE_COLORMAPPED();											/*!< BGR with 8-bits per primary, Run-length encoding, and indexed color. */
+		XTGAAPI static Parameters BGR16();																			/*!< BGR with 5-bits per primary (1-bit set to ignore). */
+		XTGAAPI static Parameters BGR16_RLE();																	/*!< BGR with 5-bits per primary (1-bit set to ignore) and Run-length encoding. */
+		XTGAAPI static Parameters BGR16_COLORMAPPED();													/*!< BGR with 5-bits per primary (1-bit set to ignore) and indexed color. */
+		XTGAAPI static Parameters BGR16_RLE_COLORMAPPED();											/*!< BGR with 5-bits per primary (1-bit set to ignore), Run-length encoding, and indexed color. */
+		XTGAAPI static Parameters BGRA32_STRAIGHT_ALPHA();											/*!< BGRA with 8-bits per primary, and 8-bit alpha (straight). */
+		XTGAAPI static Parameters BGRA32_PREMULTIPLIED_ALPHA();									/*!< BGRA with 8-bits per primary, and 8-bits alpha (premultiplied).*/
+		XTGAAPI static Parameters BGRA32_RLE_STRAIGHT_ALPHA();									/*!< BGRA with 8-bits per primary, 8-bit alpha (straight), and Run-length encoding. */
+		XTGAAPI static Parameters BGRA32_RLE_PREMULTIPLIED_ALPHA();							/*!< BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and Run-length encoding. */
+		XTGAAPI static Parameters BGRA32_COLORMAPPED_STRAIGHT_ALPHA();					/*!< BGRA with 8-bits per primary, 8-bit alpha (straight), and indexed color. */
+		XTGAAPI static Parameters BGRA32_COLORMAPPED_PREMULTIPLIED_ALPHA();			/*!< BGRA with 8-bits per primary, 8-bit alpha (premultiplied), and indexed color. */
+		XTGAAPI static Parameters BGRA32_RLE_COLORMAPPED_STRAIGHT_ALPHA();			/*!< BGRA with 8-bits per primary, 8-bit alpha (straight), Run-length encoding, and indexed color. */
+		XTGAAPI static Parameters BGRA32_RLE_COLORMAPPED_PREMULTIPLIED_ALPHA();	/*!< BGRA with 8-bits per primary, 8-bit alpha (premultiplied), Run-length encoding, and indexed color. */
+		XTGAAPI static Parameters I8();																					/*!< Grayscale with 8-bit primary. */
+		XTGAAPI static Parameters I8_RLE();																			/*!< Grayscale with 8-bit primary and Run-length encoding. */
+		XTGAAPI static Parameters IA16_STRAIGHT_ALPHA();												/*!< Grayscale with 8-bit primary, 8-bit alpha (straight). */
+		XTGAAPI static Parameters IA16_PREMULTIPLIED_ALPHA();										/*!< Grayscale with 8-bit primary, 8-bit alpha (premultiplied). */
+		XTGAAPI static Parameters IA16_RLE_STRAIGHT_ALPHA();										/*!< Grayscale with 8-bit primary, 8-bit alpha (straight), and Run-length encoding. */
+		XTGAAPI static Parameters IA16_RLE_PREMULTIPLIED_ALPHA();								/*!< Grayscale with 8-bit primary, 8-bit alpha (premultiplied), and Run-length encoding. */
 
-		pixelformats::PIXELFORMATS InputFormat	= pixelformats::PIXELFORMATS::DEFAULT;		/* The input pixel format. */
-		flags::ALPHATYPE AlphaType				= flags::ALPHATYPE::UNDEFINED_ALPHA_KEEP;	/* The type of alpha the output image contains. */
-		bool UseColorMap						= false;									/* Whether or not to generate a color map. It will not be generated if it would take more bits than storing the image without it would. */
-		bool TGA2File							= true;										/* The file should be TGA 2.0 */
-		bool UseThumbnailImage					= false;									/* Whether or not to generate a thumbnail image. REQUIRES TGA 2.0 */
-		bool RunLengthEncode					= true;										/* Whether or not to use run-length encoding to save space. */
+		pixelformats::PIXELFORMATS InputFormat	= pixelformats::PIXELFORMATS::DEFAULT;		/*!< The input pixel format. */
+		flags::ALPHATYPE AlphaType							= flags::ALPHATYPE::UNDEFINED_ALPHA_KEEP;	/*!< The type of alpha the output image contains. */
+		bool UseColorMap												= false;																	/*!< Whether or not to generate a color map. It will not be generated if it would take more bits than storing the image without it would. */
+		bool TGA2File														= true;																		/*!< The file should be TGA 2.0 */
+		bool UseThumbnailImage									= false;																	/*!< Whether or not to generate a thumbnail image. REQUIRES TGA 2.0 */
+		bool RunLengthEncode										= true;																		/*!< Whether or not to use run-length encoding to save space. */
 
-		XTGAAPI pixelformats::PIXELFORMATS GetOutputFormat() const;							/* Returns the target output format. */
+		XTGAAPI pixelformats::PIXELFORMATS GetOutputFormat() const;												/*!< Returns the target output format. */
 
 	private:
 		pixelformats::PIXELFORMATS OutputFormat = pixelformats::PIXELFORMATS::BGRA8888;
@@ -82,7 +86,7 @@ namespace xtga
 		/// @return TGAFile*				The created TGAFile (or nullptr if an error occured).
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI static TGAFile* Alloc(const void* buffer, uint16 width, uint16 height, const Parameters& config, ERRORCODE* error = nullptr);
-		
+
 		//----------------------------------------------------------------------------------------------------
 		/// Frees the supplied TGAFile object and sets its pointer to nullptr.
 		/// @param[in] obj			        The TGAFile object to free.
@@ -269,7 +273,7 @@ namespace xtga
 		/// @param[out] PixelType			The type of pixel that was grabbed (can be nullptr).
 		/// @param[out] AlphaType			The type of alpha in the image (can be nullptr).
 		/// @param[out] error				Contains the error/status code (can be nullptr).
-		/// @return ManagedArray<IPixel>*	The image buffer (or nullptr if an error occured). Use ::Free() when done.
+		/// @return ManagedArray<IPixel>*	The image buffer (or nullptr if an error occured). Use Free() when done.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI ManagedArray<pixelformats::IPixel>* GetThumbnail(pixelformats::PIXELFORMATS* PixelType = nullptr, flags::ALPHATYPE* AlphaType = nullptr, ERRORCODE* error = nullptr);
 
@@ -277,7 +281,7 @@ namespace xtga
 		/// Returns the decoded thumbnail image in RGBA format with the top left pixel being the first pixel.
 		/// @param[out] AlphaType			The type of alpha in the image (can be nullptr).
 		/// @param[out] error				Contains the error/status code (can be nullptr).
-		/// @return ManagedArray<RGBA8888>*	The image buffer (or nullptr if an error occured). Use ::Free() when done.
+		/// @return ManagedArray<RGBA8888>*	The image buffer (or nullptr if an error occured). Use Free() when done.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI ManagedArray<pixelformats::RGBA8888>* GetThumbnailRGBA(flags::ALPHATYPE* AlphaType = nullptr, ERRORCODE* error = nullptr);
 
@@ -299,7 +303,7 @@ namespace xtga
 		/// @param[out] PixelType			The type of pixel that was grabbed (can be nullptr).
 		/// @param[out] AlphaType			The type of alpha in the image (can be nullptr).
 		/// @param[out] error				Contains the error/status code (can be nullptr).
-		/// @return ManagedArray<IPixel>*	The image buffer (or nullptr if an error occured). Use ::Free() when done.
+		/// @return ManagedArray<IPixel>*	The image buffer (or nullptr if an error occured). Use Free() when done.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI ManagedArray<pixelformats::IPixel>* GetImage(pixelformats::PIXELFORMATS* PixelType = nullptr, flags::ALPHATYPE* AlphaType = nullptr, ERRORCODE* error = nullptr);
 
@@ -307,7 +311,7 @@ namespace xtga
 		/// Returns the image in RGBA8888 format with the top left pixel being the first pixel.
 		/// @param[out] AlphaType			The type of alpha in the image (can be nullptr).
 		/// @param[out] error				Contains the error/status code (can be nullptr).
-		/// @return ManagedArray<RGBA8888>*	The RGBA buffer (or nullptr if an error occured). Use ::Free() when done.
+		/// @return ManagedArray<RGBA8888>*	The RGBA buffer (or nullptr if an error occured). Use Free() when done.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI ManagedArray<pixelformats::RGBA8888>* GetImageRGBA(flags::ALPHATYPE* AlphaType = nullptr, ERRORCODE* error = nullptr);
 

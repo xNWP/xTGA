@@ -1,10 +1,10 @@
-//============ Copyright © 2019 Brett Anthony. All rights reserved. ============
+//============ Copyright Â© 2019 Brett Anthony. All rights reserved. ============
 ///
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
 //==============================================================================
-/// file 	: marray.h
-/// purpose : Provides the declaration of a managed array. This exists so that
+/// @file marray.h
+/// @brief Provides the declaration of a managed array. This exists so that
 ///			  (de)allocation can be handled by the same compiler.
 //==============================================================================
 
@@ -55,7 +55,7 @@ namespace xtga
 		XTGAAPI T& at(addressable index, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
-		/// Identical to ::at(). However does not provide error checking.
+		/// Identical to at(). However does not provide error checking.
 		/// @tparam T					The type of data the array contains.
 		/// @param[in] index			The index of the element.
 		/// @return T*					The returned element [editable]. If index is out of range the first item is returned.

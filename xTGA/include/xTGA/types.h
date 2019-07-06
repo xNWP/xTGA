@@ -3,8 +3,8 @@
 /// This work is licensed under the terms of the MIT license.
 /// For a copy, see <https://opensource.org/licenses/MIT>.
 //==============================================================================
-/// file 	: types.h
-/// purpose : defines various types the library uses.
+/// @file types.h
+/// @brief defines various types the library uses.
 //==============================================================================
 
 #ifndef XTGA_TYPES_H__
