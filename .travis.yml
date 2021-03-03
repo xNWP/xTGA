@@ -1,5 +1,4 @@
 language: cpp
-sudo: required
 
 addons:
     apt:
@@ -26,7 +25,7 @@ template_deploy : &template_deploy
     file_glob: true
     file: packages/*
     draft: true
-    skip_cleanup: true
+    cleanup: false
     on:
       repo: xNWP/xTGA
       tags: true
