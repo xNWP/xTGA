@@ -13,7 +13,7 @@ stages:
   - deploy binaries
 
 # Deploy Teplates
-template_deploy : &template_deploy
+_template_deploy : &template_deploy
   script:
     - mkdir travispackaging && cd travispackaging && cmake ..
     - cmake --build . --target PACKAGE
@@ -21,7 +21,7 @@ template_deploy : &template_deploy
   deploy:
     provider: releases
     api_key:
-      secure: NA3i42LJkvMqmp7g0jdAnJNrsDdh7jJUHlHT+kGYeZF6kLRYHHIOldv4bM4hM2HcLUo/S6ngKZ2newjTAqrVRlZ2PWtkriZ3CoVTqyYyE0a0n21hEKX0wkVDWdheh1Q3LWtgBNmhFGwJUZiyJ2VzDIMefljHiT+nyAKWPTdjO/bYIzmCqI7OOplcuKWXok2FbJ163bLb03V9oCxazrPjeQqNf/TQBmPgqq9r8E5IetmIgukSvn2+lm/usNk9KXUCRWGWUd0t+KcdifvIvnpOqQj32mYKaa0T5u9AWKSPUFC1sS0Pcg+e8yPoKjG0JPybl4g43+owpwEiCaEOg/N8WXWcMOTYHcomRFurv18yRlMkXOz3Ul/DA7jG4PHTPJd6TPADSOkw9OpL0bYS+qjbGpLVsE5x2/KaYb5xDBMwdWJa9WEbxaNo2CtnPJrII7F2qZNy2L4jwwDH7t6DKNwrKwr+YFf2TMYxziR8+lTC3DoNskU00MLm/s45SHzze2Zog60SZbiT9ZaCDdFPYbOcQ1vGWYUkoYJM70v6s82nl3UycTMZ69XdrChtNnj4Kvs7Hx4+B9uSjK24+JLBO8I/qlwXcDh1xo+svbZV+haAT4M/WqETipdjanzn6fND5wykndr2a1gNWdXYJdnic2H1dEUy9LtiuANsubJtF8YzFXI=
+      secure: "ZHF5WR6ng4hYz9uhcmxE6BxpAVFrZMP5f8yUtC4nUmIorDvLn/GzplIHTHlF+Y3etEKoeCzSyMsd8kvkkFfoCmcHJySfxfsC9Y4dJxk+/M6WEQD3tV2/F3WnmZ9Cfiv1NsC6zMoQAi1XMLYtgKyXHfYVn25yfHdC+T5EG6VrTRbtoPS8JNWXdq/ibdhxN4t41mRRhu0cOcGeumqwtnPd5jiGMZYq59v9s2ED8Nl8vrED/xNy3b7GxlWOLJIB54QfKSH6eaL86n5oFJMgwtaIc/I4n+wSLcH2GbPFQllyTizWYRH0RQqfOGaYUKM2mCAX+J8++CFjBD0MpUnznTB2dCZDb+goehLeH5koV7aK00jvxyv22Qg3CPQ/xK89rlFxHYAllQwqCkxh++5sEekcLkfCZqswF3M0YihizRHLEIP0iPy67yzSv1CDN4mmw1DAzljlRN9AMBXph+ZzeY4hJZmaWzXJjSxTl0bvm6p4PLJXABJ7qwtJQS1rLXjbP7VL9Fgig0J14ky8NtbhF+sUTeZ4zaavzDcbKhcHtFY49sbm9cVHDeN4fMhHqXNfOMCbt/nNWYU8ZeU0p+RHcMyt9iT4DO3AsFP+6e5181MFNHaZyOULgvShziZJXQG2pgs+eIlib5bb0vWs/eZ7VNJV3UEKhO+1rvCQId5aKXOGBb0="
     file_glob: true
     file: packages/*
     draft: true

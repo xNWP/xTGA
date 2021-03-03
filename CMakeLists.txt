@@ -2,12 +2,12 @@
 
 cmake_minimum_required(VERSION 3.14)
 
-project(xTGA	VERSION 100
+project(xTGA	VERSION 110
 				DESCRIPTION "A C/C++ library for opening/saving/manipulating TrueVision Targa (TGA) Images."
 				LANGUAGES C CXX)
 
 set(XTGA_VERSION ${PROJECT_VERSION})
-set(XTGA_VERSION_ASCII "1.0")
+set(XTGA_VERSION_ASCII "1.1")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
