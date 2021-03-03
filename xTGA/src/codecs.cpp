@@ -2260,8 +2260,8 @@ bool xtga::codecs::DecodeImage(const void* buffer, void*& obuffer, flags::IMAGEO
 
 	if (!obuffer)
 	{
-		obuffer = (uchar*)malloc((addressable)w * h * depth);
-		for (addressable i = 0; i < (addressable)w * h * depth; ++i)
+		obuffer = (uchar*)malloc((addressable)w * h * depth / 8);
+		for (addressable i = 0; i < (addressable)w * h * depth / 8; ++i)
 		{
 			((uchar*)obuffer)[i] = ((uchar*)buffer)[i];
 		}
