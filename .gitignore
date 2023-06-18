@@ -13,3 +13,13 @@ CTestTestfile.cmake
 *.vcxproj
 *.sln
 cmake_install.cmake
+*.so
+*.dll
+*.a
+*.lib
+test_c_loading*
+test_c_linkage*
+test_types*
+test_dll*
+test_static*
+test_loading*

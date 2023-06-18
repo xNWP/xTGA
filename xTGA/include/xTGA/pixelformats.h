@@ -30,9 +30,9 @@ namespace xtga
 			BGR565		= 0x03,		/*!< A BGR pixel with 5-bits blue, 6-bits green, and 5-bits green. */
 			ARGB1555	= 0x04,		/*!< An RGB pixel with 5-bits per primary and 1-bit alpha/attribute. */
 			BGRA5551	= 0x05,		/*!< A BGR pixel with 5-bits per primary and 1-bit alpha/attribute. */
-			I8				= 0x06,		/*!< A luminance (I) pixel with 8-bits. */
-			IA88			= 0x07,		/*!< An IA pixel with 8-bit primary and 8-bit alpha. */
-			AI88			= 0x08,		/*!< An AI pixel with 8-bit primary and 8-bit alpha. */
+			I8		= 0x06,		/*!< A luminance (I) pixel with 8-bits. */
+			IA88		= 0x07,		/*!< An IA pixel with 8-bit primary and 8-bit alpha. */
+			AI88		= 0x08,		/*!< An AI pixel with 8-bit primary and 8-bit alpha. */
 			RGBA8888	= 0x09,		/*!< An RGBA pixel with 8-bits per primary and 8-bit alpha. */
 			ABGR8888	= 0x0A,		/*!< An ABGR pixel with 8-bits per primary and 8-bit alpha. */
 			ARGB8888	= 0x0B,		/*!< An ARGB pixel with 8-bits per primary and 8-bit alpha. */

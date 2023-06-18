@@ -1849,6 +1849,16 @@ uchar xtga::TGAFile::GetBitDepth() const
 	return this->_impl->_Header->IMAGE_DEPTH;
 }
 
+bool xtga::TGAFile::GetHorizontalFlip() const
+{
+	return ((uchar)this->_impl->_Header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN & 0b10u) >> 1;
+}
+
+bool xtga::TGAFile::GetVerticalFlip() const
+{
+	return ((uchar)this->_impl->_Header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN & 0b01u) >> 0;
+}
+
 uint16 xtga::TGAFile::GetDeveloperEntryCount() const
 {
 	return (uint16)this->_impl->__DeveloperEntries.size();

@@ -20,16 +20,16 @@ namespace xtga
 	*/
 	enum class ERRORCODE : uint32
 	{
-		UNKNOWN								= 0xFFFFFFFF,	/*!< An unknown error occured. */
-		NONE 									= 0x00000000,	/*!< Operation completed without error. */
-		FILE_ERROR 						= 0x00000001,	/*!< An error occured while opening/saving a file descriptor. */
+		UNKNOWN				= 0xFFFFFFFF,	/*!< An unknown error occured. */
+		NONE 				= 0x00000000,	/*!< Operation completed without error. */
+		FILE_ERROR 			= 0x00000001,	/*!< An error occured while opening/saving a file descriptor. */
 		INDEX_OUT_OF_RANGE 		= 0x00000002,	/*!< The requested index was out of range. */
 		REDUNDANT_OPERATION		= 0x00000003,	/*!< The requested operation would be redundant. */
 		OVERFLOW_DETECTED 		= 0x00000004,	/*!< The requested operation causes an overflow. */
-		INVALID_OPERATION			= 0x00000005,	/*!< The requested operation is invalid for the object. */
-		INVALID_DEPTH					= 0x00000010,	/*!< The supplied image bit depth was invalid. */
+		INVALID_OPERATION		= 0x00000005,	/*!< The requested operation is invalid for the object. */
+		INVALID_DEPTH			= 0x00000010,	/*!< The supplied image bit depth was invalid. */
 		COLORMAP_TOO_LARGE 		= 0x00000011,	/*!< The resulting color map wouldn't save space and thus was not returned. */
-		CONTAINER_FULL 				= 0x00000100	/*!< The container is at max capacity and cannot have any new items added. */
+		CONTAINER_FULL 			= 0x00000100	/*!< The container is at max capacity and cannot have any new items added. */
 	};
 }
 
