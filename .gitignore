@@ -17,6 +17,8 @@ cmake_install.cmake
 *.dll
 *.a
 *.lib
+tests/data/*_*
+test_generate*
 test_c_loading*
 test_c_linkage*
 test_types*
