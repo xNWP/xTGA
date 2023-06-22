@@ -122,7 +122,7 @@ bool tga2raw(uint8_t bpp, const std::filesystem::path& src)
 
 	/* write raw image and print progress status */
 	FILE* fp = fopen(raw_out.c_str(), "wb");
-	if(fp != nullptr && (written = fwrite_progress_bar(obuffer, raw_out.c_str(), len, 1024, fp)) != len)
+	if(fp != nullptr && (written = fwrite_progress_bar(obuffer, raw_out.c_str(), len, 1024, fp, 40, '=', ' ')) != len)
 	fclose(fp);
 
 	/* cleanup */
