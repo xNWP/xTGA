@@ -132,11 +132,19 @@ namespace xtga
 		*/
 		struct ColorCorrectionEntry
 		{
-			// TODO: Verify that this is the correct format
-			uint16 B;
-			uint16 G;
-			uint16 R;
-			uint16 A;
+			uint16_t A;
+			uint16_t R;
+			uint16_t G;
+			uint16_t B;
+
+			ColorCorrectionEntry(const uint16_t& red, const uint16_t& green, const uint16_t& blue, const uint16_t& alpha = 65535)
+			{
+				A = alpha;
+				R = red;
+				G = green;
+				B = blue;
+			}
+			ColorCorrectionEntry(const ColorCorrectionEntry& src) : A(src.A), R(src.R), G(src.G), B(src.B) { }
 		};
 	}
 }

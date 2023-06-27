@@ -2297,10 +2297,10 @@ void xtga::TGAFile::GenerateColorCorrectionTable()
 
 	for (uint16 i = 0; i < 256; ++i)
 	{
-		this->_impl->_ColorCorrectionTable[i].B = i * 256;
-		this->_impl->_ColorCorrectionTable[i].G = i * 256;
-		this->_impl->_ColorCorrectionTable[i].R = i * 256;
 		this->_impl->_ColorCorrectionTable[i].A = i * 256;
+		this->_impl->_ColorCorrectionTable[i].R = i * 256;
+		this->_impl->_ColorCorrectionTable[i].G = i * 256;
+		this->_impl->_ColorCorrectionTable[i].B = i * 256;
 	}
 
 	this->_impl->__DanglingArrays.push_back(this->_impl->_ColorCorrectionTable);
