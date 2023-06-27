@@ -22,13 +22,13 @@ namespace xtga
 		*/
 		enum class IMAGETYPE : uchar
 		{
-			NONE							= 0x00,			/*!< No image data present. */
-			COLOR_MAPPED			= 0x01,			/*!< Uncompressed Color Mapped. */
-			TRUE_COLOR				= 0x02,			/*!< Uncompressed True Color. */
-			GRAYSCALE					= 0x03,			/*!< Uncompressed Grayscale. */
+			NONE			= 0x00,			/*!< No image data present. */
+			COLOR_MAPPED		= 0x01,			/*!< Uncompressed Color Mapped. */
+			TRUE_COLOR		= 0x02,			/*!< Uncompressed True Color. */
+			GRAYSCALE		= 0x03,			/*!< Uncompressed Grayscale. */
 			COLOR_MAPPED_RLE	= 0x09,			/*!< Run-length encoded Color Mapped. */
 			TRUE_COLOR_RLE		= 0x0A,			/*!< Run-length encoded True Color. */
-			GRAYSCALE_RLE			= 0x0B			/*!< Run-length encoded Grayscale. */
+			GRAYSCALE_RLE		= 0x0B			/*!< Run-length encoded Grayscale. */
 		};
 
 		/**
@@ -38,9 +38,9 @@ namespace xtga
 		enum class IMAGEORIGIN : uchar
 		{
 			BOTTOM_LEFT		= 0x00,			/*!< First pixel goes in the bottom left. */
-			BOTTOM_RIGHT	= 0x01,			/*!< First pixel goes in the bottom right. */
-			TOP_LEFT			= 0x02,			/*!< First pixel goes in the top left. */
-			TOP_RIGHT			= 0x03			/*!< First pixel goes in the top right. */
+			BOTTOM_RIGHT		= 0x01,			/*!< First pixel goes in the bottom right. */
+			TOP_LEFT		= 0x02,			/*!< First pixel goes in the top left. */
+			TOP_RIGHT		= 0x03			/*!< First pixel goes in the top right. */
 		};
 
 		/**
@@ -49,11 +49,11 @@ namespace xtga
 		*/
 		enum class ALPHATYPE : uchar
 		{
-			NOALPHA									= 0x00,			/*!< There is no alpha in the image. */
+			NOALPHA			= 0x00,			/*!< There is no alpha in the image. */
 			UNDEFINED_ALPHA_IGNORE	= 0x01,			/*!< The data in the alpha channel is undefined and can be ignored. */
-			UNDEFINED_ALPHA_KEEP		= 0x02,			/*!< The data in the alpha channel is undefined but should be kept. */
-			STRAIGHT								= 0x03,			/*!< The data in the alpha channel is a valid straight alpha. */
-			PREMULTIPLIED						= 0x04			/*!< The data in the alpha channel is a valid premultiplied alpha. */
+			UNDEFINED_ALPHA_KEEP	= 0x02,			/*!< The data in the alpha channel is undefined but should be kept. */
+			STRAIGHT		= 0x03,			/*!< The data in the alpha channel is a valid straight alpha. */
+			PREMULTIPLIED		= 0x04			/*!< The data in the alpha channel is a valid premultiplied alpha. */
 		};
 	}
 }

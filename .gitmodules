@@ -1,0 +1,3 @@
+[submodule "xTGA/include/rw_progress_bar"]
+	path = xTGA/include/rw_progress_bar
+	url = http://github.com/jopadan/rw_progress_bar

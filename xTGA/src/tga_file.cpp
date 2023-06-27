@@ -1849,6 +1849,16 @@ uchar xtga::TGAFile::GetBitDepth() const
 	return this->_impl->_Header->IMAGE_DEPTH;
 }
 
+bool xtga::TGAFile::GetHorizontalFlip() const
+{
+	return ((uchar)this->_impl->_Header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN & 0b10u) >> 1;
+}
+
+bool xtga::TGAFile::GetVerticalFlip() const
+{
+	return ((uchar)this->_impl->_Header->IMAGE_DESCRIPTOR.IMAGE_ORIGIN & 0b01u) >> 0;
+}
+
 uint16 xtga::TGAFile::GetDeveloperEntryCount() const
 {
 	return (uint16)this->_impl->__DeveloperEntries.size();
@@ -2287,10 +2297,10 @@ void xtga::TGAFile::GenerateColorCorrectionTable()
 
 	for (uint16 i = 0; i < 256; ++i)
 	{
-		this->_impl->_ColorCorrectionTable[i].B = i * 256;
-		this->_impl->_ColorCorrectionTable[i].G = i * 256;
-		this->_impl->_ColorCorrectionTable[i].R = i * 256;
 		this->_impl->_ColorCorrectionTable[i].A = i * 256;
+		this->_impl->_ColorCorrectionTable[i].R = i * 256;
+		this->_impl->_ColorCorrectionTable[i].G = i * 256;
+		this->_impl->_ColorCorrectionTable[i].B = i * 256;
 	}
 
 	this->_impl->__DanglingArrays.push_back(this->_impl->_ColorCorrectionTable);

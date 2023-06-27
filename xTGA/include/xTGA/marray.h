@@ -31,49 +31,49 @@ namespace xtga
 
 		//----------------------------------------------------------------------------------------------------
 		/// Allocates a new ManagedArray of type 'T' with 'size' elements while taking ownership of an exiting array.
-		/// @tparam T					The type of data the array contains.
-		/// @param[in] data				The exiting array, the new object takes ownership of it and will handle deallocation.
-		/// @param[in] size				The number of elements the array contains.
+		/// @tparam T			The type of data the array contains.
+		/// @param[in] data		The exiting array, the new object takes ownership of it and will handle deallocation.
+		/// @param[in] size		The number of elements the array contains.
 		/// @return ManagedArray<T>*	The created managed array.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI static ManagedArray* Alloc(T* data, addressable size);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Frees the given object.
-		/// @tparam T					The type of data the array contains.
-		/// @param[in,out] obj			The object to free.
+		/// @tparam T			The type of data the array contains.
+		/// @param[in,out] obj		The object to free.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI static void Free(ManagedArray*& obj);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the element at 'index' [editable].
-		/// @tparam T					The type of data the array contains.
-		/// @param[in] index			The index of the element.
-		/// @param[out] error			The error/status code. Can be nullptr.
-		/// @return T&					The returned element [editable]. If index is out of range the first item is returned.
+		/// @tparam T			The type of data the array contains.
+		/// @param[in] index		The index of the element.
+		/// @param[out] error		The error/status code. Can be nullptr.
+		/// @return T&			The returned element [editable]. If index is out of range the first item is returned.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI T& at(addressable index, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Identical to at(). However does not provide error checking.
-		/// @tparam T					The type of data the array contains.
-		/// @param[in] index			The index of the element.
-		/// @return T*					The returned element [editable]. If index is out of range the first item is returned.
+		/// @tparam T			The type of data the array contains.
+		/// @param[in] index		The index of the element.
+		/// @return T*			The returned element [editable]. If index is out of range the first item is returned.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI T& operator[](addressable index);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the raw pointer [editable] at the given index.
-		/// @tparam T					The type of data the array contains (does not effect behaviour in this case).
-		/// @param[in] index			The index of the element.
-		/// @param[out] error			The error/status code. Can be nullptr.
-		/// @return void*				The data at the index.
+		/// @tparam T			The type of data the array contains (does not effect behaviour in this case).
+		/// @param[in] index		The index of the element.
+		/// @param[out] error		The error/status code. Can be nullptr.
+		/// @return void*		The data at the index.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI void* rawat(addressable index, ERRORCODE* error = nullptr);
 
 		//----------------------------------------------------------------------------------------------------
 		/// Returns the size of the array.
-		/// @return addressable			The size of the array.
+		/// @return addressable		The size of the array.
 		//----------------------------------------------------------------------------------------------------
 		XTGAAPI addressable size() const;
 
