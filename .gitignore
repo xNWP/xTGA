@@ -13,3 +13,14 @@ CTestTestfile.cmake
 *.vcxproj
 *.sln
 cmake_install.cmake
+libxTGA.*
+libxTGAs.*
+test_c_linkage*
+test_c_loading*
+test_dll*
+test_generate*
+test_loading*
+test_static*
+test_types*
+tests/data/32x32_*
+

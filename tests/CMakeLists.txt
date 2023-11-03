@@ -22,6 +22,10 @@ add_executable(test_dll main.cpp)
 target_link_libraries(test_dll xTGA)
 target_include_directories(test_dll PUBLIC ${interface})
 
+add_executable(test_generate generate.cpp)
+target_link_libraries(test_generate xTGA)
+target_include_directories(test_generate PUBLIC ${interface} )
+
 add_executable(test_static main.cpp)
 target_link_libraries(test_static xTGAs)
 target_include_directories(test_static PUBLIC ${interface})
@@ -40,3 +44,4 @@ target_include_directories(test_c_linkage PUBLIC ${interface})
 add_executable(test_c_loading c_loading.c assert_equal.h library_error.h cmake_file.h)
 target_link_libraries(test_c_loading xTGA)
 target_include_directories(test_c_loading PUBLIC ${interface} ${common})
+
