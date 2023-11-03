@@ -13,14 +13,14 @@
 #ifdef __cplusplus
 #	include <cstdint>
 #	include <cfloat>
-	typedef std::uint8_t uchar;
+	typedef std::uint8_t  uchar;
 	typedef std::uint16_t uint16;
 	typedef std::uint32_t uint32;
 	typedef std::uint64_t uint64;
 #else
 #	include <stdint.h>
 #	include <float.h>
-	typedef uint8_t uchar;
+	typedef uint8_t  uchar;
 	typedef uint16_t uint16;
 	typedef uint32_t uint32;
 	typedef uint64_t uint64;
